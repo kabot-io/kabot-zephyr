@@ -1,0 +1,16 @@
+/.west
+/modules
+/tools
+/build
+/zephyr
+
+# macOS
+*.DS_Store
+
+# Python
+__pycache__
+.python-version
+.venv
+
+# clangd
+app/.cache/
