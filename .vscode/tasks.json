@@ -1,0 +1,36 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build native_sim",
+            "type": "shell",
+            "command": "source .venv/bin/activate && west build app --build-dir build -b native_sim -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build esp32s3",
+            "type": "shell",
+            "command": "source .venv/bin/activate && west build app --build-dir build -b esp32s3_devkitc/esp32s3/appcpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Clean esp32s3",
+            "type": "shell",
+            "command": "source .venv/bin/activate && west build app --build-dir build/esp32s3 -b esp32s3_devkitc/esp32s3/appcpu clean"
+        },
+        {
+            "label": "Clean build directory",
+            "type": "shell",
+            "command": "rm -rf build",
+            "problemMatcher": []
+        }
+    ]
+}

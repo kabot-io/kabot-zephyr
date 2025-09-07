@@ -11,7 +11,9 @@
 			"extensions": [
 				"maattdd.gitless",
 				"josetr.cmake-language-support-vscode",
-				"cheshirekow.cmake-format"
+				"cheshirekow.cmake-format",
+				"llvm-vs-code-extensions.vscode-clangd",
+				"xaver.clang-format"
 			]
 		}
 	},

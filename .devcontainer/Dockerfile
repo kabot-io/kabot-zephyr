@@ -24,6 +24,8 @@ RUN apt-get update \
 RUN apt-get update \
     && apt-get install -y \
         ccache \
+        clang-format \
+        clangd \
         cmake-format \
         device-tree-compiler \
         dfu-util \
