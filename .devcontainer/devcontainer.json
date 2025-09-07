@@ -15,9 +15,6 @@
 			]
 		}
 	},
-	"containerEnv": {
-		"ZEPHYR_TOOLCHAIN_VARIANT": "host"
-	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 

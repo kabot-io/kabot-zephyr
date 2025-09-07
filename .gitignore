@@ -1,7 +1,8 @@
 /.west
+/bootloader
+/build
 /modules
 /tools
-/build
 /zephyr
 
 # macOS

@@ -33,7 +33,7 @@ manifest:
         - hal_ambiq
         - hal_atmel
         - hal_bouffalolab
-        - hal_espressif
+        # - hal_espressif
         - hal_ethos_u
         - hal_gigadevice
         - hal_infineon
@@ -54,7 +54,7 @@ manifest:
         - hal_ti
         - hal_wch
         - hal_wurthelektronik
-        # - hal_xtensa
+        - hal_xtensa
         - liblc3
         - libmctp
         - libmetal
@@ -64,7 +64,7 @@ manifest:
         - loramac-node
         - lvgl
         - mbedtls
-        - mcuboot
+        # - mcuboot
         - mipi-sys-t
         - nanopb
         # - net-tools

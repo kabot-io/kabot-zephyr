@@ -27,6 +27,7 @@ RUN apt-get update \
         cmake-format \
         device-tree-compiler \
         dfu-util \
+        file \
         g++-multilib \
         gcc-multilib \
         gperf \
