@@ -14,8 +14,8 @@
         },
         {
             "label": "Run native_sim",
-            "type": "process",
-            "command": "./build/zephyr/zephyr.exe",
+            "type": "shell",
+            "command": "./build/zephyr/zephyr.exe --eeprom=build/eeprom.bin",
             "problemMatcher": []
         },
         {

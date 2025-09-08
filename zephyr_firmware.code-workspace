@@ -1,14 +1,14 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"clangd.path": "/usr/bin/clangd-18",
-		"clang-format.executable": "/usr/bin/clang-format-18",
-		"editor.formatOnSave": true,
-		"editor.tabSize": 4,
-		"editor.insertSpaces": true
-	}
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "clangd.path": "/usr/bin/clangd-18",
+        "clang-format.executable": "/usr/bin/clang-format-18",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    }
 }

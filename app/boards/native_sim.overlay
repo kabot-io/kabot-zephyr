@@ -1,0 +1,11 @@
+/ {
+    uart0: uart {
+        status = "okay";
+        compatible = "zephyr,native-pty-uart";
+    };
+    eeprom0: eeprom {
+        status = "okay";
+        compatible = "zephyr,sim-eeprom";
+        size = <256>;
+    };
+};
