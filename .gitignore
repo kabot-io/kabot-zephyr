@@ -4,6 +4,8 @@
 /modules
 /tools
 /zephyr
+/.microros-tutorial-workspace/**
+!/.microros-tutorial-workspace/init.sh
 
 # macOS
 *.DS_Store
