@@ -1,5 +1,12 @@
 #!/usr/bin/zsh
 
+CURRENT_DIR=$(pwd)
+cd $(git rev-parse --show-toplevel)
+
+sudo apt install --no-install-recommends git cmake ninja-build gperf \
+  ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk \
+  xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
+
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip
@@ -46,3 +53,5 @@ west zephyr-export
 
 west sdk install --toolchain x86_64-zephyr-elf xtensa-espressif_esp32s3_zephyr-elf
 west blobs fetch hal_espressif
+
+cd $CURRENT_DIR
