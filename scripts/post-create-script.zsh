@@ -5,7 +5,8 @@ rm -rf .venv
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip
-pip install west
+pip install west catkin_pkg lark-parser empy colcon-common-extensions
+
 if [ ! -d ".west" ]; then
     west init --local app
 fi
