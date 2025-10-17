@@ -3,9 +3,7 @@
 {
     "name": "Ubuntu",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-    "build": {
-        "dockerfile": "Dockerfile"
-    },
+    "image": "ghcr.io/kabot-io/kabot-zephyr/dev-noble-kilted:latest",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -17,7 +15,8 @@
                 "plorefice.devicetree",
                 "EditorConfig.EditorConfig",
                 "redhat.vscode-yaml",
-                "HashiCorp.HCL"
+                "HashiCorp.HCL",
+                "GitHub.vscode-github-actions"
             ]
         }
     },

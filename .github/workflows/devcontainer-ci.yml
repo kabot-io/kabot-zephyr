@@ -48,14 +48,23 @@ jobs:
             - name: Build and push
               uses: docker/bake-action@v6
               with:
-                  #   push: ${{ github.ref == 'refs/heads/main' }}
                   push: true
                   targets: ${{ matrix.target }}
                   files: "docker/docker-bake.hcl"
                   set: |
                       *.cache-from=type=gha,scope=${{ matrix.target }}
                       *.cache-to=type=gha,mode=max,scope=${{ matrix.target }}
-            # - name: Build and run dev container task
+                      *.tags="[ghcr.io/${{github.repository}}/${{ matrix.target }}:${{github.ref_name}}]"
+            - name: Make latest tag
+              uses: docker/bake-action@v6
+              if: ${{ github.ref == 'refs/heads/main' }}
+              with:
+                  push: true
+                  files: "docker/docker-bake.hcl"
+                  set: |
+                      *.tags="[ghcr.io/${{github.repository}}/${{ matrix.target }}:latest]"
+
+            # - name: Build and run dev "container task
             #   uses: devcontainers/ci@v0.3
             #   with:
             #       runCmd: echo "Hello from ros distro $ROS_DISTRO"
