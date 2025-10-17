@@ -52,7 +52,9 @@ jobs:
                   push: true
                   targets: ${{ matrix.target }}
                   files: "docker/docker-bake.hcl"
-
+                  set: |
+                      *.cache-from=type=gha
+                      *.cache-to=type=gha,mode=max
             # - name: Build and run dev container task
             #   uses: devcontainers/ci@v0.3
             #   with:
