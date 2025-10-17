@@ -16,7 +16,8 @@
                 "xaver.clang-format",
                 "plorefice.devicetree",
                 "EditorConfig.EditorConfig",
-                "redhat.vscode-yaml"
+                "redhat.vscode-yaml",
+                "HashiCorp.HCL"
             ]
         }
     },
