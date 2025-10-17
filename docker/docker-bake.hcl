@@ -16,7 +16,7 @@ target "images" {
     }
     dockerfile = "docker/devcontainer.Dockerfile"
     context = "."
-    tags = ["${replace(GITHUB_SERVER_URL, "https://", "")}/${GITHUB_REPOSITORY}/${ubuntu_distro}-${ros_distro}:latest"]
+    tags = ["ghcr.io/${GITHUB_REPOSITORY}/${ubuntu_distro}-${ros_distro}:latest"]
     args = {
         UBUNTU_DISTRO = "${ubuntu_distro}"
         ROS_DISTRO    = "${ros_distro}"
