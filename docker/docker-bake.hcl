@@ -9,14 +9,14 @@ variable "GITHUB_REPOSITORY" {
 }
 
 target "images" {
-    name = "kabot-${ubuntu_distro}-${ros_distro}"
+    name = "dev-${ubuntu_distro}-${ros_distro}"
     matrix = {
         ubuntu_distro = ["noble"]
         ros_distro    = ["jazzy", "kilted", "rolling"]
     }
     dockerfile = "docker/devcontainer.Dockerfile"
     context = "."
-    tags = ["ghcr.io/${GITHUB_REPOSITORY}/${ubuntu_distro}-${ros_distro}:latest"]
+    tags = ["ghcr.io/${GITHUB_REPOSITORY}/dev-${ubuntu_distro}-${ros_distro}:latest"]
     args = {
         UBUNTU_DISTRO = "${ubuntu_distro}"
         ROS_DISTRO    = "${ros_distro}"
