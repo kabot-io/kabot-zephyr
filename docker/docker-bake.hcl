@@ -8,7 +8,10 @@ variable "GITHUB_REPOSITORY" {
     default = "kabot-io/kabot-zephyr"
 }
 
+target "docker-metadata-action" {}
+
 target "images" {
+    inherits = ["docker-metadata-action"]
     name = "dev-${ubuntu_distro}-${ros_distro}"
     matrix = {
         ubuntu_distro = ["noble"]
@@ -16,7 +19,6 @@ target "images" {
     }
     dockerfile = "docker/devcontainer.Dockerfile"
     context = "."
-    tags = ["ghcr.io/${GITHUB_REPOSITORY}/dev-${ubuntu_distro}-${ros_distro}:latest"]
     args = {
         UBUNTU_DISTRO = "${ubuntu_distro}"
         ROS_DISTRO    = "${ros_distro}"
