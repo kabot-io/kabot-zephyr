@@ -73,10 +73,19 @@ jobs:
                       *.cache-from=type=gha
                       *.cache-to=type=gha,mode=max
 
-    run:
+    experiment:
         runs-on: ubuntu-latest
         needs:
             - build
+        steps:
+            - name: Info
+              run: |
+                  echo "Built image tags: ${{ needs.build.outputs.tags }}"
+    test:
+        runs-on: ubuntu-latest
+        needs:
+            - build
+            - experiment
         strategy:
             matrix:
                 tag: ${{ fromJson(format('[{0}]', needs.build.outputs.tags)) }}
