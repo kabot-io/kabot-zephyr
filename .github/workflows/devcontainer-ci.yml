@@ -25,7 +25,8 @@ jobs:
         runs-on: ubuntu-latest
         needs:
             - prepare
-
+        outputs:
+            tags: ${{ steps.meta.outputs.tags }}
         permissions:
             contents: read
             packages: write
@@ -65,12 +66,18 @@ jobs:
                   files: |
                       "docker/docker-bake.hcl"
                       cwd://${{ steps.meta.outputs.bake-file }}
-                  #   set: |
-                  #       *.cache-from=type=gha,scope=${{ matrix.target }}
-                  #       *.cache-to=type=gha,mode=max,scope=${{ matrix.target }}
-                  #       *.tags=${{steps.meta.outputs.tags}}
-                  #       *.labels=${{steps.meta.outputs.labels}}
 
+    run:
+        runs-on: ubuntu-latest
+        needs:
+            - build
+        strategy:
+            matrix:
+                tag: ${{ needs.build.outputs.tags }}
+        steps:
+            - name: Info
+              run: |
+                  echo "Built image: ${{ matrix.tag }}"
             # - name: Build and run dev "container task
             #   uses: devcontainers/ci@v0.3
             #   with:
