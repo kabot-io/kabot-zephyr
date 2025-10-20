@@ -75,7 +75,7 @@ jobs:
             - build
         strategy:
             matrix:
-                tag: ${{ needs.build.outputs.tags }}
+                tag: ${{ fromJson(needs.build.outputs.tags) }}
         steps:
             - name: Info
               run: |
