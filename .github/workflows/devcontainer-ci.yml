@@ -47,8 +47,10 @@ jobs:
             - name: Docker meta
               id: meta
               uses: docker/metadata-action@v5
+
               with:
                   images: ghcr.io/${{github.repository}}/${{ matrix.target }}
+                  sep-tags: ","
                   tags: |
                       type=ref,event=branch
                       type=ref,event=pr
@@ -62,12 +64,13 @@ jobs:
               uses: docker/bake-action@v6
               with:
                   push: true
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
                   targets: ${{ matrix.target }}
                   files: |
                       "docker/docker-bake.hcl"
                       cwd://${{ steps.meta.outputs.bake-file }}
+                  set: |
+                      *.cache-from=type=registry,ref=user/app:latest
+                      *.cache-to=type=inline
 
     run:
         runs-on: ubuntu-latest
@@ -75,7 +78,7 @@ jobs:
             - build
         strategy:
             matrix:
-                tag: ${{ fromJson(needs.build.outputs.tags) }}
+                tag: ${{ fromJson(format('[{0}]', needs.build.outputs.tags)) }}
         steps:
             - name: Info
               run: |
