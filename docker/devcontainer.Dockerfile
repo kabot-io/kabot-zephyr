@@ -1,4 +1,4 @@
-ARG UBUNTU_DISTRO
+ARG UBUNTU_DISTRO="noble"
 FROM mcr.microsoft.com/devcontainers/base:${UBUNTU_DISTRO}
 
 ARG ROS_DISTRO
