@@ -3,8 +3,13 @@
 {
     "name": "Ubuntu",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+    // "image": "ghcr.io/kabot-io/kabot-zephyr/dev-noble-kilted:latest",
     "build": {
-        "dockerfile": "Dockerfile"
+        "dockerfile": "Dockerfile",
+        "args": {
+            "IMAGE_NAME": "${localEnv:IMAGE_NAME:dev-noble-kilted}",
+            "IMAGE_TAG": "${localEnv:IMAGE_TAG:latest}"
+        }
     },
     "customizations": {
         "vscode": {
@@ -16,7 +21,9 @@
                 "xaver.clang-format",
                 "plorefice.devicetree",
                 "EditorConfig.EditorConfig",
-                "redhat.vscode-yaml"
+                "redhat.vscode-yaml",
+                "HashiCorp.HCL",
+                "GitHub.vscode-github-actions"
             ]
         }
     },
