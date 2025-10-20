@@ -1,5 +1,7 @@
 name: "build"
-on: # rebuild any PRs and main branch changes
+on:
+    schedule:
+        - cron: "0 17 * * *"
     pull_request:
     push:
         branches:
