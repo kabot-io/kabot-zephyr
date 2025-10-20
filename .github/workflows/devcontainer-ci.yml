@@ -70,8 +70,8 @@ jobs:
                       "docker/docker-bake.hcl"
                       cwd://${{ steps.meta.outputs.bake-file }}
                   set: |
-                      *.cache-from=type=gha
-                      *.cache-to=type=gha,mode=max
+                      *.cache-from=type=gha,scope=${{ matrix.target }}
+                      *.cache-to=type=gha,mode=max,scope=${{ matrix.target }}
 
     experiment:
         runs-on: ubuntu-latest
