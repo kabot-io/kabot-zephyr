@@ -6,8 +6,8 @@ ENV ROS_DISTRO=${ROS_DISTRO}
 ARG USER_UID=1000
 ARG USER_GID=1000
 
-RUN groupmod -g ${USER_GID} vscode \
-    && usermod -u ${USER_UID} -g ${USER_GID} vscode
+RUN groupmod -aG ${USER_GID} vscode \
+    && usermod -u ${USER_UID} -g ${USER_GID} -aG dialout vscode
 
 WORKDIR /workspaces
 
