@@ -101,7 +101,4 @@ jobs:
               with:
                   push: never
                   imageName: ghcr.io/${{ github.repository }}/devcontainer-test-${{ matrix.target }}
-                  runCmd: |
-                      echo "Hello from Ubuntu $(. /etc/os-release && echo ${VERSION_CODENAME}) with ROS2 ${ROS_DISTRO}"
-                      source /opt/ros/${ROS_DISTRO}/setup.zsh
-                      scripts/build.zsh
+                  runCmd: scripts/build.zsh
