@@ -27,6 +27,11 @@
             ]
         }
     },
+    "runArgs": [
+        "--privileged",
+        "-v", "/dev/bus/usb:/dev/bus/usb",
+        "--group-add", "dialout"
+    ],
     // Features to add to the dev container. More info: https://containers.dev/features.
     // "features": {},
     // Use 'forwardPorts' to make a list of ports inside the container available locally.

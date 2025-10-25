@@ -16,7 +16,10 @@
             "label": "Run native_sim",
             "type": "shell",
             "command": "./build/zephyr/zephyr.exe --eeprom=build/eeprom.bin",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "dependsOn": [
+                "Build native_sim"
+            ]
         },
         {
             "label": "Build esp32s3",
@@ -31,6 +34,16 @@
             "label": "Clean esp32s3",
             "type": "shell",
             "command": "source .venv/bin/activate && west build app --build-dir build/esp32s3 -b esp32s3_devkitc/esp32s3/appcpu clean"
+        },
+        {
+            "label": "Flash esp32s3",
+            "type": "shell",
+            "command": "./scripts/flash.zsh",
+        },
+        {
+            "label": "Monitor esp32s3",
+            "type": "shell",
+            "command": "source .venv/bin/activate && west espressif monitor",
         },
         {
             "label": "Clean build directory",
