@@ -16,6 +16,16 @@ This repository is configured to use a `.devcontainer` for development. To ensur
 
     This script is guaranteed to work within the development container.
 
+3. **Flashing Firmware**
+    Connect your ESP32-S3 to the serial port and then run:
+    ```zsh
+    ./scripts/flash.zsh
+    ```
+    This script is guaranteed to work within the development container.
+
+    > **NOTE**
+    > If you're using WSL2, you'll need to take a few extra steps to connect your device to the WSL2 environment.
+    > These steps will be printed automatically by the flashing script.
 ## Requirements
 
 - Visual Studio Code

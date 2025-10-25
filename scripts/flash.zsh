@@ -2,26 +2,22 @@
 
 set -e
 
-ESP32_DEV_NAME="ttyACM0"
+if [ ! -d /dev/serial/by-id ] || [ -z "$(ls -A /dev/serial/by-id 2>/dev/null)" ]; then
+    echo "Error: no serial devices detected in /dev/serial/by-id"
 
-if [ ! -e "/dev/$ESP32_DEV_NAME" ]; then
-    echo "Error: no USB devices attached to WSL"
-    echo ""
-    echo "on Powershell (admin), run:"
-    echo "winget install usbipd"
-    echo "usbipd list"
-    echo "usbipd bind --busid <id>"
-    echo "usbipd attach --wsl --busid <id>"
-    exit 1
+    if [ -n "$WSL_DISTRO_NAME" ]; then
+        echo "To attach a device to WSL:"
+        echo "In Powershell (admin), run:"
+        echo "winget install usbipd"
+        echo "usbipd list"
+        echo "usbipd bind --busid <id>"
+        echo "usbipd attach --wsl --busid <id>"
+        exit 1
+    fi
 fi
 
-if ! groups "$USER" | grep -qw dialout; then
+if ! groups | grep -qw dialout; then
     echo "Error: user '$USER' is not in the 'dialout' group"
-    echo ""
-    echo "in the devcontainer, run:"
-    echo "sudo usermod -aG dialout vscode"
-    echo "then, in powershell, run:"
-    echo "wsl --shutdown"
     exit 1
 fi
 

@@ -29,7 +29,8 @@
     },
     "runArgs": [
         "--privileged",
-        "-v", "/dev/bus/usb:/dev/bus/usb"
+        "-v", "/dev/bus/usb:/dev/bus/usb",
+        "--group-add", "dialout"
     ],
     // Features to add to the dev container. More info: https://containers.dev/features.
     // "features": {},
