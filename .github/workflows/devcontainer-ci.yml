@@ -53,6 +53,10 @@ jobs:
 
               with:
                   images: ghcr.io/${{github.repository}}/${{ matrix.target }}
+                  flavor: |
+                      latest=auto
+                      prefix=
+                      suffix=
                   sep-tags: ","
                   tags: |
                       type=ref,event=branch
