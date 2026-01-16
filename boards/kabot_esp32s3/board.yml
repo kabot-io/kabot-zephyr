@@ -1,0 +1,6 @@
+board:
+    name: kabot
+    vendor: kabot
+    full_name: Kabot main board
+    socs:
+        - name: esp32s3

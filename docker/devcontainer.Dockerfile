@@ -18,30 +18,46 @@ RUN apt-get update \
     && dpkg -i /tmp/ros2-apt-source.deb \
     && apt-get update \
     && apt-get install -y \
-        ros-dev-tools \
-        ros-${ROS_DISTRO}-ros-base \
+    ros-dev-tools \
+    ros-${ROS_DISTRO}-ros-base \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update \
     && apt-get install -y \
-        ccache \
-        clang-format \
-        clangd \
-        cmake-format \
-        device-tree-compiler \
-        dfu-util \
-        file \
-        g++-multilib \
-        gcc-multilib \
-        gperf \
-        ninja-build \
-        python3-venv \
+    ccache \
+    clang-format \
+    clangd \
+    cmake-format \
+    device-tree-compiler \
+    dfu-util \
+    file \
+    g++-multilib \
+    gcc-multilib \
+    gperf \
+    ninja-build \
+    python3-venv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.zsh' | sudo tee -a /etc/zsh/zshrc
-RUN echo 'source $(find /workspaces/*/.venv/bin/activate)' | sudo tee -a /etc/zsh/zshrc
 
 USER vscode
 SHELL ["/usr/bin/zsh", "-c"]
+
+WORKDIR /west-workspace
+COPY  --chown=vscode:vscode . /west-workspace/kabot-zephyr
+
+RUN python3 -m venv .venv
+RUN . .venv/bin/activate \
+    && pip install --upgrade pip \
+    && pip install west \
+    && west init --local kabot-zephyr \
+
+
+    #     && west update \
+    #     && west zephyr-export
+
+    # RUN echo "source <(west completion zsh)" | sudo tee -a /etc/zsh/zshrc
+    # RUN echo 'source /opt/zephyr-venv/bin/activate' | sudo tee -a /etc/zsh/zshrc
+    # RUN echo 'source /opt/ros/${ROS_DISTRO}/setup.zsh' | sudo tee -a /etc/zsh/zshrc
+    # RUN echo 'source $(find /workspaces/*/.venv/bin/activate)' | sudo tee -a /etc/zsh/zshrc

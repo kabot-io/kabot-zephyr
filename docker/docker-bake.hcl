@@ -15,7 +15,8 @@ target "images" {
     name = "dev-${ubuntu_distro}-${ros_distro}"
     matrix = {
         ubuntu_distro = ["noble"]
-        ros_distro    = ["jazzy", "kilted", "rolling"]
+        ros_distro    = ["kilted"]
+        # ros_distro    = ["jazzy", "kilted", "rolling"]
     }
     dockerfile = "docker/devcontainer.Dockerfile"
     context = "."

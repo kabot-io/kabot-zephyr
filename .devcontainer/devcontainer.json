@@ -27,12 +27,21 @@
             ]
         }
     },
+    "runArgs": [
+        "--privileged",
+        "-v",
+        "/dev:/dev",
+        "--group-add=dialout"
+    ],
+    "remoteEnv": {
+        "ESPTOOL_PORT": "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_34:85:18:99:C4:38-if00"
+    }
     // Features to add to the dev container. More info: https://containers.dev/features.
     // "features": {},
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],
     // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "scripts/post-create-script.zsh"
+    // "postCreateCommand": "scripts/post-create-script.zsh"
     // Configure tool-specific properties.
     // "customizations": {},
     // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

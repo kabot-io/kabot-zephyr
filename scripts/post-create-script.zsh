@@ -1,15 +1,11 @@
 #!/usr/bin/zsh
 
-rm -rf .venv
-
-python3 -m venv .venv
+if [ ! -d ".venv" ]; then
+    python3 -m venv .venv
+fi
 source .venv/bin/activate
 pip install -U pip
 pip install west
-
-if [ ! -d ".west" ]; then
-    west init --local app
-fi
 
 west update
 west packages pip --install

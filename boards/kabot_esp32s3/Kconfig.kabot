@@ -1,0 +1,3 @@
+config BOARD_KABOT
+    select SOC_ESP32S3_WROOM_N16R8
+    select SOC_ESP32S3_PROCPU
