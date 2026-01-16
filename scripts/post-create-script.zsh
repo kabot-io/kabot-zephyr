@@ -7,10 +7,6 @@ source .venv/bin/activate
 pip install -U pip
 pip install west
 
-if [ ! -d ".west" ]; then
-    west init --local app
-fi
-
 west update
 west packages pip --install
 west zephyr-export
