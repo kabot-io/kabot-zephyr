@@ -2,12 +2,20 @@ manifest:
     remotes:
         - name: zephyrproject-rtos
           url-base: https://github.com/zephyrproject-rtos
+        - name: micro-ros
+          url-base: https://github.com/kpochwala/
     projects:
+        - name: micro_ros_zephyr_module
+          remote: micro-ros
+          revision: libmicroros-only-jazzy
+          path: deps/modules/micro_ros_zephyr_module
+
         - name: zephyr
           remote: zephyrproject-rtos
-          revision: v4.2.0
+          revision: v4.3.0
           clone-depth: 1
           import:
+              path-prefix: deps
               name-blocklist:
                   - acpica
                   - babblesim_base
@@ -46,6 +54,7 @@ manifest:
                   - hal_quicklogic
                   - hal_renesas
                   - hal_rpi_pico
+                  - hal_sifli
                   - hal_silabs
                   - hal_st
                   - hal_stm32
@@ -55,6 +64,7 @@ manifest:
                   - hal_wch
                   - hal_wurthelektronik
                   - hal_xtensa
+                  - hostap
                   - liblc3
                   - libmctp
                   - libmetal
@@ -73,13 +83,9 @@ manifest:
                   - open-amp
                   - openthread
                   - percepio
-                  - picolibc
+                  # - picolibc
                   - segger
                   - trusted-firmware-a
                   - trusted-firmware-m
                   - uoscore-uedhoc
                   - zcbor
-        - name: micro_ros_zephyr_module
-          url: https://github.com/micro-ROS/micro_ros_zephyr_module.git
-          path: modules/lib/micro_ros_zephyr
-          revision: kilted
