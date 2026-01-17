@@ -3,14 +3,12 @@ manifest:
         - name: zephyrproject-rtos
           url-base: https://github.com/zephyrproject-rtos
         - name: micro-ros
-          url-base: https://github.com/micro-ROS
+          url-base: https://github.com/kpochwala/
     projects:
-        # - name: micro_ros_zephyr_module
-        #   remote: micro-ros
-        #   path: modules/lib/micro_ros_zephyr
-        #   revision: jazzy
-        #   import:
-        #     path-prefix: deps
+        - name: micro_ros_zephyr_module
+          remote: micro-ros
+          revision: libmicroros-only-jazzy
+          path: deps/modules/micro_ros_zephyr_module
 
         - name: zephyr
           remote: zephyrproject-rtos
@@ -85,7 +83,7 @@ manifest:
                   - open-amp
                   - openthread
                   - percepio
-                  - picolibc
+                  # - picolibc
                   - segger
                   - trusted-firmware-a
                   - trusted-firmware-m
