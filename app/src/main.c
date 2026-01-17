@@ -20,9 +20,16 @@ static void udp_motor_service_handler(struct net_socket_service_event *pev)
 
 NET_SOCKET_SERVICE_SYNC_DEFINE(udp_motor_service, udp_motor_service_handler, 2);
 
+int setup_socket_and_bind(struct sockaddr* addr) {
+    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if(bind(sock, addr, sizeof(*addr)) < 0) {
+        LOG_ERR("bind: %d", -errno);
+        return -errno;
+    }
+    return sock;
+}
+
 int main(void) {
-    int socket_left = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    int socket_right = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     struct sockaddr_in addr_left = {
         .sin_family = AF_INET,
@@ -35,28 +42,21 @@ int main(void) {
         .sin_addr.s_addr = INADDR_ANY,
     };
 
-    if(bind(socket_left, (struct sockaddr *)&addr_left, sizeof(addr_left)) < 0) {
-		LOG_ERR("bind: %d", -errno);
-		close(socket_left);
-		return -errno;
-    }
-    if(bind(socket_right, (struct sockaddr *)&addr_right, sizeof(addr_right)) < 0) {
-		LOG_ERR("bind: %d", -errno);
-		close(socket_right);
-		return -errno;
-    }
+    int socket_left = setup_socket_and_bind((struct sockaddr*)&addr_left);
+    int socket_right = setup_socket_and_bind((struct sockaddr*)&addr_right);
 
-    char buf[64];
+    char buf_left[64];
+    char buf_right[64];
     while (1) {
-        int len_left = zsock_recv(socket_left, buf, sizeof(buf) - 1, 0);
+        int len_left = zsock_recv(socket_left, buf_left, sizeof(buf_left) - 1, 0);
         if (len_left > 0) {
-            buf[len_left] = '\0';
-            printk("Received left: %s\n", buf);
+            buf_left[len_left] = '\0';
+            printk("Received left: %s\n", buf_left);
         }
-        int len_right = zsock_recv(socket_right, buf, sizeof(buf) - 1, 0);
+        int len_right = zsock_recv(socket_right, buf_right, sizeof(buf_right) - 1, 0);
         if (len_right > 0) {
-            buf[len_right] = '\0';
-            printk("Received right: %s\n", buf);
+            buf_right[len_right] = '\0';
+            printk("Received right: %s\n", buf_right);
         }
     }
 }
