@@ -7,7 +7,7 @@
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
-            "IMAGE_NAME": "${localEnv:IMAGE_NAME:dev-noble-kilted}",
+            "IMAGE_NAME": "${localEnv:IMAGE_NAME:dev-noble-jazzy}",
             "IMAGE_TAG": "${localEnv:IMAGE_TAG:latest}"
         }
     },

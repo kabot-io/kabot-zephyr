@@ -1,9 +1,8 @@
-/.west
 /bootloader
 /build
 /modules
 /tools
-/zephyr
+/deps
 /.microros-tutorial-workspace/**
 !/.microros-tutorial-workspace/init.sh
 
