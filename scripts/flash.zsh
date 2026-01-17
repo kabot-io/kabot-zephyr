@@ -6,11 +6,13 @@ if [ ! -d /dev/serial/by-id ] || [ -z "$(ls -A /dev/serial/by-id 2>/dev/null)" ]
     echo "Error: no serial devices detected in /dev/serial/by-id"
 
     if [ -n "$WSL_DISTRO_NAME" ]; then
-        echo "To attach a device to WSL:"
+        echo "To attach a device to WSL, follow Microsoft documentation:"
+        echo "https://learn.microsoft.com/en-us/windows/wsl/connect-usb"
+        echo
         echo "In Powershell (admin), run:"
         echo "winget install usbipd"
         echo "usbipd list"
-        echo "usbipd bind --busid <id>"
+        echo "usbipd bind --busid <id> # id of the board from usbipd list"
         echo "usbipd attach --wsl --busid <id>"
         exit 1
     fi
