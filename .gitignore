@@ -3,6 +3,7 @@
 /modules
 /tools
 /deps
+/zephyr
 /.microros-tutorial-workspace/**
 !/.microros-tutorial-workspace/init.sh
 
