@@ -35,8 +35,21 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
         return;
     }
 
+    if(len > 1) {
+        LOG_WRN("Received datagram larger than expected size of 1 byte. Actual size: %d bytes", len);
+    }
+
     int8_t effort = (int8_t)buf[0];
-    uint16_t port = (pfd->fd == socket_left) ? PORT_LEFT : PORT_RIGHT;
+    uint16_t port;
+    if (pfd->fd == socket_left) {
+        port = PORT_LEFT;
+    } else if (pfd->fd == socket_right) {
+        port = PORT_RIGHT;
+    } else {
+        LOG_ERR("Data received on unknown socket: %d", pfd->fd);
+        return;
+    }
+
     LOG_INF("Port: %u | Effort: %d", port, effort);
 }
 
