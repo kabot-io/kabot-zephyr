@@ -12,9 +12,9 @@
 
 LOG_MODULE_REGISTER(kabot, LOG_LEVEL_DBG);
 
-#define PORT_LEFT 30010
+#define PORT_LEFT  30010
 #define PORT_RIGHT 30020
-#define MTU 1500
+#define MTU        1500
 
 static int socket_left = -1;
 static int socket_right = -1;
@@ -30,9 +30,11 @@ static void udp_motor_service_handler(struct net_socket_service_event *pev)
     static char buf[MTU];
     int len;
 
-    len = recvfrom(client_socket, buf, sizeof(buf), 0, (struct sockaddr*)&sender_addr, &addrlen);
+    len = recvfrom(client_socket, buf, sizeof(buf), 0, (struct sockaddr *)&sender_addr, &addrlen);
 
-    if (len <= 0) return;
+    if (len <= 0) {
+        return;
+    }
 
     // 1. Identify Port
     uint16_t local_port = (client_socket == socket_left) ? PORT_LEFT : PORT_RIGHT;
@@ -54,10 +56,13 @@ static void udp_motor_service_handler(struct net_socket_service_event *pev)
 
 NET_SOCKET_SERVICE_SYNC_DEFINE(udp_motor_service, udp_motor_service_handler, 2);
 
-int setup_socket_and_bind(struct sockaddr_in* addr) {
+int setup_socket_and_bind(struct sockaddr_in *addr)
+{
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (sock < 0) return -errno;
-    if (bind(sock, (struct sockaddr*)addr, sizeof(*addr)) < 0) {
+    if (sock < 0) {
+        return -errno;
+    }
+    if (bind(sock, (struct sockaddr *)addr, sizeof(*addr)) < 0) {
         close(sock);
         return -errno;
     }
@@ -90,15 +95,25 @@ static void close_motor_sockets(void)
     sockfd_udp[1].fd = -1;
 }
 
-static int handle_motor_service_error(const char *msg, int err_code) {
+static int handle_motor_service_error(const char *msg, int err_code)
+{
     LOG_ERR("%s: %d", msg, err_code);
     close_motor_sockets(); // Centralized cleanup
     return err_code;
 }
 
-static int start_motor_service(void) {
-    struct sockaddr_in addr_left = { .sin_family = AF_INET, .sin_port = htons(PORT_LEFT), .sin_addr.s_addr = INADDR_ANY, };
-    struct sockaddr_in addr_right = { .sin_family = AF_INET, .sin_port = htons(PORT_RIGHT), .sin_addr.s_addr = INADDR_ANY, };
+static int start_motor_service(void)
+{
+    struct sockaddr_in addr_left = {
+            .sin_family = AF_INET,
+            .sin_port = htons(PORT_LEFT),
+            .sin_addr.s_addr = INADDR_ANY,
+    };
+    struct sockaddr_in addr_right = {
+            .sin_family = AF_INET,
+            .sin_port = htons(PORT_RIGHT),
+            .sin_addr.s_addr = INADDR_ANY,
+    };
     int ret;
 
     socket_left = setup_socket_and_bind(&addr_left);
@@ -122,10 +137,14 @@ static int start_motor_service(void) {
     }
 
     LOG_INF("Motor service started successfully.");
-    return 0;}
+    return 0;
+}
 
 SYS_INIT(start_motor_service, APPLICATION, 99);
 
-int main(void) {
-    while(1) { k_sleep(K_FOREVER); }
+int main(void)
+{
+    while (1) {
+        k_sleep(K_FOREVER);
+    }
 }
