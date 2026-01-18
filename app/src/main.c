@@ -8,7 +8,7 @@
 #include <zephyr/net/socket_service.h>
 #include <zephyr/posix/poll.h>
 #include <arpa/inet.h>
-#include <stdint.h> // Required for int8_t
+#include <stdint.h>
 
 LOG_MODULE_REGISTER(kabot, LOG_LEVEL_DBG);
 
@@ -37,7 +37,6 @@ static void udp_motor_service_handler(struct net_socket_service_event *pev)
     // 1. Identify Port
     uint16_t local_port = (client_socket == socket_left) ? PORT_LEFT : PORT_RIGHT;
 
-    // 2. Validate Length (Python is sending exactly 1 byte)
     if (len != 1) {
         LOG_ERR("Port: %u | Error: Expected 1 byte, but got %d", local_port, len);
         return;
@@ -65,24 +64,65 @@ int setup_socket_and_bind(struct sockaddr_in* addr) {
     return sock;
 }
 
+static void close_motor_sockets(void)
+{
+    /* 1. Unregister the socket service first to stop the kernel from polling */
+    /* This is safe to call even if registration failed or hasn't happened yet */
+    (void)net_socket_service_unregister(&udp_motor_service);
+
+    /* 2. Close the left socket */
+    if (socket_left >= 0) {
+        LOG_DBG("Closing left socket (%d)", socket_left);
+        close(socket_left);
+        socket_left = -1;
+    }
+
+    /* 3. Close the right socket */
+    if (socket_right >= 0) {
+        LOG_DBG("Closing right socket (%d)", socket_right);
+        close(socket_right);
+        socket_right = -1;
+    }
+
+    /* 4. Reset the pollfd structures to be safe */
+    memset(sockfd_udp, 0, sizeof(sockfd_udp));
+    sockfd_udp[0].fd = -1;
+    sockfd_udp[1].fd = -1;
+}
+
+static int handle_motor_service_error(const char *msg, int err_code) {
+    LOG_ERR("%s: %d", msg, err_code);
+    close_motor_sockets(); // Centralized cleanup
+    return err_code;
+}
+
 static int start_motor_service(void) {
-    struct sockaddr_in addr_left = {
-        .sin_family = AF_INET, .sin_port = htons(PORT_LEFT), .sin_addr.s_addr = INADDR_ANY,
-    };
-    struct sockaddr_in addr_right = {
-        .sin_family = AF_INET, .sin_port = htons(PORT_RIGHT), .sin_addr.s_addr = INADDR_ANY,
-    };
+    struct sockaddr_in addr_left = { .sin_family = AF_INET, .sin_port = htons(PORT_LEFT), .sin_addr.s_addr = INADDR_ANY, };
+    struct sockaddr_in addr_right = { .sin_family = AF_INET, .sin_port = htons(PORT_RIGHT), .sin_addr.s_addr = INADDR_ANY, };
+    int ret;
 
     socket_left = setup_socket_and_bind(&addr_left);
+    if (socket_left < 0) {
+        return handle_motor_service_error("Failed to setup left socket", socket_left);
+    }
+
     socket_right = setup_socket_and_bind(&addr_right);
+    if (socket_right < 0) {
+        return handle_motor_service_error("Failed to setup right socket", socket_right);
+    }
 
     sockfd_udp[0].fd = socket_left;
     sockfd_udp[0].events = POLLIN;
     sockfd_udp[1].fd = socket_right;
     sockfd_udp[1].events = POLLIN;
 
-    return net_socket_service_register(&udp_motor_service, sockfd_udp, ARRAY_SIZE(sockfd_udp), NULL);
-}
+    ret = net_socket_service_register(&udp_motor_service, sockfd_udp, ARRAY_SIZE(sockfd_udp), NULL);
+    if (ret < 0) {
+        return handle_motor_service_error("Failed to register socket service", ret);
+    }
+
+    LOG_INF("Motor service started successfully.");
+    return 0;}
 
 SYS_INIT(start_motor_service, APPLICATION, 99);
 
