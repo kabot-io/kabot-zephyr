@@ -1,0 +1,7 @@
+/ {
+	&pwm0 {
+        status = "okay";
+        frequency = 50;
+    };
+
+};
