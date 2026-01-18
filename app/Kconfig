@@ -1,0 +1,8 @@
+source "Kconfig.zephyr"
+
+config APP_RUN_TESTS
+    bool "Run application unit tests"
+    default n
+    help
+      When enabled on native_sim, the app will execute ZTest suites
+      instead of just idling in the main loop.

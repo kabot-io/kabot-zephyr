@@ -1,11 +1,10 @@
 / {
-    uart0: uart {
+    pwm0: pwm0 {
+        compatible = "zephyr,fake-pwm";
+        #pwm-cells = <2>;
+        frequency = <10000>; // 10 kHz
         status = "okay";
-        compatible = "zephyr,native-pty-uart";
+
     };
-    eeprom0: eeprom {
-        status = "okay";
-        compatible = "zephyr,sim-eeprom";
-        size = <256>;
-    };
+
 };
