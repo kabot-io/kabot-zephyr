@@ -17,14 +17,23 @@ static int socket_left = -1;
 static int socket_right = -1;
 static struct pollfd sockfd_udp[2];
 
-static void udp_motor_handler(struct net_socket_service_event *pev) {
+static void udp_motor_handler(struct net_socket_service_event *pev)
+{
     struct pollfd *pfd = &pev->event;
     struct sockaddr_in sender_addr;
     socklen_t addrlen = sizeof(sender_addr);
     static char buf[MTU];
 
     int len = recvfrom(pfd->fd, buf, sizeof(buf), 0, (struct sockaddr *)&sender_addr, &addrlen);
-    if (len != 1) return;
+    if (len < 0) {
+        LOG_ERR("recvfrom failed with error %d", errno);
+        return;
+    }
+
+    if (len == 0) {
+        /* Zero-length datagram received, do nothing. */
+        return;
+    }
 
     int8_t effort = (int8_t)buf[0];
     uint16_t port = (pfd->fd == socket_left) ? PORT_LEFT : PORT_RIGHT;
@@ -33,14 +42,17 @@ static void udp_motor_handler(struct net_socket_service_event *pev) {
 
 NET_SOCKET_SERVICE_SYNC_DEFINE(udp_motor_service, udp_motor_handler, 2);
 
-static int setup_socket(uint16_t port) {
+static int setup_socket(uint16_t port)
+{
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (sock < 0) return -errno;
+    if (sock < 0) {
+        return -errno;
+    }
 
     struct sockaddr_in addr = {
-        .sin_family = AF_INET,
-        .sin_port = htons(port),
-        .sin_addr.s_addr = INADDR_ANY,
+            .sin_family = AF_INET,
+            .sin_port = htons(port),
+            .sin_addr.s_addr = INADDR_ANY,
     };
 
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
@@ -50,15 +62,25 @@ static int setup_socket(uint16_t port) {
     return sock;
 }
 
-void stop_motor_service(void) {
+void stop_motor_service(void)
+{
     (void)net_socket_service_unregister(&udp_motor_service);
-    if (socket_left >= 0) { close(socket_left); socket_left = -1; }
-    if (socket_right >= 0) { close(socket_right); socket_right = -1; }
+    if (socket_left >= 0) {
+        close(socket_left);
+        socket_left = -1;
+    }
+    if (socket_right >= 0) {
+        close(socket_right);
+        socket_right = -1;
+    }
 }
 
-int start_motor_service(void) {
+int start_motor_service(void)
+{
     socket_left = setup_socket(PORT_LEFT);
-    if (socket_left < 0) return socket_left;
+    if (socket_left < 0) {
+        return socket_left;
+    }
 
     socket_right = setup_socket(PORT_RIGHT);
     if (socket_right < 0) {
