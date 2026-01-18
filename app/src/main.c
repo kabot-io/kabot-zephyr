@@ -14,7 +14,8 @@ DEFINE_FFF_GLOBALS;
 #endif
 
 /* Standard Init Logic */
-static int kabot_init(void) {
+static int kabot_init(void)
+{
     return start_motor_service();
 }
 SYS_INIT(kabot_init, APPLICATION, 99);
@@ -22,7 +23,8 @@ SYS_INIT(kabot_init, APPLICATION, 99);
 /* --- ENTRY POINT LOGIC --- */
 
 #ifdef CONFIG_ZTEST
-void test_main(void) {
+void test_main(void)
+{
 #if defined(CONFIG_APP_RUN_TESTS)
     /* SCENARIO 2: UTs */
     ztest_run_all(NULL, false, 1, 1);
@@ -36,7 +38,8 @@ void test_main(void) {
 }
 #else
 /* SCENARIO 3: ESP32 */
-int main(void) {
+int main(void)
+{
     while (1) {
         k_sleep(K_FOREVER);
     }
