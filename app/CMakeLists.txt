@@ -9,4 +9,5 @@ zephyr_library_include_directories(include)
 target_sources(app PRIVATE
     src/main.c
     src/motor_service.c
+    src/zbus/effort_channel.c
 )
