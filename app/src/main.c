@@ -20,7 +20,7 @@ static void effort_subscriber_task(void)
             continue;
         }
         struct effort_msg effort;
-        if (zbus_chan_read(&effort_channel, &effort, K_MSEC(500)) == 0) {
+        if (zbus_chan_read(&effort_channel, &effort, K_MSEC(20)) == 0) {
             LOG_INF("From subscriber -> Left effort=%d, Right effort=%d", effort.left, effort.right);
         } else {
             LOG_WRN("Failed to read from effort_channel");

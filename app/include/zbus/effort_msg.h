@@ -2,6 +2,9 @@
 
 #include <zephyr/types.h>
 
+#define EFFORT_VALUE_MIN -100
+#define EFFORT_VALUE_MAX 100
+
 /**
  * @brief Message type for motor effort commands.
  *

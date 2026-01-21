@@ -3,7 +3,7 @@
 /**
  * @brief Initialize and start the UDP motor control service.
  *
- * This function sets up the UDP socket and starts listening for motor control commands.
+ * This function sets up the UDP sockets and starts listening for motor control commands.
  *
  * @return 0 on success, negative errno on failure.
  */

@@ -3,16 +3,16 @@
 #include <zephyr/zbus/zbus.h>
 #include "zbus/effort_msg.h"
 
-#define EFFORT_MSG_INVALID {.left = -127, .right = -127}
+#define EFFORT_MSG_INVALID {.left = INT8_MIN, .right = INT8_MIN}
 
 /**
  * @brief Publishes an effort_msg to the effort_channel.
  *
  * @param msg Pointer to the effort_msg structure to publish.
  * @param timeout Timeout for publishing the message.
- * @return true if the message was published successfully, false otherwise.
+ * @return 0 if the message was published successfully, negative errno on failure.
  */
-bool publish_effort_msg(const struct effort_msg *msg, k_timeout_t timeout);
+int publish_effort_msg(const struct effort_msg *msg, k_timeout_t timeout);
 
 /**
  * @brief Validates an effort_msg for the effort_channel.
