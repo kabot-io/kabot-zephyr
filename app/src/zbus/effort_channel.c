@@ -12,21 +12,18 @@ bool publish_effort_msg(const struct effort_msg *msg, k_timeout_t timeout)
 
 bool effort_channel_validator(const void *msg, size_t msg_size)
 {
-    ARG_UNUSED(msg_size);
-
     const struct effort_msg *effort = msg;
 
-    bool fail = false;
-    fail |= (msg_size != sizeof(struct effort_msg));
-    fail |= (effort->left < -100 || effort->left > 100);
-    fail |= (effort->right < -100 || effort->right > 100);
+    bool valid = (msg_size == sizeof(struct effort_msg)) &&
+                 (effort->left >= -100 && effort->left <= 100) &&
+                 (effort->right >= -100 && effort->right <= 100);
 
-    if(fail) {
+    if (!valid) {
         LOG_WRN("Effort channel validator failed: left=%d, right=%d, msg_size=%zu",
                 effort->left, effort->right, msg_size);
     }
 
-    return !fail;
+    return valid;
 }
 
 ZBUS_CHAN_DEFINE(effort_channel,

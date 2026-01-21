@@ -52,6 +52,9 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
         return;
     }
 
+    // A complete message (both left and right valid) needs to be constructed
+    // using data received from both ports. The channel validator ensures that
+    // partially updated message (e.g. first one) is not sent.
     static struct effort_msg msg = EFFORT_MSG_INVALID;
 
     if(port == PORT_LEFT) {
