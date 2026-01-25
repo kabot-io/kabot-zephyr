@@ -6,6 +6,8 @@
 #include <arpa/inet.h>
 
 #include "motor_service.h"
+#include "zbus/effort_channel.h"
+#include "zbus/effort_msg.h"
 
 LOG_MODULE_REGISTER(motor_service, LOG_LEVEL_DBG);
 
@@ -50,7 +52,26 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
         return;
     }
 
-    LOG_INF("Port: %u | Effort: %d", port, effort);
+    // A complete message (both left and right valid) needs to be constructed
+    // using data received from both ports. The channel validator ensures that
+    // partially updated message (e.g. first one) is not sent. This is temporary
+    // needed until a more robust protocol is implemented.
+    static struct effort_msg msg = EFFORT_MSG_INVALID;
+
+    if(port == PORT_LEFT) {
+        msg.left = effort;
+    } else if(port == PORT_RIGHT) {
+        msg.right = effort;
+    }
+
+    if(effort_channel_validator(&msg, sizeof(msg))) {
+        int publish_error = publish_effort_msg(&msg, K_MSEC(1000));
+        if (publish_error) {
+            LOG_ERR("Failed to publish effort message: %d", publish_error);
+            msg = (struct effort_msg)EFFORT_MSG_INVALID;
+        }
+    }
+
 }
 
 NET_SOCKET_SERVICE_SYNC_DEFINE(udp_motor_service, udp_motor_handler, 2);
