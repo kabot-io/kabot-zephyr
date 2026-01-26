@@ -5,7 +5,13 @@
         zephyr,console = &usb_serial;
         zephyr,shell-uart = &usb_serial;
     };
-pwmleds {
+    aliases {
+        servo0 = &led_15;
+        servo1 = &led_16;
+        led0 = &led_40;
+        led1 = &led_41;
+    };
+    pwmleds {
         compatible = "pwm-leds";
         led_15: led_15 {
             pwms = <&ledc0 0 1000 PWM_POLARITY_NORMAL>;
