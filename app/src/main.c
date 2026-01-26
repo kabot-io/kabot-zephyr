@@ -6,6 +6,9 @@
 #include "zbus/effort_msg.h"
 #include "zbus/effort_channel.h"
 
+#include <zephyr/net/wifi_mgmt.h>
+
+
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
@@ -29,9 +32,28 @@ static void effort_subscriber_task(void)
 }
 K_THREAD_DEFINE(effort_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, effort_subscriber_task, NULL, NULL, NULL, 3, 0, 0);
 
+
+static void autoconnect_wifi(void)
+{
+    LOG_INF("Auto-connecting to Wi-Fi...");
+
+    struct net_if *iface = net_if_get_wifi_sta();
+
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE
+	wifi_set_enterprise_credentials(iface, 0);
+#endif /* CONFIG_WIFI_NM_WPA_SUPPLICANT_CRYPTO_ENTERPRISE */
+
+    int rc = net_mgmt(NET_REQUEST_WIFI_CONNECT_STORED, iface, NULL, 0);
+    if (rc < 0) {
+        LOG_ERR("Failed to connect to Wi-Fi: %d", rc);
+    }
+    // Implement Wi-Fi connection logic here
+}
+
 // Automatic startup using Zephyr's init system
 static int kabot_init(void)
 {
+    autoconnect_wifi();
     return start_motor_service();
 }
 

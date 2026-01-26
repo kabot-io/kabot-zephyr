@@ -1,0 +1,78 @@
+#include <zephyr/dt-bindings/pwm/pwm.h>
+
+/ {
+    chosen {
+        zephyr,console = &usb_serial;
+        zephyr,shell-uart = &usb_serial;
+    };
+pwmleds {
+        compatible = "pwm-leds";
+        led_15: led_15 {
+            pwms = <&ledc0 0 1000 PWM_POLARITY_NORMAL>;
+        };
+        led_16: led_16 {
+            pwms = <&ledc0 1 1000 PWM_POLARITY_NORMAL>;
+        };
+        led_40: led_40 {
+            pwms = <&ledc0 2 1000 PWM_POLARITY_NORMAL>;
+        };
+        led_41: led_41 {
+            pwms = <&ledc0 3 1000 PWM_POLARITY_NORMAL>;
+        };
+    };
+};
+
+&pinctrl {
+    ledc0_default: ledc0_default {
+        group1 {
+            pinmux = <LEDC_CH0_GPIO15>,
+                     <LEDC_CH1_GPIO16>,
+                     <LEDC_CH2_GPIO40>,
+                     <LEDC_CH3_GPIO41>;
+            output-enable;
+        };
+    };
+};
+
+&ledc0 {
+    pinctrl-0 = <&ledc0_default>;
+    pinctrl-names = "default";
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    channel0@0 {
+        reg = <0x0>;
+        timer = <0>;
+    };
+    channel1@1 {
+        reg = <0x1>;
+        timer = <0>;
+    };
+    channel2@2 {
+        reg = <0x2>;
+        timer = <1>; // Using a second timer is optional but common for organization
+    };
+    channel3@3 {
+        reg = <0x3>;
+        timer = <1>;
+    };
+};
+
+&flash0 {
+	/delete-node/ partitions;
+};
+
+&flash0 {
+	reg = <0x0 DT_SIZE_M(16)>;
+};
+
+#include <espressif/partitions_0x0_amp_16M.dtsi>
+
+&psram0 {
+	size = <DT_SIZE_M(8)>;
+};
+
+&usb_serial {
+    status = "okay";
+};
