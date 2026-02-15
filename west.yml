@@ -73,7 +73,7 @@ manifest:
                   - lora-basics-modem
                   - loramac-node
                   - lvgl
-                  - mbedtls
+                  # - mbedtls
                   # - mcuboot
                   - mipi-sys-t
                   - nanopb
