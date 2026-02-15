@@ -28,8 +28,8 @@
         }
     },
     "runArgs": [
-        "--privileged",
-        "-v", "/dev/bus/usb:/dev/bus/usb",
+        "--device-cgroup-rule=c 188:* rwm", // ttyUSB*
+        "--device-cgroup-rule=c 166:* rwm", // ttyACM*
         "--group-add", "dialout"
     ],
     // Features to add to the dev container. More info: https://containers.dev/features.

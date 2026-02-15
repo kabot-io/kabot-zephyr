@@ -28,7 +28,6 @@ cd $(git rev-parse --show-toplevel)
 
 source .venv/bin/activate
 
-west build app --build-dir build -b esp32s3_devkitc/esp32s3/procpu --pristine -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-west flash --build-dir build -r esp32 --skip-rebuild
+west flash --build-dir build/esp32s3_procpu -r esp32 --skip-rebuild
 
 cd $CURRENT_DIR
