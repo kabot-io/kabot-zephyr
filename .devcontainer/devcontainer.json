@@ -32,6 +32,11 @@
             ]
         }
     },
+    "runArgs": [
+        "--device-cgroup-rule=c 188:* rwm", // ttyUSB*
+        "--device-cgroup-rule=c 166:* rwm", // ttyACM*
+        "--group-add", "dialout"
+    ],
     // Features to add to the dev container. More info: https://containers.dev/features.
     "features": {
         "ghcr.io/devcontainers/features/docker-in-docker:2": {

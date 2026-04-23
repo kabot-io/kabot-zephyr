@@ -2,6 +2,14 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "monitorPort",
+            "type": "promptString",
+            "description": "Serial port for monitor (e.g. /dev/ttyACM0)",
+            "default": "/dev/ttyACM0"
+        }
+    ],
     "tasks": [
         {
             "label": "Build native_sim",
@@ -16,12 +24,15 @@
             "label": "Run native_sim",
             "type": "shell",
             "command": "./build/zephyr/zephyr.exe --eeprom=build/eeprom.bin",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "dependsOn": [
+                "Build native_sim"
+            ]
         },
         {
             "label": "Build esp32s3",
             "type": "shell",
-            "command": "source .venv/bin/activate && west build app --build-dir build -b esp32s3_devkitc/esp32s3/appcpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            "command": "source .venv/bin/activate && west build app --build-dir build/esp32s3_procpu -b esp32s3_devkitc/esp32s3/procpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -30,7 +41,17 @@
         {
             "label": "Clean esp32s3",
             "type": "shell",
-            "command": "source .venv/bin/activate && west build app --build-dir build/esp32s3 -b esp32s3_devkitc/esp32s3/appcpu clean"
+            "command": "source .venv/bin/activate && west build app --build-dir build/esp32s3_procpu -b esp32s3_devkitc/esp32s3/procpu clean"
+        },
+        {
+            "label": "Flash esp32s3",
+            "type": "shell",
+            "command": "./scripts/flash.zsh",
+        },
+        {
+            "label": "Monitor esp32s3",
+            "type": "shell",
+            "command": "source .venv/bin/activate && cd build/esp32s3_procpu && ZEPHYR_BASE=${workspaceFolder}/deps/zephyr west espressif monitor -p ${input:monitorPort}",
         },
         {
             "label": "Clean build directory",
