@@ -21,21 +21,23 @@ void effort_subscriber_task(void)
         }
         struct effort_msg effort;
         if (zbus_chan_read(&effort_channel, &effort, K_MSEC(20)) == 0) {
-            LOG_INF("From subscriber -> Left effort=%d, Right effort=%d", effort.left, effort.right);
+            LOG_INF("From subscriber -> Left effort=%d, Right effort=%d", effort.left,
+                    effort.right);
             set_motor_effort(&effort);
         } else {
             LOG_WRN("Failed to read from effort_channel");
         }
     }
 }
-K_THREAD_DEFINE(effort_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, effort_subscriber_task, NULL, NULL, NULL, 3, 0, 0);
+K_THREAD_DEFINE(effort_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, effort_subscriber_task, NULL,
+                NULL, NULL, 3, 0, 0);
 int initialize_motor_pwms(void)
 {
-    if(!device_is_ready(left_motor_pwm.dev)) {
+    if (!device_is_ready(left_motor_pwm.dev)) {
         LOG_ERR("Left motor PWM device not ready");
         return -ENODEV;
     }
-    if(!device_is_ready(right_motor_pwm.dev)) {
+    if (!device_is_ready(right_motor_pwm.dev)) {
         LOG_ERR("Right motor PWM device not ready");
         return -ENODEV;
     }
@@ -67,11 +69,21 @@ int set_motor_effort(struct effort_msg *effort)
     uint32_t left_pulse = map_effort_to_pulse(effort->left, true);
     uint32_t right_pulse = map_effort_to_pulse(effort->right, false);
 
-    LOG_INF("Setting motor efforts: Left pulse=%d us, Right pulse=%d us", left_pulse,  right_pulse);
+    LOG_INF("Setting motor efforts: Left pulse=%d us, Right pulse=%d us", left_pulse, right_pulse);
 
-    pwm_set_dt(&left_motor_pwm, PWM_USEC(20000), PWM_USEC(left_pulse));
-    pwm_set_dt(&right_motor_pwm, PWM_USEC(20000), PWM_USEC(right_pulse));
+    int ret = pwm_set_dt(&left_motor_pwm, PWM_USEC(20000), PWM_USEC(left_pulse));
+    if (ret < 0) {
+        LOG_ERR("Failed to set left motor PWM: %d", ret);
+        return ret;
+    }
 
+    ret = pwm_set_dt(&right_motor_pwm, PWM_USEC(20000), PWM_USEC(right_pulse));
+    if (ret < 0) {
+        LOG_ERR("Failed to set right motor PWM: %d", ret);
+        return ret;
+    }
+
+    return 0;
 
     return 0;
 }
