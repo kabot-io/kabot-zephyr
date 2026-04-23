@@ -14,7 +14,7 @@ int initialize_motor_pwms(void);
 int set_motor_effort(struct effort_msg *effort);
 
 /**
- * @brief Maps effort (-100 to 100) to pulse width (1500us to 2500us)
+ * @brief Maps effort (-100 to 100) to pulse width (1000us to 2500us)
  * @param effort Value between -100 and 100
  * @param flip   Boolean to reverse the direction
  * @return uint32_t Pulse width in microseconds
