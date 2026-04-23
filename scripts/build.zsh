@@ -8,5 +8,6 @@ source .venv/bin/activate
 
 # west build app --build-dir build/native_sim -b native_sim -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 west build app --build-dir build/esp32s3_devkitc -b esp32s3_devkitc/esp32s3/procpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+# west flash --build-dir build/esp32s3_devkitc
 
 cd $CURRENT_DIR
