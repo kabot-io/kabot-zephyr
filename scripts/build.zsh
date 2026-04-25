@@ -11,6 +11,7 @@ west build app --build-dir build/esp32s3_devkitc -b esp32s3_devkitc/esp32s3/proc
 [[ $? -eq 0 ]] || exit 1
 if [[ "$*" != *"--no-flash"* ]]; then
     west flash --build-dir build/esp32s3_devkitc || exit 1
+    tio ${ESPTOOL_PORT} -b 115200
 fi
 
 cd $CURRENT_DIR
