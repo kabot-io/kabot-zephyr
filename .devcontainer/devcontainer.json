@@ -1,9 +1,5 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
     "name": "Ubuntu",
-    // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-    // "image": "ghcr.io/kabot-io/kabot-zephyr/dev-noble-kilted:latest",
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
@@ -13,9 +9,14 @@
     },
     "privileged": true,
     "runArgs": [
-        "--group-add", "dialout",
-        "--group-add", "plugdev"
+        "--group-add",
+        "dialout",
+        "--group-add",
+        "plugdev"
     ],
+    "remoteEnv": {
+        "ESPTOOL_PORT": "${localEnv:ESPTOOL_PORT:/dev/ttyACM0}"
+    },
     "customizations": {
         "vscode": {
             "extensions": [
@@ -32,19 +33,11 @@
             ]
         }
     },
-    // Features to add to the dev container. More info: https://containers.dev/features.
     "features": {
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "version": "27.3.1",
             "moby": "false"
         }
     },
-    // Use 'forwardPorts' to make a list of ports inside the container available locally.
-    // "forwardPorts": [],
-    // Use 'postCreateCommand' to run commands after the container is created.
     "postCreateCommand": "scripts/post-create-script.zsh"
-    // Configure tool-specific properties.
-    // "customizations": {},
-    // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-    // "remoteUser": "root"
 }
