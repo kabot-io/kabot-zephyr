@@ -18,25 +18,26 @@ RUN apt-get update \
     && dpkg -i /tmp/ros2-apt-source.deb \
     && apt-get update \
     && apt-get install -y \
-        ros-dev-tools \
-        ros-${ROS_DISTRO}-ros-base \
+    ros-dev-tools \
+    ros-${ROS_DISTRO}-ros-base \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update \
     && apt-get install -y \
-        ccache \
-        clang-format \
-        clangd \
-        cmake-format \
-        device-tree-compiler \
-        dfu-util \
-        file \
-        g++-multilib \
-        gcc-multilib \
-        gperf \
-        ninja-build \
-        python3-venv \
+    ccache \
+    clang-format \
+    clangd \
+    cmake-format \
+    device-tree-compiler \
+    dfu-util \
+    file \
+    g++-multilib \
+    gcc-multilib \
+    gperf \
+    ninja-build \
+    python3-venv \
+    tio \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
