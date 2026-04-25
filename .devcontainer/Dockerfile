@@ -1,5 +1,5 @@
-ARG IMAGE_NAME
-ARG IMAGE_TAG
+ARG IMAGE_NAME=dev-noble-jazzy
+ARG IMAGE_TAG=latest
 
 FROM ghcr.io/kabot-io/kabot-zephyr/${IMAGE_NAME}:${IMAGE_TAG}
 
