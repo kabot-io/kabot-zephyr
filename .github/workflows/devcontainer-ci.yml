@@ -100,5 +100,6 @@ jobs:
 
               with:
                   push: never
-                  imageName: ghcr.io/${{ github.repository }}/devcontainer-test-${{ matrix.target }}
-                  runCmd: scripts/build.zsh
+                  imageName: ghcr.io/${{ github.repository }}/devcontainer-test-${{
+                      matrix.target}}
+                  runCmd: scripts/build.zsh --no-flash
