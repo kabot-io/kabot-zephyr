@@ -4,6 +4,8 @@ manifest:
           url-base: https://github.com/zephyrproject-rtos
         - name: kpochwala
           url-base: https://github.com/kpochwala/
+        - name: sylvio-alves
+          url-base: https://github.com/sylvioalves
     projects:
         - name: micro_ros_zephyr_module
           remote: kpochwala
@@ -11,8 +13,8 @@ manifest:
           path: deps/modules/micro_ros_zephyr_module
 
         - name: zephyr
-          remote: zephyrproject-rtos
-          revision: v4.4.0
+          remote: sylvio-alves
+          revision: feature/esp32-pcnt-driver-update
           clone-depth: 1
           import:
               path-prefix: deps
