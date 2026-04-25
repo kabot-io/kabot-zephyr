@@ -10,6 +10,7 @@
         servo1 = &led_16;
         led0 = &led_40;
         led1 = &led_41;
+        qdec0 = &pcnt;
     };
     pwmleds {
         compatible = "pwm-leds";
@@ -40,10 +41,10 @@
     };
     pcnt_default: pcnt_default {
         group1 {
-            pinmux = <PCNT0_CH0SIG_GPIO8>,
-                     <PCNT0_CH0CTRL_GPIO11>,
-                     <PCNT1_CH0SIG_GPIO4>,
-                     <PCNT1_CH0CTRL_GPIO5>;
+            pinmux = <PCNT0_CH0SIG_GPIO5>,
+                     <PCNT0_CH0CTRL_GPIO4>,
+                     <PCNT1_CH0SIG_GPIO8>,
+                     <PCNT1_CH0CTRL_GPIO11>;
             bias-pull-up;
         };
     };

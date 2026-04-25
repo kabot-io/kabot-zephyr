@@ -10,7 +10,6 @@ void sensor_subscriber_task(void)
 {
     const struct zbus_channel *chan;
 
-    LOG_INF("Starting subscriber on sensor channel");
     while (!zbus_sub_wait(&sensor_subscriber, &chan, K_FOREVER)) {
         if (&sensor_channel != chan) {
             continue;
@@ -18,12 +17,12 @@ void sensor_subscriber_task(void)
 
         struct sensor_msg sensor;
         if (zbus_chan_read(&sensor_channel, &sensor, K_MSEC(20)) == 0) {
-            LOG_INF("Sensor data: ts=%llu shift=%d value=%d",
-                    (unsigned long long)sensor.data.header.base_timestamp_ns,
-                    sensor.data.shift,
-                    sensor.data.readings[0].value);
-        } else {
-            LOG_WRN("Failed to read from sensor_channel");
+            LOG_INF("Sensor tuple: left=(ts=%llu,value=%d,shift=%d) "
+                    "right=(ts=%llu,value=%d,shift=%d)",
+                    (unsigned long long)sensor.left_encoder.header.base_timestamp_ns,
+                    sensor.left_encoder.readings[0].value, sensor.left_encoder.shift,
+                    (unsigned long long)sensor.right_encoder.header.base_timestamp_ns,
+                    sensor.right_encoder.readings[0].value, sensor.right_encoder.shift);
         }
     }
 }
