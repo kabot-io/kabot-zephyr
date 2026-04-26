@@ -23,7 +23,7 @@ RTIO_DEFINE_WITH_MEMPOOL(qdec_rtio, 4, 4, 4, 256, sizeof(void *));
 /* Unit order follows DT child reg values, e.g. unit0@0, unit1@1. */
 static const uint8_t unit_indices[] = {DT_FOREACH_CHILD_SEP(QDEC_NODE, DT_REG_ADDR, (, ))};
 
-BUILD_ASSERT(ARRAY_SIZE(unit_indices) >= 2, "Encoder publisher requires at least two qdec units.");
+BUILD_ASSERT(ARRAY_SIZE(unit_indices) == 2, "Encoder publisher requires exactly two qdec units.");
 
 LOG_MODULE_REGISTER(encoder_publisher, LOG_LEVEL_DBG);
 
