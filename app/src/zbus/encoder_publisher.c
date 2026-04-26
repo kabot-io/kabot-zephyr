@@ -71,7 +71,10 @@ void encoder_publisher_task(void)
             LOG_DBG("Encoder unit %u: q31=%d shift=%d", unit_indices[i],
                     (int)data.readings[0].value, data.shift);
 
-            if (i < 2U) {
+            if (i < ARRAY_SIZE(decoded)) {
+                decoded[i] = data;
+                decoded_ok[i] = true;
+            }
                 decoded[i] = data;
                 decoded_ok[i] = true;
             }
