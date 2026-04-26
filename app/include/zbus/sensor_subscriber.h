@@ -9,3 +9,15 @@
  * This function runs in its own thread and waits for messages on the sensor_channel.
  */
 void sensor_subscriber_task(void);
+
+/**
+ * @brief Start the sensor subscriber thread.
+ *
+ * @return 0 on success, negative errno on failure.
+ */
+int start_sensor_subscriber(void);
+
+/**
+ * @brief Stop the sensor subscriber thread.
+ */
+void stop_sensor_subscriber(void);

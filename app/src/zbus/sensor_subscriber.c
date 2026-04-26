@@ -1,10 +1,16 @@
 #include "zbus/sensor_subscriber.h"
 #include "zbus/sensor_channel.h"
 
+#include <errno.h>
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(sensor_subscriber, LOG_LEVEL_DBG);
 
 ZBUS_SUBSCRIBER_DEFINE(sensor_subscriber, 1);
+
+K_THREAD_STACK_DEFINE(sensor_subscriber_stack, CONFIG_MAIN_STACK_SIZE);
+static struct k_thread sensor_subscriber_thread;
+static k_tid_t sensor_subscriber_tid;
 
 void sensor_subscriber_task(void)
 {
@@ -27,5 +33,30 @@ void sensor_subscriber_task(void)
     }
 }
 
-K_THREAD_DEFINE(sensor_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, sensor_subscriber_task, NULL,
-                NULL, NULL, 3, 0, 0);
+int start_sensor_subscriber(void)
+{
+    if (sensor_subscriber_tid != NULL) {
+        return -EALREADY;
+    }
+
+    sensor_subscriber_tid = k_thread_create(&sensor_subscriber_thread, sensor_subscriber_stack,
+                                            K_THREAD_STACK_SIZEOF(sensor_subscriber_stack),
+                                            (k_thread_entry_t)sensor_subscriber_task, NULL, NULL,
+                                            NULL, 3, 0, K_NO_WAIT);
+
+    if (sensor_subscriber_tid == NULL) {
+        return -EIO;
+    }
+
+    return 0;
+}
+
+void stop_sensor_subscriber(void)
+{
+    if (sensor_subscriber_tid == NULL) {
+        return;
+    }
+
+    k_thread_abort(sensor_subscriber_tid);
+    sensor_subscriber_tid = NULL;
+}

@@ -6,6 +6,7 @@
 #include "zbus/effort_subscriber.h"
 #include "zbus/effort_msg.h"
 #include "zbus/effort_channel.h"
+#include "zbus/sensor_subscriber.h"
 
 #include <zephyr/net/wifi_mgmt.h>
 
@@ -34,7 +35,21 @@ static int kabot_init(void)
 {
     autoconnect_wifi();
     initialize_motor_pwms();
-    return start_motor_service();
+
+    int rc = start_sensor_subscriber();
+    if (rc < 0) {
+        LOG_ERR("Failed to start sensor subscriber: %d", rc);
+        return rc;
+    }
+
+    rc = start_motor_service();
+    if (rc < 0) {
+        LOG_ERR("Failed to start motor service: %d", rc);
+        stop_sensor_subscriber();
+        return rc;
+    }
+
+    return 0;
 }
 
 SYS_INIT(kabot_init, APPLICATION, 99);

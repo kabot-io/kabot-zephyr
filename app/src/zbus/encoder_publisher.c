@@ -90,7 +90,7 @@ void encoder_publisher_task(void)
             LOG_WRN("Skipping publish: missing decoded data for one or more encoder channels");
         }
 
-        k_sleep(K_SECONDS(1));
+        k_sleep(K_MSEC(100));
     }
 }
 
