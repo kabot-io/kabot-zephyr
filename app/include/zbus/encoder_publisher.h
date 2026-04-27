@@ -1,6 +1,7 @@
 #pragma once
 
 /**
- * @brief Background task that publishes dummy encoder sensor data.
+ * @brief Background task that reads and decodes qdec encoder sensor data and
+ * publishes it.
  */
 void encoder_publisher_task(void);
