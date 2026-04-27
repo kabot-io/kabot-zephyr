@@ -1,4 +1,5 @@
 #include <zephyr/dt-bindings/pwm/pwm.h>
+#include <zephyr/sensing/sensing_sensor_types.h>
 
 / {
     chosen {
@@ -6,26 +7,42 @@
         zephyr,shell-uart = &usb_serial;
     };
     aliases {
-        servo0 = &led_15;
-        servo1 = &led_16;
+        // servo0 = &led_15;
+        // servo1 = &led_16;
         led0 = &led_40;
         led1 = &led_41;
         qdec0 = &pcnt;
     };
     pwmleds {
         compatible = "pwm-leds";
-        led_15: led_15 {
-            pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
-        };
-        led_16: led_16 {
-            pwms = <&ledc0 1 20000000 PWM_POLARITY_NORMAL>;
-        };
+        // led_15: led_15 {
+            //     pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
+        // };
+        // led_16: led_16 {
+            //     pwms = <&ledc0 1 20000000 PWM_POLARITY_NORMAL>;
+        // };
         led_40: led_40 {
             pwms = <&ledc0 2 20000000 PWM_POLARITY_NORMAL>;
         };
         led_41: led_41 {
             pwms = <&ledc0 3 20000000 PWM_POLARITY_NORMAL>;
         };
+    };
+
+    esc_left: esc_left {
+        compatible = "kabot,esc";
+        pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
+        reverse-pulse = <1000000>;
+        stop-pulse = <1500000>;
+        forward-pulse = <2000000>;
+    };
+
+    esc_right: esc_right {
+        compatible = "kabot,esc";
+        pwms = <&ledc0 1 20000000 PWM_POLARITY_NORMAL>;
+        reverse-pulse = <1000000>;
+        stop-pulse = <1500000>;
+        forward-pulse = <2000000>;
     };
 };
 
@@ -115,18 +132,22 @@
     };
 };
 
-&flash0 {
-	/delete-node/ partitions;
+&coretemp {
+    status = "okay";
 };
 
 &flash0 {
-	reg = <0x0 DT_SIZE_M(16)>;
+    /delete-node/ partitions;
+};
+
+&flash0 {
+    reg = <0x0 DT_SIZE_M(16)>;
 };
 
 #include <espressif/partitions_0x0_amp_16M.dtsi>
 
 &psram0 {
-	size = <DT_SIZE_M(8)>;
+    size = <DT_SIZE_M(8)>;
 };
 
 &usb_serial {

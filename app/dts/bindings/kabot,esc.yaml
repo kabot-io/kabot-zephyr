@@ -1,0 +1,26 @@
+description: PWM driven Electronic Speed Controller (ESC).
+
+compatible: "kabot,esc"
+
+include: base.yaml
+
+properties:
+    pwms:
+        required: true
+        type: phandle-array
+        description: PWM generating pulses for the esc.
+
+    reverse-pulse:
+        required: true
+        type: int
+        description: Full reverse pulse width (nanoseconds).
+
+    stop-pulse:
+        required: true
+        type: int
+        description: No motion pulse width (nanoseconds).
+
+    forward-pulse:
+        required: true
+        type: int
+        description: Maximum forward pulse width (nanoseconds).
