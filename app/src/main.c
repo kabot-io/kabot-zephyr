@@ -11,6 +11,8 @@
 #include <zephyr/net/wifi_mgmt.h>
 
 #include <zephyr/logging/log.h>
+#include <zephyr/logging/log_ctrl.h>
+
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 static void autoconnect_wifi(void)
@@ -33,6 +35,15 @@ static void autoconnect_wifi(void)
 // Automatic startup using Zephyr's init system
 static int kabot_init(void)
 {
+
+    uint32_t domain_count = log_domains_count();
+    for (uint32_t d = 0; d < domain_count; d++) {
+        uint32_t source_count = log_src_cnt_get(d);
+        for (uint32_t i = 0; i < source_count; i++) {
+            log_filter_set(NULL, d, i, CONFIG_KABOT_LOG_LEVEL_DEFAULT);
+        }
+    }
+
     autoconnect_wifi();
     initialize_motor_drivers();
 

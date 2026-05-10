@@ -6,7 +6,7 @@
 /**
  * @brief Abstract motor driver interface.
  *
- * Every concrete motor backend (ESC, H-Bridge, simulation stub, …) embeds
+ * Every concrete motor backend (ESC, H-Bridge, simulation stub, ...) embeds
  * a @ref motor_driver as its **first** member and fills in the @p api
  * pointer.  Callers interact exclusively through the inline helpers below
  * so that the subscriber code never needs to know which backend is in use.

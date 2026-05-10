@@ -45,9 +45,9 @@ void encoder_publisher_task(void)
     LOG_INF("Encoder publisher started with %u unit(s)", (unsigned int)ARRAY_SIZE(unit_indices));
 
     while (1) {
-        int rc = sensor_read(&qdec_iodev, &qdec_rtio, buf, sizeof(buf));
-        struct sensor_q31_data decoded[2] = {0};
         bool decoded_ok[2] = {false, false};
+        struct sensor_q31_data decoded[2] = {0};
+        int rc = sensor_read(&qdec_iodev, &qdec_rtio, buf, sizeof(buf));
 
         if (rc != 0) {
             LOG_WRN("sensor_read failed: %d", rc);
@@ -72,9 +72,6 @@ void encoder_publisher_task(void)
                     (int)data.readings[0].value, data.shift);
 
             if (i < ARRAY_SIZE(decoded)) {
-                decoded[i] = data;
-                decoded_ok[i] = true;
-            }
                 decoded[i] = data;
                 decoded_ok[i] = true;
             }

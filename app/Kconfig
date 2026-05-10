@@ -1,0 +1,16 @@
+mainmenu "kabot"
+
+# Source the main Zephyr Kconfig tree
+source "Kconfig.zephyr"
+
+config KABOT_LOG_LEVEL_DEFAULT
+    int "Default runtime log level"
+    default 3
+    range 0 4
+    help
+      Sets the default runtime log level applied at boot.
+      0: OFF
+      1: ERROR
+      2: WARNING
+      3: INFO
+      4: DEBUG
