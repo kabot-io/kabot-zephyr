@@ -10,6 +10,7 @@ target_sources(
     app
     PRIVATE src/main.c
             src/esc_driver.c
+            src/sim_motor_driver.c
             src/motor_service.c
             src/zbus/effort_channel.c
             src/zbus/effort_subscriber.c

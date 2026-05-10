@@ -34,7 +34,7 @@ static void autoconnect_wifi(void)
 static int kabot_init(void)
 {
     autoconnect_wifi();
-    initialize_motor_pwms();
+    initialize_motor_drivers();
 
     int rc = start_sensor_subscriber();
     if (rc < 0) {

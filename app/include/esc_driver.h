@@ -1,12 +1,17 @@
 #pragma once
 
+#include "motor_driver.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/pwm.h>
 
+extern const struct motor_driver_api esc_driver_api;
+
 struct esc_driver {
+    struct motor_driver base; /**< Must be first — enables casting to motor_driver. */
     struct pwm_dt_spec pwm;
     uint32_t reverse_pulse;
     uint32_t stop_pulse;
@@ -16,10 +21,10 @@ struct esc_driver {
 
 #define ESC_DRIVER_FROM_DT(node_id, is_flipped)                                                    \
     {                                                                                              \
-        .pwm = PWM_DT_SPEC_GET(node_id), .reverse_pulse = DT_PROP(node_id, reverse_pulse),         \
+        .base = {.api = &esc_driver_api},                                                          \
+        .pwm = PWM_DT_SPEC_GET(node_id),                                                           \
+        .reverse_pulse = DT_PROP(node_id, reverse_pulse),                                          \
         .stop_pulse = DT_PROP(node_id, stop_pulse),                                                \
-        .forward_pulse = DT_PROP(node_id, forward_pulse), .flip = is_flipped,                      \
+        .forward_pulse = DT_PROP(node_id, forward_pulse),                                          \
+        .flip = is_flipped,                                                                        \
     }
-
-int esc_driver_init(const struct esc_driver *esc);
-int esc_driver_set_effort(const struct esc_driver *esc, int32_t effort);
