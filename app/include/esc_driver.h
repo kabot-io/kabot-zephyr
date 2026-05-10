@@ -19,12 +19,12 @@ struct esc_driver {
     bool flip;
 };
 
-#define ESC_DRIVER_FROM_DT(node_id, is_flipped)                                                    \
+#define ESC_DRIVER_FROM_DT(node_id)                                                                \
     {                                                                                              \
         .base = {.api = &esc_driver_api},                                                          \
         .pwm = PWM_DT_SPEC_GET(node_id),                                                           \
         .reverse_pulse = DT_PROP(node_id, reverse_pulse),                                          \
         .stop_pulse = DT_PROP(node_id, stop_pulse),                                                \
         .forward_pulse = DT_PROP(node_id, forward_pulse),                                          \
-        .flip = is_flipped,                                                                        \
+        .flip = DT_PROP(node_id, flip),                                                            \
     }
