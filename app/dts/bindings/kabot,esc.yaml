@@ -24,8 +24,3 @@ properties:
         required: true
         type: int
         description: Maximum forward pulse width (nanoseconds).
-
-    flip:
-        required: false
-        type: boolean
-        description: Invert the effort direction (e.g. for a physically reversed motor).

@@ -33,10 +33,9 @@
     esc_left: esc_left {
         compatible = "kabot,esc";
         pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
-        reverse-pulse = <1000000>;
+        reverse-pulse = <2000000>;
         stop-pulse = <1500000>;
-        forward-pulse = <2000000>;
-        flip;
+        forward-pulse = <1000000>;
     };
 
     esc_right: esc_right {

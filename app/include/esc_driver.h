@@ -2,7 +2,6 @@
 
 #include "motor_driver.h"
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #include <zephyr/devicetree.h>
@@ -16,7 +15,6 @@ struct esc_driver {
     uint32_t reverse_pulse;
     uint32_t stop_pulse;
     uint32_t forward_pulse;
-    bool flip;
 };
 
 #define ESC_DRIVER_FROM_DT(node_id)                                                                \
@@ -26,5 +24,4 @@ struct esc_driver {
         .reverse_pulse = DT_PROP(node_id, reverse_pulse),                                          \
         .stop_pulse = DT_PROP(node_id, stop_pulse),                                                \
         .forward_pulse = DT_PROP(node_id, forward_pulse),                                          \
-        .flip = DT_PROP(node_id, flip),                                                            \
     }
