@@ -92,8 +92,15 @@ void effort_subscriber_task(void)
         if (zbus_chan_read(&effort_channel, &effort, K_MSEC(20)) == 0) {
             LOG_INF("From subscriber -> Left effort=%d, Right effort=%d", effort.left,
                     effort.right);
-            (void)motor_driver_set_effort(motors[0].drv, effort.left);
-            (void)motor_driver_set_effort(motors[1].drv, effort.right);
+            const struct motor_registry_entry *left = motor_registry_find("left");
+            const struct motor_registry_entry *right = motor_registry_find("right");
+
+            if (left != NULL) {
+                (void)motor_driver_set_effort(left->drv, effort.left);
+            }
+            if (right != NULL) {
+                (void)motor_driver_set_effort(right->drv, effort.right);
+            }
         } else {
             LOG_WRN("Failed to read from effort_channel");
         }
