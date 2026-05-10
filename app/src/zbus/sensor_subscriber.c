@@ -2,6 +2,7 @@
 #include "zbus/sensor_channel.h"
 
 #include <errno.h>
+#include <math.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(sensor_subscriber, LOG_LEVEL_DBG);
@@ -23,12 +24,16 @@ void sensor_subscriber_task(void)
 
         struct sensor_msg sensor;
         if (zbus_chan_read(&sensor_channel, &sensor, K_MSEC(20)) == 0) {
-            LOG_INF("Sensor tuple: left=(ts=%llu,value=%d,shift=%d) "
-                    "right=(ts=%llu,value=%d,shift=%d)",
+            const float left_q31 = (float)sensor.left_encoder.readings[0].value / 2147483648.0f;
+            const float right_q31 = (float)sensor.right_encoder.readings[0].value / 2147483648.0f;
+            const float left_value = ldexpf(left_q31, sensor.left_encoder.shift);
+            const float right_value = ldexpf(right_q31, sensor.right_encoder.shift);
+
+            LOG_INF("Sensor tuple: left=(ts=%llu,value=%f) right=(ts=%llu,value=%f)",
                     (unsigned long long)sensor.left_encoder.header.base_timestamp_ns,
-                    sensor.left_encoder.readings[0].value, sensor.left_encoder.shift,
+                    (double)left_value,
                     (unsigned long long)sensor.right_encoder.header.base_timestamp_ns,
-                    sensor.right_encoder.readings[0].value, sensor.right_encoder.shift);
+                    (double)right_value);
         }
     }
 }
