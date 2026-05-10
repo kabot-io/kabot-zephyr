@@ -14,12 +14,9 @@ static uint32_t lerp_pulse(uint32_t start, uint32_t end, int32_t percent)
 }
 
 static uint32_t map_effort_to_pulse(int32_t effort, uint32_t reverse_pulse, uint32_t stop_pulse,
-                                    uint32_t forward_pulse, bool flip)
+                                    uint32_t forward_pulse)
 {
     effort = CLAMP(effort, -100, 100);
-    if (flip) {
-        effort = -effort;
-    }
 
     if (effort <= 0) {
         return lerp_pulse(reverse_pulse, stop_pulse, effort + 100);
@@ -44,7 +41,7 @@ static int esc_set_effort(const struct motor_driver *drv, int32_t effort)
 {
     const struct esc_driver *esc = (const struct esc_driver *)drv;
     uint32_t pulse = map_effort_to_pulse(effort, esc->reverse_pulse, esc->stop_pulse,
-                                         esc->forward_pulse, esc->flip);
+                                         esc->forward_pulse);
 
     int ret = pwm_set_dt(&esc->pwm, esc->pwm.period, pulse);
     if (ret < 0) {
