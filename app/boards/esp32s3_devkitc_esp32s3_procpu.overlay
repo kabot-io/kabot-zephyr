@@ -6,8 +6,6 @@
         zephyr,shell-uart = &usb_serial;
     };
     aliases {
-        // servo0 = &led_15;
-        // servo1 = &led_16;
         led0 = &led_40;
         led1 = &led_41;
         qdec0 = &pcnt;
@@ -16,12 +14,6 @@
     };
     pwmleds {
         compatible = "pwm-leds";
-        // led_15: led_15 {
-            //     pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
-        // };
-        // led_16: led_16 {
-            //     pwms = <&ledc0 1 20000000 PWM_POLARITY_NORMAL>;
-        // };
         led_40: led_40 {
             pwms = <&ledc0 2 20000000 PWM_POLARITY_NORMAL>;
         };
@@ -80,7 +72,7 @@
         #address-cells = <1>;
         #size-cells = <0>;
         filter = <100>;
-        // counts-per-revolution = <4096>;
+        counts-per-revolution = <(14 * 298)>;
 
         channelA@0 {
             reg = <0>;
@@ -96,7 +88,7 @@
         #address-cells = <1>;
         #size-cells = <0>;
         filter = <100>;
-        // counts-per-revolution = <4096>;
+        counts-per-revolution = <(14 * 298)>;
 
         channelA@0 {
             reg = <0>;
