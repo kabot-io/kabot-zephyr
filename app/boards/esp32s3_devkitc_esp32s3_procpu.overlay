@@ -30,15 +30,15 @@
         };
     };
 
-    esc_left: esc_left {
+    esc_right: esc_right {
         compatible = "kabot,esc";
         pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
-        reverse-pulse = <2000000>;
+        reverse-pulse = <1000000>;
         stop-pulse = <1500000>;
-        forward-pulse = <1000000>;
+        forward-pulse = <2000000>;
     };
 
-    esc_right: esc_right {
+    esc_left: esc_left {
         compatible = "kabot,esc";
         pwms = <&ledc0 1 20000000 PWM_POLARITY_NORMAL>;
         reverse-pulse = <1000000>;
@@ -69,11 +69,11 @@
 };
 
 &pcnt {
-	pinctrl-0 = <&pcnt_default>;
-	pinctrl-names = "default";
-	status = "okay";
-	#address-cells = <1>;
-	#size-cells = <0>;
+    pinctrl-0 = <&pcnt_default>;
+    pinctrl-names = "default";
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
 
     unit0@0 {
         reg = <0>;
