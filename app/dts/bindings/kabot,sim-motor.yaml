@@ -1,0 +1,5 @@
+description: Simulation (stub) motor driver for native_sim / Gazebo bridge.
+
+compatible: "kabot,sim-motor"
+
+include: base.yaml

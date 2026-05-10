@@ -1,5 +1,4 @@
 #include <zephyr/dt-bindings/pwm/pwm.h>
-#include <zephyr/sensing/sensing_sensor_types.h>
 
 / {
     chosen {
@@ -12,6 +11,8 @@
         led0 = &led_40;
         led1 = &led_41;
         qdec0 = &pcnt;
+        motor-left = &esc_left;
+        motor-right = &esc_right;
     };
     pwmleds {
         compatible = "pwm-leds";
@@ -35,6 +36,7 @@
         reverse-pulse = <1000000>;
         stop-pulse = <1500000>;
         forward-pulse = <2000000>;
+        flip;
     };
 
     esc_right: esc_right {

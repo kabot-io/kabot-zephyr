@@ -8,4 +8,16 @@
         compatible = "zephyr,sim-eeprom";
         size = <256>;
     };
+    sim_left: sim_left {
+        compatible = "kabot,sim-motor";
+        status = "okay";
+    };
+    sim_right: sim_right {
+        compatible = "kabot,sim-motor";
+        status = "okay";
+    };
+    aliases {
+        motor-left = &sim_left;
+        motor-right = &sim_right;
+    };
 };
