@@ -26,11 +26,11 @@ void effort_subscriber_task(void)
             const struct motor_registry_entry *left = motor_registry_find("left");
             const struct motor_registry_entry *right = motor_registry_find("right");
 
-            int ret_l = left ? motor_driver_set_effort(left->drv, effort.left) : -ENOENT;
-            int ret_r = right ? motor_driver_set_effort(right->drv, effort.right) : -ENOENT;
+            int ret_left = left ? motor_driver_set_effort(left->drv, effort.left) : -ENOENT;
+            int ret_right = right ? motor_driver_set_effort(right->drv, effort.right) : -ENOENT;
 
-            if (ret_l < 0 || ret_r < 0) {
-                LOG_WRN("Failed to set motor effort: L=%d, R=%d", ret_l, ret_r);
+            if (ret_left < 0 || ret_right < 0) {
+                LOG_WRN("Failed to set motor effort: L=%d, R=%d", ret_left, ret_right);
             }
         } else {
             LOG_WRN("Failed to read from effort_channel");
