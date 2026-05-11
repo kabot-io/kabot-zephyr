@@ -8,7 +8,7 @@
  * @brief Motor registry entry.
  *
  * Associates a human-readable name with a concrete motor driver instance.
- * The registry is populated at build time in effort_subscriber.c using the
+ * The registry is populated at build time in motor_registry.c using the
  * names "left" and "right".  The board overlay's motor-left / motor-right
  * aliases determine which hardware backend (ESC, sim, …) is instantiated
  * for each entry; the entry names themselves are independent of the alias

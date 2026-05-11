@@ -11,7 +11,7 @@ target_sources(
     PRIVATE src/main.c
             src/esc_driver.c
             src/sim_motor_driver.c
-            src/motor_shell.c
+            src/motor_registry.c
             src/motor_service.c
             src/zbus/effort_channel.c
             src/zbus/effort_subscriber.c
@@ -20,3 +20,5 @@ target_sources(
             src/zbus/sensor_subscriber.c
             src/encoder_sensor_service.c
 )
+
+target_sources_ifdef(CONFIG_KABOT_MOTOR_SHELL app PRIVATE src/motor_shell.c)

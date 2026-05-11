@@ -14,3 +14,10 @@ config KABOT_LOG_LEVEL_DEFAULT
       2: WARNING
       3: INFO
       4: DEBUG
+
+config KABOT_MOTOR_SHELL
+    bool "Enable motor shell commands"
+    default y
+    depends on SHELL
+    help
+      Enable the `motor` shell command group.
