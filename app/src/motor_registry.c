@@ -56,6 +56,10 @@ const struct motor_registry_entry *motor_registry_get(size_t idx)
 
 const struct motor_registry_entry *motor_registry_find(const char *name)
 {
+    if (name == NULL) {
+        return NULL;
+    }
+
     for (size_t i = 0; i < ARRAY_SIZE(motors); i++) {
         if (strcmp(motors[i].name, name) == 0) {
             return &motors[i];
