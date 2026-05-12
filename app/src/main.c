@@ -2,7 +2,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/zbus/zbus.h>
 
-#include "motor_service.h"
+#include "motor/motor_service.h"
 #include "zbus/effort_subscriber.h"
 #include "zbus/effort_msg.h"
 #include "zbus/effort_channel.h"

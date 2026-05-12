@@ -1,21 +1,20 @@
 #pragma once
 
+#include "motor/motor_math.h"
+
 #include <zephyr/types.h>
 
-#define EFFORT_VALUE_MIN -100
-#define EFFORT_VALUE_MAX 100
+#define EFFORT_VALUE_MIN MOTOR_EFFORT_Q31_MIN
+#define EFFORT_VALUE_MAX MOTOR_EFFORT_Q31_MAX
 
 /**
  * @brief Message type for motor effort commands.
  *
- * This message contains
- * left and right effort values for motor control.
+ * This message contains left and right effort values for motor control.
  *
- * @note Values are integer percentage of motor maximum effort. Range: [-100, 100].
+ * @note Values are normalized Q31 effort. Range: [INT32_MIN, INT32_MAX].
  */
 struct effort_msg {
-    /** @brief Effort value for the left motor. */
-    int8_t left;
-    /** @brief Effort value for the right motor. */
-    int8_t right;
+    int32_t left;
+    int32_t right;
 };
