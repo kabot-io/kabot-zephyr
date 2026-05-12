@@ -4,33 +4,31 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build native_sim",
+            "label": "Build esp32s3",
             "type": "shell",
-            "command": "source .venv/bin/activate && west build app --build-dir build -b native_sim -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            "command": "./scripts/build.zsh --no-flash",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
         },
         {
-            "label": "Run native_sim",
+            "label": "Build and flash esp32s3",
             "type": "shell",
-            "command": "./build/zephyr/zephyr.exe --eeprom=build/eeprom.bin",
-            "problemMatcher": []
-        },
-        {
-            "label": "Build esp32s3",
-            "type": "shell",
-            "command": "source .venv/bin/activate && west build app --build-dir build -b esp32s3_devkitc/esp32s3/appcpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+            "command": "./scripts/build.zsh --no-monitor",
             "group": {
                 "kind": "build",
                 "isDefault": false
             }
         },
         {
-            "label": "Clean esp32s3",
+            "label": "Build flash and monitor esp32s3",
             "type": "shell",
-            "command": "source .venv/bin/activate && west build app --build-dir build/esp32s3 -b esp32s3_devkitc/esp32s3/appcpu clean"
+            "command": "./scripts/build.zsh",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
         },
         {
             "label": "Clean build directory",
