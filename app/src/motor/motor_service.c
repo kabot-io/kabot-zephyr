@@ -1,14 +1,15 @@
+#include "motor/motor_math.h"
+#include "motor/motor_service.h"
+#include "zbus/effort_channel.h"
+#include "zbus/effort_msg.h"
+
+#include <arpa/inet.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/net/socket_service.h>
 #include <zephyr/posix/poll.h>
 #include <zephyr/posix/sys/socket.h>
 #include <zephyr/posix/unistd.h>
-#include <arpa/inet.h>
-
-#include "motor_service.h"
-#include "zbus/effort_channel.h"
-#include "zbus/effort_msg.h"
 
 LOG_MODULE_REGISTER(motor_service, LOG_LEVEL_DBG);
 
@@ -34,16 +35,21 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
     }
 
     if (len == 0) {
-        /* Zero-length datagram received, do nothing. */
         return;
     }
 
     if (len > 1) {
-        LOG_WRN("Received datagram larger than expected size of 1 byte. Actual size: %d bytes",
-                len);
+        LOG_WRN("Received datagram larger than expected size of 1 byte. Actual size: %d bytes", len);
     }
 
-    int8_t effort = (int8_t)buf[0];
+    int32_t effort_percent = (int8_t)buf[0];
+    int32_t effort_q31;
+    int convert_error = motor_percent_to_q31(effort_percent, &effort_q31);
+    if (convert_error < 0) {
+        LOG_WRN("Ignoring out-of-range effort percent: %d", effort_percent);
+        return;
+    }
+
     uint16_t port;
     if (pfd->fd == socket_left) {
         port = PORT_LEFT;
@@ -54,24 +60,26 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
         return;
     }
 
-    // A complete message (both left and right valid) needs to be constructed
-    // using data received from both ports. The channel validator ensures that
-    // partially updated message (e.g. first one) is not sent. This is temporary
-    // needed until a more robust protocol is implemented.
-    static struct effort_msg msg = EFFORT_MSG_INVALID;
+    static struct effort_msg msg;
+    static bool left_ready;
+    static bool right_ready;
 
     if (port == PORT_LEFT) {
-        msg.left = effort;
+        msg.left = effort_q31;
+        left_ready = true;
     } else if (port == PORT_RIGHT) {
-        msg.right = effort;
+        msg.right = effort_q31;
+        right_ready = true;
     }
 
-    if (effort_channel_validator(&msg, sizeof(msg))) {
+    if (left_ready && right_ready && effort_channel_validator(&msg, sizeof(msg))) {
         int publish_error = publish_effort_msg(&msg, K_MSEC(1000));
         if (publish_error) {
             LOG_ERR("Failed to publish effort message: %d", publish_error);
-            msg = (struct effort_msg)EFFORT_MSG_INVALID;
         }
+
+        left_ready = false;
+        right_ready = false;
     }
 }
 
@@ -85,9 +93,9 @@ static int setup_socket(uint16_t port)
     }
 
     struct sockaddr_in addr = {
-            .sin_family = AF_INET,
-            .sin_port = htons(port),
-            .sin_addr.s_addr = INADDR_ANY,
+        .sin_family = AF_INET,
+        .sin_port = htons(port),
+        .sin_addr.s_addr = INADDR_ANY,
     };
 
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
@@ -119,7 +127,7 @@ int start_motor_service(void)
 
     socket_right = setup_socket(PORT_RIGHT);
     if (socket_right < 0) {
-        stop_motor_service(); // Cleanup resource 1
+        stop_motor_service();
         return socket_right;
     }
 

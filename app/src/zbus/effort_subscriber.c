@@ -1,33 +1,53 @@
-
-#include "zbus/effort_subscriber.h"
+#include "motor/motor_driver.h"
+#include "motor/motor_math.h"
 #include "zbus/effort_channel.h"
-#include "motor_driver.h"
-#include "motor_registry.h"
+#include "zbus/effort_subscriber.h"
 
 #include <errno.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
 #include <zephyr/logging/log.h>
+
 LOG_MODULE_REGISTER(effort_subscriber, LOG_LEVEL_DBG);
 
-/* --- Subscriber task ----------------------------------------------------- */
+#define MOTOR_LEFT_NODE  DT_ALIAS(motor_left)
+#define MOTOR_RIGHT_NODE DT_ALIAS(motor_right)
+
+#define MOTOR_NODE_IS_SUPPORTED(node_id)                                                          \
+    (DT_NODE_HAS_COMPAT(node_id, kabot_esc) || DT_NODE_HAS_COMPAT(node_id, kabot_sim_motor))
+
+BUILD_ASSERT(DT_NODE_EXISTS(MOTOR_LEFT_NODE),
+             "Board overlay must provide a 'motor-left' alias for motor device.");
+BUILD_ASSERT(DT_NODE_EXISTS(MOTOR_RIGHT_NODE),
+             "Board overlay must provide a 'motor-right' alias for motor device.");
+
+BUILD_ASSERT(MOTOR_NODE_IS_SUPPORTED(MOTOR_LEFT_NODE),
+             "Alias 'motor-left' must target a node compatible with motor API.");
+BUILD_ASSERT(MOTOR_NODE_IS_SUPPORTED(MOTOR_RIGHT_NODE),
+             "Alias 'motor-right' must target a node compatible with motor API.");
+
+#define MOTOR_LEFT_DEV  DEVICE_DT_GET(MOTOR_LEFT_NODE)
+#define MOTOR_RIGHT_DEV DEVICE_DT_GET(MOTOR_RIGHT_NODE)
 
 ZBUS_SUBSCRIBER_DEFINE(effort_subscriber, 1);
+
 void effort_subscriber_task(void)
 {
     const struct zbus_channel *chan;
     LOG_INF("Starting subscriber on effort channel");
+
     while (!zbus_sub_wait(&effort_subscriber, &chan, K_FOREVER)) {
         if (&effort_channel != chan) {
             continue;
         }
+
         struct effort_msg effort;
         if (zbus_chan_read(&effort_channel, &effort, K_MSEC(20)) == 0) {
-            LOG_INF("From subscriber -> Left effort=%d, Right effort=%d", effort.left,
-                    effort.right);
-            const struct motor_registry_entry *left = motor_registry_find("left");
-            const struct motor_registry_entry *right = motor_registry_find("right");
+            LOG_INF("From subscriber -> Left effort=%d%%, Right effort=%d%%",
+                    motor_q31_to_percent(effort.left), motor_q31_to_percent(effort.right));
 
-            int left_result = left ? motor_driver_set_effort(left->drv, effort.left) : -ENOENT;
-            int right_result = right ? motor_driver_set_effort(right->drv, effort.right) : -ENOENT;
+            int left_result = motor_set_effort(MOTOR_LEFT_DEV, effort.left);
+            int right_result = motor_set_effort(MOTOR_RIGHT_DEV, effort.right);
 
             if (left_result < 0 || right_result < 0) {
                 LOG_WRN("Failed to set motor effort: L=%d, R=%d", left_result, right_result);
@@ -37,22 +57,21 @@ void effort_subscriber_task(void)
         }
     }
 }
+
 K_THREAD_DEFINE(effort_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, effort_subscriber_task, NULL,
                 NULL, NULL, 3, 0, 0);
 
-/* --- Initialization ------------------------------------------------------ */
-
 int initialize_motor_drivers(void)
 {
-    size_t count = motor_registry_count();
-
-    for (size_t i = 0; i < count; i++) {
-        const struct motor_registry_entry *entry = motor_registry_get(i);
-        int ret = motor_driver_init(entry->drv);
-        if (ret < 0) {
-            LOG_ERR("Failed to init motor '%s': %d", entry->name, ret);
-            return ret;
-        }
+    if (!device_is_ready(MOTOR_LEFT_DEV)) {
+        LOG_ERR("Left motor device not ready: %s", MOTOR_LEFT_DEV->name);
+        return -ENODEV;
     }
+
+    if (!device_is_ready(MOTOR_RIGHT_DEV)) {
+        LOG_ERR("Right motor device not ready: %s", MOTOR_RIGHT_DEV->name);
+        return -ENODEV;
+    }
+
     return 0;
 }
