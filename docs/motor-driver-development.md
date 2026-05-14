@@ -4,6 +4,12 @@
 
 This guide explains how to implement a new motor backend that is compatible with the app motor API.
 
+Current structure in this repository:
+
+- motor driver module: `modules/motor_driver`
+- app motor shell and UDP service: `app/src/motor`
+- app zbus transport/subscriber: `app/src/zbus`
+
 ## Requirements
 
 A compatible driver must:
@@ -16,7 +22,7 @@ A compatible driver must:
 
 ## Step 1: Add Devicetree Binding
 
-Create a binding file in `app/dts/bindings`, for example:
+Create a binding file in `modules/motor_driver/dts/bindings`, for example:
 
 - `vendor,my-motor.yaml`
 
@@ -27,17 +33,17 @@ Include:
 
 ## Step 2: Add Driver Config/Data Types
 
-Create a header under `app/include/motor`, for example:
+Create a header under `modules/motor_driver/include/motor`, for example:
 
-- `app/include/motor/my_motor_driver.h`
+- `modules/motor_driver/include/motor/my_motor_driver.h`
 
 Define config/data structs used by `dev->config` and/or `dev->data`.
 
 ## Step 3: Implement Backend Source
 
-Create source under `app/src/motor`, for example:
+Create source under `modules/motor_driver/drivers/motor`, for example:
 
-- `app/src/motor/my_motor_driver.c`
+- `modules/motor_driver/drivers/motor/my_motor_driver.c`
 
 Typical pattern:
 
@@ -95,7 +101,9 @@ Specifically extend the `motor_names` macro expansion with your compatible.
 
 ## Step 8: Build Integration
 
-Add source to `app/CMakeLists.txt` under motor sources.
+Add source to `modules/motor_driver/CMakeLists.txt` under module driver sources.
+
+The app integrates the module in `app/CMakeLists.txt` using `ZEPHYR_EXTRA_MODULES`.
 
 ## Validation Checklist
 
@@ -109,5 +117,5 @@ Add source to `app/CMakeLists.txt` under motor sources.
 
 Use existing drivers as templates:
 
-- `app/src/motor/esc_driver.c`
-- `app/src/motor/sim_motor_driver.c`
+- `modules/motor_driver/drivers/motor/esc_driver.c`
+- `modules/motor_driver/drivers/motor/sim_motor_driver.c`

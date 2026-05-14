@@ -1,0 +1,9 @@
+menu "Motor Driver Module"
+
+config MOTOR_DRIVER_MODULE
+    bool "Enable motor driver module"
+    default y
+    help
+      Enables the custom motor driver module.
+
+endmenu

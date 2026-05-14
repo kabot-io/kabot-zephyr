@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20.5)
 
+list(APPEND ZEPHYR_EXTRA_MODULES
+    ${CMAKE_CURRENT_SOURCE_DIR}/../modules/motor_driver
+)
+
 find_package(Zephyr REQUIRED)
 
 project(kabot)
@@ -9,8 +13,6 @@ zephyr_library_include_directories(include)
 target_sources(
     app
     PRIVATE src/main.c
-            src/motor/esc_driver.c
-            src/motor/sim_motor_driver.c
             src/motor/motor_service.c
             src/zbus/effort_channel.c
             src/zbus/effort_subscriber.c
