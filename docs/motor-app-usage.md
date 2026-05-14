@@ -8,10 +8,14 @@ Motor control flow in the app is split into three parts:
 2. UDP motor service ingress
 3. effort subscriber applying left/right commands
 
-Motor-specific code lives under:
+App-level motor shell/service code lives under:
 
 - `app/src/motor`
 - `app/include/motor`
+
+Driver API/backends/bindings live in the module:
+
+- `modules/motor_driver`
 
 Zbus effort transport code lives under:
 
@@ -88,8 +92,8 @@ In `app/src/main.c`:
 
 Backends implement Zephyr devices and expose motor API:
 
-- `app/src/motor/esc_driver.c`
-- `app/src/motor/sim_motor_driver.c`
+- `modules/motor_driver/drivers/motor/esc_driver.c`
+- `modules/motor_driver/drivers/motor/sim_motor_driver.c`
 
 The app-level motor paths never call backend internals directly; they only use:
 

@@ -27,7 +27,7 @@ static int sim_motor_set_effort(const struct device *dev, int32_t effort_q31)
     return 0;
 }
 
-static const struct motor_driver_api sim_motor_driver_api = {
+static DEVICE_API(motor, sim_motor_driver_api) = {
     .set_effort = sim_motor_set_effort,
 };
 
