@@ -21,5 +21,3 @@ target_sources(
             src/zbus/sensor_subscriber.c
             src/encoder_sensor_service.c
 )
-
-target_sources_ifdef(CONFIG_KABOT_MOTOR_SHELL app PRIVATE src/motor/motor_shell.c)

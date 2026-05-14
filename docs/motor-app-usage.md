@@ -8,14 +8,18 @@ Motor control flow in the app is split into three parts:
 2. UDP motor service ingress
 3. effort subscriber applying left/right commands
 
-App-level motor shell/service code lives under:
+App-level motor service code lives under:
 
-- `app/src/motor`
+- `app/src/motor/motor_service.c`
 - `app/include/motor`
 
 Driver API/backends/bindings live in the module:
 
 - `modules/motor_driver`
+
+Motor shell now lives in module subsystem path:
+
+- `modules/motor_driver/subsys/motor/motor_shell.c`
 
 Zbus effort transport code lives under:
 
@@ -26,7 +30,7 @@ Zbus effort transport code lives under:
 
 Source:
 
-- `app/src/motor/motor_shell.c`
+- `modules/motor_driver/subsys/motor/motor_shell.c`
 
 Commands:
 

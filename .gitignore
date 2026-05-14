@@ -1,6 +1,4 @@
-/bootloader
 /build
-/modules
 /tools
 /deps
 /.microros-tutorial-workspace/**
