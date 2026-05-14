@@ -7,7 +7,8 @@ This guide explains how to implement a new motor backend that is compatible with
 Current structure in this repository:
 
 - motor driver module: `modules/motor_driver`
-- app motor shell and UDP service: `app/src/motor`
+- app motor UDP service: `app/src/motor`
+- module motor shell: `modules/motor_driver/subsys/motor`
 - app zbus transport/subscriber: `app/src/zbus`
 
 ## Requirements
@@ -95,7 +96,7 @@ The shell currently lists motor devices from known motor-compatible DT nodes.
 
 If you add a new compatible, update the compatible list in:
 
-- `app/src/motor/motor_shell.c`
+- `modules/motor_driver/subsys/motor/motor_shell.c`
 
 Specifically extend the `motor_names` macro expansion with your compatible.
 
