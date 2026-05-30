@@ -51,7 +51,7 @@ Typical pattern:
 1. include `motor/motor_driver.h`
 2. parse config from DT macros
 3. implement `my_motor_set_effort(...)`
-4. define `static const struct motor_driver_api my_motor_api = { ... }`
+4. define `static DEVICE_API(motor, my_motor_api) = { ... }`
 5. instantiate devices with `DEVICE_DT_DEFINE(...)`
 
 ## Step 4: Map Q31 to Hardware Command
@@ -90,19 +90,24 @@ If this backend should participate in left/right app control, point aliases:
 - `motor-left = &my_left_node;`
 - `motor-right = &my_right_node;`
 
-## Step 7: Update Shell Discovery List
+## Step 7: Shell Discovery Behavior
 
-The shell currently lists motor devices from known motor-compatible DT nodes.
-
-If you add a new compatible, update the compatible list in:
+The shell discovers motor devices by iterating all registered devices and
+filtering with `DEVICE_API_IS(motor, dev)` in:
 
 - `modules/motor_driver/subsys/motor/motor_shell.c`
 
-Specifically extend the `motor_names` macro expansion with your compatible.
+No backend-compatible list update is required when adding new motor backends,
+as long as they implement the motor API class.
 
 ## Step 8: Build Integration
 
 Add source to `modules/motor_driver/CMakeLists.txt` under module driver sources.
+
+If adding new motor API headers/subsystem tags, ensure syscall/subsystem scan
+includes module headers through:
+
+- `zephyr_syscall_include_directories(include)` in module CMake.
 
 The app integrates the module in `app/CMakeLists.txt` using `ZEPHYR_EXTRA_MODULES`.
 
