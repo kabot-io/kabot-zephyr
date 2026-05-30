@@ -12,6 +12,9 @@ LOG_MODULE_REGISTER(esc_driver, LOG_LEVEL_DBG);
 
 #if DT_HAS_COMPAT_STATUS_OKAY(kabot_esc)
 
+BUILD_ASSERT(CONFIG_MOTOR_DRIVER_INIT_PRIORITY > CONFIG_PWM_INIT_PRIORITY,
+             "MOTOR_DRIVER_INIT_PRIORITY must be greater than PWM_INIT_PRIORITY");
+
 static uint32_t lerp_pulse_q31(uint32_t start, uint32_t end, int64_t numerator, int64_t denominator)
 {
     if (denominator <= 0) {
@@ -68,18 +71,18 @@ static int esc_set_effort(const struct device *dev, int32_t effort_q31)
 }
 
 static DEVICE_API(motor, esc_driver_api) = {
-    .set_effort = esc_set_effort,
+        .set_effort = esc_set_effort,
 };
 
-#define ESC_MOTOR_DEFINE(node_id)                                                                 \
-    static const struct esc_motor_config esc_config_##node_id = {                                \
-        .pwm = PWM_DT_SPEC_GET(node_id),                                                          \
-        .reverse_pulse = DT_PROP(node_id, reverse_pulse),                                         \
-        .stop_pulse = DT_PROP(node_id, stop_pulse),                                               \
-        .forward_pulse = DT_PROP(node_id, forward_pulse),                                         \
+#define ESC_MOTOR_DEFINE(node_id)                                                                  \
+    static const struct esc_motor_config esc_config_##node_id = {                                  \
+            .pwm = PWM_DT_SPEC_GET(node_id),                                                       \
+            .reverse_pulse = DT_PROP(node_id, reverse_pulse),                                      \
+            .stop_pulse = DT_PROP(node_id, stop_pulse),                                            \
+            .forward_pulse = DT_PROP(node_id, forward_pulse),                                      \
     };                                                                                             \
-    DEVICE_DT_DEFINE(node_id, esc_init, NULL, NULL, &esc_config_##node_id, POST_KERNEL,          \
-                     CONFIG_PWM_INIT_PRIORITY, &esc_driver_api)
+    DEVICE_DT_DEFINE(node_id, esc_init, NULL, NULL, &esc_config_##node_id, POST_KERNEL,            \
+                     CONFIG_MOTOR_DRIVER_INIT_PRIORITY, &esc_driver_api)
 
 DT_FOREACH_STATUS_OKAY(kabot_esc, ESC_MOTOR_DEFINE);
 

@@ -13,6 +13,9 @@ LOG_MODULE_REGISTER(h_bridge_driver, LOG_LEVEL_DBG);
 
 #if DT_HAS_COMPAT_STATUS_OKAY(kabot_h_bridge)
 
+BUILD_ASSERT(CONFIG_MOTOR_DRIVER_INIT_PRIORITY > CONFIG_PWM_INIT_PRIORITY,
+             "MOTOR_DRIVER_INIT_PRIORITY must be greater than PWM_INIT_PRIORITY");
+
 static uint32_t effort_to_duty_ns(int32_t effort_q31, uint32_t period_ns)
 {
     if (effort_q31 == 0) {
@@ -102,7 +105,7 @@ static DEVICE_API(motor, h_bridge_driver_api) = {
             .has_supply_gpio = DT_NODE_HAS_PROP(node_id, supply_gpios),                            \
     };                                                                                             \
     DEVICE_DT_DEFINE(node_id, h_bridge_init, NULL, NULL, &h_bridge_config_##node_id, POST_KERNEL,  \
-                     CONFIG_PWM_INIT_PRIORITY, &h_bridge_driver_api)
+                     CONFIG_MOTOR_DRIVER_INIT_PRIORITY, &h_bridge_driver_api)
 
 DT_FOREACH_STATUS_OKAY(kabot_h_bridge, H_BRIDGE_MOTOR_DEFINE);
 
