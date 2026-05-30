@@ -1,10 +1,17 @@
-menu "Motor Driver Module"
-
-config MOTOR_DRIVER_MODULE
+menuconfig MOTOR_DRIVER_MODULE
     bool "Enable motor driver module"
     default y
     help
       Enables the custom motor driver module.
+
+if MOTOR_DRIVER_MODULE
+
+config KABOT_MOTOR_SHELL
+    bool "Motor shell commands"
+    default y
+    depends on SHELL
+    help
+      Enables the 'motor' shell command for manual control and listing.
 
 config MOTOR_DRIVER_INIT_PRIORITY
     int "Motor driver init priority"
@@ -15,4 +22,4 @@ config MOTOR_DRIVER_INIT_PRIORITY
       Must be greater than CONFIG_PWM_INIT_PRIORITY so motor drivers are
       initialized after PWM.
 
-endmenu
+endif # MOTOR_DRIVER_MODULE
