@@ -119,4 +119,5 @@ The app integrates the module in `app/CMakeLists.txt` using `ZEPHYR_EXTRA_MODULE
 Use existing drivers as templates:
 
 - `modules/motor_driver/drivers/motor/esc_driver.c`
+- `modules/motor_driver/drivers/motor/h_bridge_driver.c`
 - `modules/motor_driver/drivers/motor/sim_motor_driver.c`

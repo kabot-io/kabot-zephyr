@@ -11,9 +11,9 @@
 #define MOTOR_NAME_ENTRY(node_id) DT_NODE_FULL_NAME(node_id),
 
 static const char *const motor_names[] = {
-    DT_FOREACH_STATUS_OKAY(kabot_esc, MOTOR_NAME_ENTRY)
-    DT_FOREACH_STATUS_OKAY(kabot_sim_motor, MOTOR_NAME_ENTRY)
-};
+        DT_FOREACH_STATUS_OKAY(kabot_esc, MOTOR_NAME_ENTRY)
+                DT_FOREACH_STATUS_OKAY(kabot_h_bridge, MOTOR_NAME_ENTRY)
+                        DT_FOREACH_STATUS_OKAY(kabot_sim_motor, MOTOR_NAME_ENTRY)};
 
 static bool motor_name_is_known(const char *name)
 {

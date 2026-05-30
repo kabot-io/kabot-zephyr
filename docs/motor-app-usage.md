@@ -105,7 +105,9 @@ The app-level motor paths never call backend internals directly; they only use:
 
 ## Typical Developer Workflow
 
-1. Build firmware for ESP32 target.
-2. Run `motor list` and confirm expected devices.
-3. Run `motor set <device_name> <percent>` for manual control.
-4. Verify UDP sender path updates left/right through subscriber.
+1. Build simulation firmware: `./scripts/build.zsh --sim`.
+2. Required simulation runtime test: run `build/native_sim/zephyr/zephyr.exe` and validate expected shell/log behavior.
+3. Build firmware for ESP32 validation target: `./scripts/build.zsh --no-flash`.
+4. Run `motor list` and confirm expected devices.
+5. Run `motor set <device_name> <percent>` for manual control.
+6. Verify UDP sender path updates left/right through subscriber.

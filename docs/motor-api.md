@@ -54,11 +54,13 @@ Usage policy in app code:
 Current compatibles:
 
 - `kabot,esc`
+- `kabot,h-bridge`
 - `kabot,sim-motor`
 
 Bindings:
 
 - `modules/motor_driver/dts/bindings/kabot,esc.yaml`
+- `modules/motor_driver/dts/bindings/kabot,h-bridge.yaml`
 - `modules/motor_driver/dts/bindings/kabot,sim-motor.yaml`
 
 Alias usage:
@@ -73,6 +75,7 @@ The effort subscriber uses these aliases to route left/right effort messages.
 Current motor-compatible backends:
 
 - ESC backend: `modules/motor_driver/drivers/motor/esc_driver.c`
+- H-bridge backend: `modules/motor_driver/drivers/motor/h_bridge_driver.c`
 - Sim backend: `modules/motor_driver/drivers/motor/sim_motor_driver.c`
 
 Both register Zephyr devices and provide `struct motor_driver_api` with `set_effort` implemented.
