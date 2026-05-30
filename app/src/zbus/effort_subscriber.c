@@ -13,8 +13,9 @@ LOG_MODULE_REGISTER(effort_subscriber, LOG_LEVEL_DBG);
 #define MOTOR_LEFT_NODE  DT_ALIAS(motor_left)
 #define MOTOR_RIGHT_NODE DT_ALIAS(motor_right)
 
-#define MOTOR_NODE_IS_SUPPORTED(node_id)                                                          \
-    (DT_NODE_HAS_COMPAT(node_id, kabot_esc) || DT_NODE_HAS_COMPAT(node_id, kabot_sim_motor))
+#define MOTOR_NODE_IS_SUPPORTED(node_id)                                                           \
+    (DT_NODE_HAS_COMPAT(node_id, kabot_esc) || DT_NODE_HAS_COMPAT(node_id, kabot_h_bridge) ||      \
+     DT_NODE_HAS_COMPAT(node_id, kabot_sim_motor))
 
 BUILD_ASSERT(DT_NODE_EXISTS(MOTOR_LEFT_NODE),
              "Board overlay must provide a 'motor-left' alias for motor device.");

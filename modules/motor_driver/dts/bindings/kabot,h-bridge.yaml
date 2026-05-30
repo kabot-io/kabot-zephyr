@@ -1,0 +1,19 @@
+description: Generic dual-input H-bridge motor driver.
+
+compatible: "kabot,h-bridge"
+
+include: base.yaml
+
+properties:
+    pwms:
+        required: true
+        type: phandle-array
+        description: Two PWM signals for H-bridge inputs in order [A, B].
+
+    pwm-names:
+        type: string-array
+        description: Optional PWM names corresponding to [A, B].
+
+    supply-gpios:
+        type: phandle-array
+        description: Optional supply or enable control GPIO for the H-bridge.
