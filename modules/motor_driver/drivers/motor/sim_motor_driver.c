@@ -15,7 +15,7 @@ static int sim_motor_init(const struct device *dev)
 {
     const struct sim_motor_config *cfg = dev->config;
 
-    LOG_INF("sim motor '%s' ready (Gazebo bridge stub)", cfg->name);
+    LOG_DBG("sim motor '%s' ready (Gazebo bridge stub)", cfg->name);
     return 0;
 }
 
@@ -23,7 +23,7 @@ static int sim_motor_set_effort(const struct device *dev, int32_t effort_q31)
 {
     const struct sim_motor_config *cfg = dev->config;
 
-    LOG_INF("sim motor '%s' effort=%d%%", cfg->name, motor_q31_to_percent(effort_q31));
+    LOG_DBG("sim motor '%s' effort=%d%%", cfg->name, motor_q31_to_percent(effort_q31));
     return 0;
 }
 
@@ -36,7 +36,7 @@ static DEVICE_API(motor, sim_motor_driver_api) = {
             .name = DT_NODE_FULL_NAME(node_id),                                                    \
     };                                                                                             \
     DEVICE_DT_DEFINE(node_id, sim_motor_init, NULL, NULL, &sim_motor_config_##node_id,             \
-                     POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT, &sim_motor_driver_api)
+                     POST_KERNEL, CONFIG_MOTOR_DRIVER_INIT_PRIORITY, &sim_motor_driver_api)
 
 DT_FOREACH_STATUS_OKAY(kabot_sim_motor, SIM_MOTOR_DEFINE);
 
