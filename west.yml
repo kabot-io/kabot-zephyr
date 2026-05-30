@@ -13,8 +13,8 @@ manifest:
           path: deps/modules/micro_ros_zephyr_module
 
         - name: zephyr
-          remote: zephyrproject-rtos
-          revision: ab92232cfcd1362ee481ba06197fda7d6613aff5
+          remote: sylvio-alves
+          revision: feature/esp32-pcnt-driver-update
           clone-depth: 1
           import:
               path-prefix: deps
