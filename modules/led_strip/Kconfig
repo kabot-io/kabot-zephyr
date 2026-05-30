@@ -1,0 +1,10 @@
+menu "LED Strip Module"
+
+config KABOT_LED_STRIP_SHELL
+    bool "Enable LED strip shell commands"
+    default y
+    depends on SHELL
+    help
+      Enable the `led_strip` shell command group (e.g. `led_strip set <N> <R> <G> <B>`).
+
+endmenu

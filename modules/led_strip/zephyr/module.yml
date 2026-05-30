@@ -1,0 +1,6 @@
+name: led_strip
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    dts_root: .
