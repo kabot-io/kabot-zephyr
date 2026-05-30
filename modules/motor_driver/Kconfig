@@ -6,4 +6,13 @@ config MOTOR_DRIVER_MODULE
     help
       Enables the custom motor driver module.
 
+config MOTOR_DRIVER_INIT_PRIORITY
+    int "Motor driver init priority"
+    default 55
+    range 0 999
+    help
+      Initialization priority for motor driver devices.
+      Must be greater than CONFIG_PWM_INIT_PRIORITY so motor drivers are
+      initialized after PWM.
+
 endmenu
