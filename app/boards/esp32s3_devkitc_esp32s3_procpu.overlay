@@ -11,16 +11,16 @@
         motor-right = &hbridge_right;
     };
 
-    hbridge_right: hbridge_right {
-        compatible = "kabot,h-bridge";
-        pwms = <&ledc0 0 100000 PWM_POLARITY_NORMAL>,
-             <&ledc0 1 100000 PWM_POLARITY_NORMAL>;
-    };
-
     hbridge_left: hbridge_left {
         compatible = "kabot,h-bridge";
+        pwms = <&ledc0 0 100000 PWM_POLARITY_NORMAL>,
+               <&ledc0 1 100000 PWM_POLARITY_NORMAL>;
+    };
+
+    hbridge_right: hbridge_right {
+        compatible = "kabot,h-bridge";
         pwms = <&ledc0 2 100000 PWM_POLARITY_NORMAL>,
-               <&ledc0 3 100000 PWM_POLARITY_NORMAL>;
+             <&ledc0 3 100000 PWM_POLARITY_NORMAL>;
     };
 
 };
