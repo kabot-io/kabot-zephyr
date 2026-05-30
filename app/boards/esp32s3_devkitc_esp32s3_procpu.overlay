@@ -6,69 +6,32 @@
         zephyr,shell-uart = &usb_serial;
     };
     aliases {
-        led0 = &led_40;
-        led1 = &led_41;
         qdec0 = &pcnt;
         motor-left = &hbridge_left;
         motor-right = &hbridge_right;
     };
-    pwmleds {
-        compatible = "pwm-leds";
-        led_40: led_40 {
-            pwms = <&ledc0 2 20000000 PWM_POLARITY_NORMAL>;
-        };
-        led_41: led_41 {
-            pwms = <&ledc0 3 20000000 PWM_POLARITY_NORMAL>;
-        };
-    };
-
-    esc_right: esc_right {
-        compatible = "kabot,esc";
-        pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
-        reverse-pulse = <1000000>;
-        stop-pulse = <1500000>;
-        forward-pulse = <2000000>;
-    };
-
-    esc_left: esc_left {
-        compatible = "kabot,esc";
-        pwms = <&ledc0 1 20000000 PWM_POLARITY_NORMAL>;
-        reverse-pulse = <1000000>;
-        stop-pulse = <1500000>;
-        forward-pulse = <2000000>;
-    };
 
     hbridge_right: hbridge_right {
         compatible = "kabot,h-bridge";
-        pwms = <&ledc0 4 100000 PWM_POLARITY_NORMAL>,
-               <&ledc0 5 100000 PWM_POLARITY_NORMAL>;
+        pwms = <&ledc0 0 100000 PWM_POLARITY_NORMAL>,
+             <&ledc0 1 100000 PWM_POLARITY_NORMAL>;
     };
 
     hbridge_left: hbridge_left {
         compatible = "kabot,h-bridge";
-        pwms = <&ledc0 6 100000 PWM_POLARITY_NORMAL>,
-               <&ledc0 7 100000 PWM_POLARITY_NORMAL>;
+        pwms = <&ledc0 2 100000 PWM_POLARITY_NORMAL>,
+               <&ledc0 3 100000 PWM_POLARITY_NORMAL>;
     };
 
 };
 
-// led_strip set 4 0 1
-// led_strip strobe 5 5000 100 255 0 100
-
 &pinctrl {
     ledc0_default: ledc0_default {
         group1 {
-            pinmux = <LEDC_CH0_GPIO15>,
-                     <LEDC_CH1_GPIO16>,
-                     <LEDC_CH2_GPIO40>;
-            output-enable;
-        };
-
-        group2 {
-            pinmux = <LEDC_CH4_GPIO41>,
-                     <LEDC_CH5_GPIO42>,
-                     <LEDC_CH6_GPIO47>,
-                     <LEDC_CH7_GPIO48>;
+            pinmux = <LEDC_CH0_GPIO41>,
+                     <LEDC_CH1_GPIO42>,
+                     <LEDC_CH2_GPIO47>,
+                     <LEDC_CH3_GPIO48>;
             output-enable;
         };
     };
@@ -130,7 +93,7 @@
     #address-cells = <1>;
     #size-cells = <0>;
 
-    channel0@0 {
+    channel0@2 {
         reg = <0x0>;
         timer = <0>;
     };
@@ -140,27 +103,11 @@
     };
     channel2@2 {
         reg = <0x2>;
-        timer = <1>; // Using a second timer is optional but common for organization
+        timer = <0>;
     };
     channel3@3 {
         reg = <0x3>;
-        timer = <1>;
-    };
-    channel4@4 {
-        reg = <0x4>;
-        timer = <2>;
-    };
-    channel5@5 {
-        reg = <0x5>;
-        timer = <2>;
-    };
-    channel6@6 {
-        reg = <0x6>;
-        timer = <3>;
-    };
-    channel7@7 {
-        reg = <0x7>;
-        timer = <3>;
+        timer = <0>;
     };
 };
 
