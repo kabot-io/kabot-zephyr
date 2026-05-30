@@ -36,7 +36,7 @@ static int parse_long(const struct shell *sh, const char *str, long lo, long hi,
     errno = 0;
     long val = strtol(str, &end, 10);
 
-    if (errno == ERANGE || *end != '\0') {
+    if (errno == ERANGE || end == str || *end != '\0') {
         shell_error(sh, "invalid number: %s", str);
         return -EINVAL;
     }
@@ -128,7 +128,7 @@ static int cmd_led_strip_strobe(const struct shell *sh, size_t argc, char **argv
         return rc;
     }
 
-    if (pulse_ms * count > total_ms) {
+    if (((int64_t)pulse_ms * (int64_t)count) > total_ms) {
         shell_error(sh, "pulse_ms * count must be <= total_ms");
         return -EINVAL;
     }
@@ -192,7 +192,7 @@ static int cmd_led_strip_strobe(const struct shell *sh, size_t argc, char **argv
     int64_t start_ms = k_uptime_get();
 
     for (long i = 0; i < count; i++) {
-        int64_t pulse_start_ms = start_ms + (i * total_ms) / count;
+        int64_t pulse_start_ms = start_ms + ((int64_t)i * total_ms) / count;
         int64_t now_ms = k_uptime_get();
         if (now_ms < pulse_start_ms) {
             k_msleep((int32_t)(pulse_start_ms - now_ms));
@@ -232,7 +232,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(led_strip_cmds,
                   "Set LED(s) to an RGB colour.\n"
                   "Usage: led_strip set <R> <G> <B> [N]\n"
                   "  R G B  colour components 0..255\n"
-                  "  N      0-based LED index (0.." STRINGIFY(STRIP_NUM_PIXELS - 1) "); omit to set all",
+                  "  N      0-based LED index (0..chain_length-1); omit to set all",
                   cmd_led_strip_set, 4, 1),
     SHELL_CMD_ARG(strobe, NULL,
                   "Overlay strobe pulses over current LED state.\n"
