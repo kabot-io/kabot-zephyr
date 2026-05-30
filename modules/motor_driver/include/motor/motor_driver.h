@@ -31,7 +31,9 @@ __subsystem struct motor_driver_api {
 };
 
 /** Set normalized motor effort in Q31 range [INT32_MIN, INT32_MAX]. */
-static inline int motor_set_effort(const struct device *dev, int32_t effort_q31)
+__syscall int motor_set_effort(const struct device *dev, int32_t effort_q31);
+
+static inline int z_impl_motor_set_effort(const struct device *dev, int32_t effort_q31)
 {
     __ASSERT(dev != NULL, "motor: invalid device");
 
@@ -45,3 +47,5 @@ static inline int motor_set_effort(const struct device *dev, int32_t effort_q31)
 
     return api->set_effort(dev, effort_q31);
 }
+
+#include <zephyr/syscalls/motor_driver.h>

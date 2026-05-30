@@ -35,7 +35,8 @@ Source:
 Commands:
 
 - `motor list`
-  - lists all motor-compatible DT nodes known to the shell
+  - iterates all registered shell-visible devices
+  - filters to motor class devices via `DEVICE_API_IS(motor, dev)`
 - `motor set <name> <effort>`
   - `<effort>` is percent in range `[-100, 100]`
   - command converts percent to Q31
@@ -82,21 +83,20 @@ Behavior:
 Compile-time guards:
 
 - build asserts ensure both aliases exist
-- build asserts ensure aliases target motor-compatible nodes
 
 ## App Initialization
 
 In `app/src/main.c`:
 
-1. `initialize_motor_drivers()` checks alias devices are ready
-2. starts sensor subscriber
-3. starts motor UDP service
+1. starts sensor subscriber
+2. starts motor UDP service
 
 ## Relationship To Backend Drivers
 
 Backends implement Zephyr devices and expose motor API:
 
 - `modules/motor_driver/drivers/motor/esc_driver.c`
+- `modules/motor_driver/drivers/motor/h_bridge_driver.c`
 - `modules/motor_driver/drivers/motor/sim_motor_driver.c`
 
 The app-level motor paths never call backend internals directly; they only use:

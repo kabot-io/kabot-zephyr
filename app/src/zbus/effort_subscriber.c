@@ -13,19 +13,10 @@ LOG_MODULE_REGISTER(effort_subscriber, LOG_LEVEL_DBG);
 #define MOTOR_LEFT_NODE  DT_ALIAS(motor_left)
 #define MOTOR_RIGHT_NODE DT_ALIAS(motor_right)
 
-#define MOTOR_NODE_IS_SUPPORTED(node_id)                                                           \
-    (DT_NODE_HAS_COMPAT(node_id, kabot_esc) || DT_NODE_HAS_COMPAT(node_id, kabot_h_bridge) ||      \
-     DT_NODE_HAS_COMPAT(node_id, kabot_sim_motor))
-
 BUILD_ASSERT(DT_NODE_EXISTS(MOTOR_LEFT_NODE),
              "Board overlay must provide a 'motor-left' alias for motor device.");
 BUILD_ASSERT(DT_NODE_EXISTS(MOTOR_RIGHT_NODE),
              "Board overlay must provide a 'motor-right' alias for motor device.");
-
-BUILD_ASSERT(MOTOR_NODE_IS_SUPPORTED(MOTOR_LEFT_NODE),
-             "Alias 'motor-left' must target a node compatible with motor API.");
-BUILD_ASSERT(MOTOR_NODE_IS_SUPPORTED(MOTOR_RIGHT_NODE),
-             "Alias 'motor-right' must target a node compatible with motor API.");
 
 #define MOTOR_LEFT_DEV  DEVICE_DT_GET(MOTOR_LEFT_NODE)
 #define MOTOR_RIGHT_DEV DEVICE_DT_GET(MOTOR_RIGHT_NODE)
@@ -61,18 +52,3 @@ void effort_subscriber_task(void)
 
 K_THREAD_DEFINE(effort_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, effort_subscriber_task, NULL,
                 NULL, NULL, 3, 0, 0);
-
-int initialize_motor_drivers(void)
-{
-    if (!device_is_ready(MOTOR_LEFT_DEV)) {
-        LOG_ERR("Left motor device not ready: %s", MOTOR_LEFT_DEV->name);
-        return -ENODEV;
-    }
-
-    if (!device_is_ready(MOTOR_RIGHT_DEV)) {
-        LOG_ERR("Right motor device not ready: %s", MOTOR_RIGHT_DEV->name);
-        return -ENODEV;
-    }
-
-    return 0;
-}

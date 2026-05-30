@@ -23,13 +23,20 @@ Defined in `modules/motor_driver/include/motor/motor_driver.h`:
 
 - `struct motor_driver_api`
   - `set_effort(const struct device *dev, int32_t effort_q31)`
-- `motor_set_effort(const struct device *dev, int32_t effort_q31)` inline wrapper
+- `__syscall int motor_set_effort(const struct device *dev, int32_t effort_q31)`
+- `z_impl_motor_set_effort(...)` implementation used by the syscall layer
 
 Wrapper behavior:
 
 - asserts `dev` and API function pointer are valid
 - validates Q31 effort input
 - returns backend error code directly
+
+Syscall integration:
+
+- header includes generated syscall declarations at end of file
+- module registers syscall include scanning in build system via
+  `zephyr_syscall_include_directories(include)`
 
 ## Effort Representation
 
@@ -83,6 +90,10 @@ Both register Zephyr devices and provide `struct motor_driver_api` with `set_eff
 ## Build Wiring
 
 Motor driver sources are grouped under `modules/motor_driver/drivers/motor` in module build:
+
+- `modules/motor_driver/CMakeLists.txt`
+
+The module also registers include path for syscall/subsystem generation in:
 
 - `modules/motor_driver/CMakeLists.txt`
 

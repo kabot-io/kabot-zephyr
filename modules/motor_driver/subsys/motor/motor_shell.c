@@ -3,46 +3,37 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <string.h>
 #include <zephyr/device.h>
-#include <zephyr/devicetree.h>
 #include <zephyr/shell/shell.h>
-
-#define MOTOR_NAME_ENTRY(node_id) DT_NODE_FULL_NAME(node_id),
-
-static const char *const motor_names[] = {
-        DT_FOREACH_STATUS_OKAY(kabot_esc, MOTOR_NAME_ENTRY)
-                DT_FOREACH_STATUS_OKAY(kabot_h_bridge, MOTOR_NAME_ENTRY)
-                        DT_FOREACH_STATUS_OKAY(kabot_sim_motor, MOTOR_NAME_ENTRY)};
-
-static bool motor_name_is_known(const char *name)
-{
-    if (name == NULL) {
-        return false;
-    }
-
-    for (size_t i = 0; i < ARRAY_SIZE(motor_names); i++) {
-        if (strcmp(motor_names[i], name) == 0) {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 static int cmd_motor_list(const struct shell *sh, size_t argc, char **argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
 
-    if (ARRAY_SIZE(motor_names) == 0) {
-        shell_print(sh, "No motors registered.");
-        return 0;
+    size_t count = 0;
+
+    for (size_t idx = 0;; idx++) {
+        const struct device *dev = shell_device_lookup(idx, NULL);
+
+        if (dev == NULL) {
+            break;
+        }
+
+        if (!DEVICE_API_IS(motor, dev)) {
+            continue;
+        }
+
+        if (count == 0) {
+            shell_print(sh, "Registered motors:");
+        }
+
+        shell_print(sh, "  %s", dev->name);
+        count++;
     }
 
-    shell_print(sh, "Registered motors:");
-    for (size_t i = 0; i < ARRAY_SIZE(motor_names); i++) {
-        shell_print(sh, "  %s", motor_names[i]);
+    if (count == 0U) {
+        shell_print(sh, "No motors registered.");
     }
 
     return 0;
@@ -70,13 +61,8 @@ static int cmd_motor_set(const struct shell *sh, size_t argc, char **argv)
         return convert_error;
     }
 
-    if (!motor_name_is_known(name)) {
-        shell_error(sh, "motor device unknown (%s)", name);
-        return -ENOENT;
-    }
-
     const struct device *dev = shell_device_get_binding(name);
-    if (dev == NULL) {
+    if (dev == NULL || !DEVICE_API_IS(motor, dev)) {
         shell_error(sh, "motor device unknown (%s)", name);
         return -ENOENT;
     }
