@@ -6,6 +6,24 @@ menuconfig MOTOR_DRIVER_MODULE
 
 if MOTOR_DRIVER_MODULE
 
+config KABOT_ESC_MOTOR
+    bool "ESC motor backend"
+    default y if DT_HAS_KABOT_ESC_ENABLED
+    help
+      Enables support for kabot,esc motor devices.
+
+config KABOT_H_BRIDGE_MOTOR
+    bool "H-bridge motor backend"
+    default y if DT_HAS_KABOT_H_BRIDGE_ENABLED
+    help
+      Enables support for kabot,h-bridge motor devices.
+
+config KABOT_SIM_MOTOR
+    bool "Simulated motor backend"
+    default y if DT_HAS_KABOT_SIM_MOTOR_ENABLED
+    help
+      Enables support for kabot,sim-motor motor devices.
+
 config KABOT_MOTOR_SHELL
     bool "Motor shell commands"
     default y
