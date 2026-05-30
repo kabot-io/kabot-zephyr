@@ -26,6 +26,17 @@ ZBUS_SUBSCRIBER_DEFINE(effort_subscriber, 1);
 void effort_subscriber_task(void)
 {
     const struct zbus_channel *chan;
+
+    if (!device_is_ready(MOTOR_LEFT_DEV)) {
+        LOG_ERR("left motor device not ready");
+        return;
+    }
+
+    if (!device_is_ready(MOTOR_RIGHT_DEV)) {
+        LOG_ERR("right motor device not ready");
+        return;
+    }
+
     LOG_INF("Starting subscriber on effort channel");
 
     while (!zbus_sub_wait(&effort_subscriber, &chan, K_FOREVER)) {
