@@ -47,18 +47,16 @@ static int cmd_motor_set(const struct shell *sh, size_t argc, char **argv)
     char *end;
 
     errno = 0;
-    long effort = strtol(argv[2], &end, 10);
+    float effort = strtof(argv[2], &end);
 
     if (errno == ERANGE || *end != '\0') {
-        shell_error(sh, "effort must be an integer in [-100, 100]");
+        shell_error(sh, "effort must be a float in [-1.0, 1.0]");
         return -EINVAL;
     }
 
-    int32_t effort_q31;
-    int convert_error = motor_percent_to_q31((int32_t)effort, &effort_q31);
-    if (convert_error < 0) {
-        shell_error(sh, "effort must be an integer in [-100, 100]");
-        return convert_error;
+    if (!motor_effort_is_valid(effort)) {
+        shell_error(sh, "effort must be a float in [-1.0, 1.0]");
+        return -EINVAL;
     }
 
     const struct device *dev = shell_device_get_binding(name);
@@ -67,14 +65,14 @@ static int cmd_motor_set(const struct shell *sh, size_t argc, char **argv)
         return -ENOENT;
     }
 
-    int ret = motor_set_effort(dev, effort_q31);
+    int ret = motor_set_effort(dev, effort);
 
     if (ret < 0) {
         shell_error(sh, "set_effort failed: %d", ret);
         return ret;
     }
 
-    shell_print(sh, "motor '%s' effort -> %ld", name, effort);
+    shell_print(sh, "motor '%s' effort -> %.3f", name, (double)effort);
     return 0;
 }
 
@@ -86,7 +84,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(motor_cmds,
                   cmd_motor_list, 1, 0),
     SHELL_CMD_ARG(set, NULL,
                   "Set motor effort.\n"
-                  "Usage: motor set <name> <effort>  (effort range: -100..100)",
+                  "Usage: motor set <name> <effort>  (effort range: -1.0..1.0)",
                   cmd_motor_set, 3, 0),
     SHELL_SUBCMD_SET_END
 );

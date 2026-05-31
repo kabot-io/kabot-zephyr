@@ -19,11 +19,11 @@ static int sim_motor_init(const struct device *dev)
     return 0;
 }
 
-static int sim_motor_set_effort(const struct device *dev, int32_t effort_q31)
+static int sim_motor_set_effort(const struct device *dev, float effort)
 {
     const struct sim_motor_config *cfg = dev->config;
 
-    LOG_DBG("sim motor '%s' effort=%d%%", cfg->name, motor_q31_to_percent(effort_q31));
+    LOG_DBG("sim motor '%s' effort=%.3f", cfg->name, (double)effort);
     return 0;
 }
 
