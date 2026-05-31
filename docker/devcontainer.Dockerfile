@@ -30,6 +30,7 @@ RUN apt-get update \
     clangd \
     cmake-format \
     device-tree-compiler \
+    protobuf-compiler \
     dfu-util \
     file \
     g++-multilib \

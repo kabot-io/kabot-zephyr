@@ -5,7 +5,7 @@ rm -rf .venv
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip
-pip install west
+pip install west protobuf grpcio-tools
 
 west update
 west packages pip --install
