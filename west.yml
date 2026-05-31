@@ -78,7 +78,7 @@ manifest:
                   # - mbedtls
                   # - mcuboot
                   - mipi-sys-t
-                  - nanopb
+                  # - nanopb
                   # - net-tools
                   - nrf_hw_models
                   - nrf_wifi
