@@ -8,6 +8,8 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
 
+#include <math.h>
+
 LOG_MODULE_REGISTER(esc_driver, LOG_LEVEL_DBG);
 
 #if DT_HAS_COMPAT_STATUS_OKAY(kabot_esc)
@@ -15,32 +17,24 @@ LOG_MODULE_REGISTER(esc_driver, LOG_LEVEL_DBG);
 BUILD_ASSERT(CONFIG_MOTOR_DRIVER_INIT_PRIORITY > CONFIG_PWM_INIT_PRIORITY,
              "MOTOR_DRIVER_INIT_PRIORITY must be greater than PWM_INIT_PRIORITY");
 
-static uint32_t lerp_pulse_q31(uint32_t start, uint32_t end, int64_t numerator, int64_t denominator)
-{
-    if (denominator <= 0) {
-        return start;
-    }
-
-    int64_t delta = (int64_t)end - (int64_t)start;
-    int64_t pulse = (int64_t)start + ((delta * numerator) / denominator);
-
-    if (pulse < 0) {
-        return 0;
-    }
-
-    return (uint32_t)pulse;
-}
-
-static uint32_t map_effort_to_pulse(int32_t effort_q31, uint32_t reverse_pulse, uint32_t stop_pulse,
+static uint32_t map_effort_to_pulse(float effort, uint32_t reverse_pulse, uint32_t stop_pulse,
                                     uint32_t forward_pulse)
 {
-    if (effort_q31 <= 0) {
-        int64_t numerator = (int64_t)effort_q31 - (int64_t)MOTOR_EFFORT_Q31_MIN;
-        return lerp_pulse_q31(reverse_pulse, stop_pulse, numerator, 2147483648LL);
+    if (effort <= 0.0f) {
+        float t = effort + 1.0f;
+        if (t < 0.0f) {
+            t = 0.0f;
+        }
+
+        return (uint32_t)lroundf((float)reverse_pulse + ((float)stop_pulse - (float)reverse_pulse) * t);
     }
 
-    return lerp_pulse_q31(stop_pulse, forward_pulse, (int64_t)effort_q31,
-                          (int64_t)MOTOR_EFFORT_Q31_MAX);
+    float t = effort;
+    if (t > 1.0f) {
+        t = 1.0f;
+    }
+
+    return (uint32_t)lroundf((float)stop_pulse + ((float)forward_pulse - (float)stop_pulse) * t);
 }
 
 static int esc_init(const struct device *dev)
@@ -55,10 +49,10 @@ static int esc_init(const struct device *dev)
     return 0;
 }
 
-static int esc_set_effort(const struct device *dev, int32_t effort_q31)
+static int esc_set_effort(const struct device *dev, float effort)
 {
     const struct esc_motor_config *cfg = dev->config;
-    uint32_t pulse = map_effort_to_pulse(effort_q31, cfg->reverse_pulse, cfg->stop_pulse,
+    uint32_t pulse = map_effort_to_pulse(effort, cfg->reverse_pulse, cfg->stop_pulse,
                                          cfg->forward_pulse);
 
     int ret = pwm_set_dt(&cfg->pwm, cfg->pwm.period, pulse);

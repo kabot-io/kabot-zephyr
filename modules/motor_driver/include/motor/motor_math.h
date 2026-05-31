@@ -1,6 +1,7 @@
 #pragma once
 
 #include <errno.h>
+#include <math.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -10,8 +11,16 @@
 #define MOTOR_EFFORT_Q31_MIN INT32_MIN
 #define MOTOR_EFFORT_Q31_MAX INT32_MAX
 
+#define MOTOR_EFFORT_MIN -1.0f
+#define MOTOR_EFFORT_MAX 1.0f
+
 #define MOTOR_EFFORT_PERCENT_MIN -100
 #define MOTOR_EFFORT_PERCENT_MAX 100
+
+static inline bool motor_effort_is_valid(float effort)
+{
+    return isfinite(effort) && effort >= MOTOR_EFFORT_MIN && effort <= MOTOR_EFFORT_MAX;
+}
 
 static inline bool motor_effort_q31_is_valid(int32_t effort_q31)
 {

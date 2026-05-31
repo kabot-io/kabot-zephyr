@@ -9,6 +9,8 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
 
+#include <math.h>
+
 LOG_MODULE_REGISTER(h_bridge_driver, LOG_LEVEL_DBG);
 
 #if DT_HAS_COMPAT_STATUS_OKAY(kabot_h_bridge)
@@ -16,20 +18,18 @@ LOG_MODULE_REGISTER(h_bridge_driver, LOG_LEVEL_DBG);
 BUILD_ASSERT(CONFIG_MOTOR_DRIVER_INIT_PRIORITY > CONFIG_PWM_INIT_PRIORITY,
              "MOTOR_DRIVER_INIT_PRIORITY must be greater than PWM_INIT_PRIORITY");
 
-static uint32_t effort_to_duty_ns(int32_t effort_q31, uint32_t period_ns)
+static uint32_t effort_to_duty_ns(float effort, uint32_t period_ns)
 {
-    if (effort_q31 == 0) {
+    if (effort == 0.0f) {
         return 0;
     }
 
-    if (effort_q31 == MOTOR_EFFORT_Q31_MIN) {
-        return period_ns;
+    float magnitude = fabsf(effort);
+    if (magnitude > 1.0f) {
+        magnitude = 1.0f;
     }
 
-    int64_t magnitude_q31 = effort_q31 < 0 ? -(int64_t)effort_q31 : (int64_t)effort_q31;
-    uint64_t scaled =
-            ((uint64_t)magnitude_q31 * (uint64_t)period_ns) + ((uint64_t)MOTOR_EFFORT_Q31_MAX / 2U);
-    uint32_t duty_ns = (uint32_t)(scaled / (uint64_t)MOTOR_EFFORT_Q31_MAX);
+    uint32_t duty_ns = (uint32_t)lroundf(magnitude * (float)period_ns);
 
     return MIN(duty_ns, period_ns);
 }
@@ -59,23 +59,23 @@ static int h_bridge_init(const struct device *dev)
     return 0;
 }
 
-static int h_bridge_set_effort(const struct device *dev, int32_t effort_q31)
+static int h_bridge_set_effort(const struct device *dev, float effort)
 {
     const struct h_bridge_motor_config *cfg = dev->config;
 
     uint32_t duty_a_ns = 0;
     uint32_t duty_b_ns = 0;
 
-    if (effort_q31 == 0) {
+    if (effort == 0.0f) {
         /* Brake at zero effort by driving both inputs active. */
         duty_a_ns = cfg->pwm_a.period;
         duty_b_ns = cfg->pwm_b.period;
-    } else if (effort_q31 > 0) {
-        duty_a_ns = effort_to_duty_ns(effort_q31, cfg->pwm_a.period);
+    } else if (effort > 0.0f) {
+        duty_a_ns = effort_to_duty_ns(effort, cfg->pwm_a.period);
         duty_b_ns = 0;
     } else {
         duty_a_ns = 0;
-        duty_b_ns = effort_to_duty_ns(effort_q31, cfg->pwm_b.period);
+        duty_b_ns = effort_to_duty_ns(effort, cfg->pwm_b.period);
     }
 
     int ret = pwm_set_dt(&cfg->pwm_a, cfg->pwm_a.period, duty_a_ns);
