@@ -70,8 +70,9 @@ static int setup_socket(uint16_t port)
     };
 
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        int err = errno;
         close(sock);
-        return -errno;
+        return -err;
     }
     return sock;
 }
