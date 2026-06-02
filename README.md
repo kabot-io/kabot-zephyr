@@ -21,4 +21,9 @@ This repository is configured to use a `.devcontainer` for development. To ensur
 - Visual Studio Code
 - Dev Containers extension
 
+## Documentation
+
+- HMI architecture: `docs/hmi-architecture.md`
+- Firmware data flow: `docs/firmware-data-flow.md`
+
 By using the provided `.devcontainer`, you ensure that all dependencies and tools are correctly configured for this project.

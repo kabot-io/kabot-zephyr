@@ -1,13 +1,13 @@
 #include "motor/motor_driver.h"
-#include "zbus/effort_channel.h"
-#include "zbus/effort_subscriber.h"
+#include "zbus/control_channel.h"
+#include "zbus/control_subscriber.h"
 
 #include <errno.h>
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(effort_subscriber, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(control_subscriber, LOG_LEVEL_DBG);
 
 #define MOTOR_LEFT_NODE  DT_ALIAS(motor_left)
 #define MOTOR_RIGHT_NODE DT_ALIAS(motor_right)
@@ -20,9 +20,9 @@ BUILD_ASSERT(DT_NODE_EXISTS(MOTOR_RIGHT_NODE),
 #define MOTOR_LEFT_DEV  DEVICE_DT_GET(MOTOR_LEFT_NODE)
 #define MOTOR_RIGHT_DEV DEVICE_DT_GET(MOTOR_RIGHT_NODE)
 
-ZBUS_SUBSCRIBER_DEFINE(effort_subscriber, 1);
+ZBUS_SUBSCRIBER_DEFINE(control_subscriber, 1);
 
-void effort_subscriber_task(void)
+void control_subscriber_task(void)
 {
     const struct zbus_channel *chan;
 
@@ -36,29 +36,32 @@ void effort_subscriber_task(void)
         return;
     }
 
-    LOG_INF("Starting subscriber on effort channel");
+    LOG_INF("Starting subscriber on control channel");
 
-    while (!zbus_sub_wait(&effort_subscriber, &chan, K_FOREVER)) {
-        if (&effort_channel != chan) {
+    while (!zbus_sub_wait(&control_subscriber, &chan, K_FOREVER)) {
+        if (&control_channel != chan) {
             continue;
         }
 
-        EffortMsg effort;
-        if (zbus_chan_read(&effort_channel, &effort, K_MSEC(20)) == 0) {
-            LOG_INF("From subscriber -> Left effort=%.3f, Right effort=%.3f", effort.left,
-                effort.right);
+        Control control;
+        if (zbus_chan_read(&control_channel, &control, K_MSEC(20)) == 0) {
+            const float left_effort = control.effort.state.x;
+            const float right_effort = control.effort.state.y;
 
-            int left_result = motor_set_effort(MOTOR_LEFT_DEV, effort.left);
-            int right_result = motor_set_effort(MOTOR_RIGHT_DEV, effort.right);
+            LOG_INF("From subscriber -> Left effort=%.3f, Right effort=%.3f", left_effort,
+                    right_effort);
+
+            int left_result = motor_set_effort(MOTOR_LEFT_DEV, left_effort);
+            int right_result = motor_set_effort(MOTOR_RIGHT_DEV, right_effort);
 
             if (left_result < 0 || right_result < 0) {
                 LOG_WRN("Failed to set motor effort: L=%d, R=%d", left_result, right_result);
             }
         } else {
-            LOG_WRN("Failed to read from effort_channel");
+            LOG_WRN("Failed to read from control_channel");
         }
     }
 }
 
-K_THREAD_DEFINE(effort_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, effort_subscriber_task, NULL,
+K_THREAD_DEFINE(control_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, control_subscriber_task, NULL,
                 NULL, NULL, 3, 0, 0);

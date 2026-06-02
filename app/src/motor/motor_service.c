@@ -1,6 +1,6 @@
 #include "motor/motor_service.h"
-#include "protos/effort_msg.pb.h"
-#include "zbus/effort_channel.h"
+#include "protos/state_control_msg.pb.h"
+#include "zbus/control_channel.h"
 
 #include <arpa/inet.h>
 #include <pb_decode.h>
@@ -13,11 +13,11 @@
 
 LOG_MODULE_REGISTER(motor_service, LOG_LEVEL_DBG);
 
-#define EFFORT_PORT 30010
-#define MTU         1500
+#define CONTROL_PORT 30010
+#define MTU          1500
 
-static int effort_socket = -1;
-static struct pollfd effort_pollfd;
+static int control_socket = -1;
+static struct pollfd control_pollfd;
 
 static void udp_motor_handler(struct net_socket_service_event *pev)
 {
@@ -36,22 +36,22 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
         return;
     }
 
-    EffortMsg msg = EffortMsg_init_zero;
+    Control msg = Control_init_zero;
     pb_istream_t stream = pb_istream_from_buffer((const pb_byte_t *)buf, (size_t)len);
-    if (!pb_decode(&stream, EffortMsg_fields, &msg)) {
-        LOG_WRN("Ignoring malformed effort protobuf datagram (%d bytes)", len);
+    if (!pb_decode(&stream, Control_fields, &msg)) {
+        LOG_WRN("Ignoring malformed control protobuf datagram (%d bytes)", len);
         return;
     }
 
-    if (pfd->fd != effort_socket) {
+    if (pfd->fd != control_socket) {
         LOG_ERR("Data received on unknown socket: %d", pfd->fd);
         return;
     }
 
-    if (effort_channel_validator(&msg, sizeof(msg))) {
-        int publish_error = publish_effort_msg(&msg, K_MSEC(100));
+    if (control_channel_validator(&msg, sizeof(msg))) {
+        int publish_error = publish_control_msg(&msg, K_MSEC(100));
         if (publish_error) {
-            LOG_ERR("Failed to publish effort message: %d", publish_error);
+            LOG_ERR("Failed to publish control message: %d", publish_error);
         }
     }
 }
@@ -81,28 +81,28 @@ static int setup_socket(uint16_t port)
 void stop_motor_service(void)
 {
     (void)net_socket_service_unregister(&udp_motor_service);
-    if (effort_socket >= 0) {
-        close(effort_socket);
-        effort_socket = -1;
+    if (control_socket >= 0) {
+        close(control_socket);
+        control_socket = -1;
     }
 }
 
 int start_motor_service(void)
 {
-    effort_socket = setup_socket(EFFORT_PORT);
-    if (effort_socket < 0) {
-        return effort_socket;
+    control_socket = setup_socket(CONTROL_PORT);
+    if (control_socket < 0) {
+        return control_socket;
     }
 
-    effort_pollfd.fd = effort_socket;
-    effort_pollfd.events = POLLIN;
+    control_pollfd.fd = control_socket;
+    control_pollfd.events = POLLIN;
 
-    int ret = net_socket_service_register(&udp_motor_service, &effort_pollfd, 1, NULL);
+    int ret = net_socket_service_register(&udp_motor_service, &control_pollfd, 1, NULL);
     if (ret < 0) {
         stop_motor_service();
         return ret;
     }
 
-    LOG_INF("Motor service active on port %d (protobuf EffortMsg)", EFFORT_PORT);
+    LOG_INF("Motor service active on port %d (protobuf Control)", CONTROL_PORT);
     return 0;
 }
