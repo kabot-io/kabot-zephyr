@@ -4,6 +4,10 @@
 
 This is a practical implementation report for adding MMC5603 magnetometer support to kabot firmware.
 
+Related implementation report:
+
+- `docs/icm42670l-implementation-report.md` (ICM42670L IMU bring-up, WHO_AM_I compatibility patch, and west patch persistence strategy)
+
 It follows the architecture in the real sensor tutorial and records:
 
 - what was implemented

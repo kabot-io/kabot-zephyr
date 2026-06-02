@@ -9,6 +9,9 @@ Implementation case study:
 - For a full real-world MMC5603 bring-up log (architecture decisions, pinmux conflicts,
   successful debug prompts, and tooling workflow), see
   `docs/magnetometer-implementation-report.md`.
+- For a full ICM42670L bring-up log (publisher integration, WHO_AM_I mismatch analysis,
+  Zephyr driver compatibility patch, and west persistence workflow), see
+  `docs/icm42670l-implementation-report.md`.
 
 ## 1. Data Transport Concepts: Ingress and Egress
 

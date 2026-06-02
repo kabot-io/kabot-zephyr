@@ -25,5 +25,8 @@ This repository is configured to use a `.devcontainer` for development. To ensur
 
 - HMI architecture: `docs/hmi-architecture.md`
 - Firmware data flow: `docs/firmware-data-flow.md`
+- Real sensor tutorial: `docs/real-sensor-publisher-tutorial.md`
+- MMC5603 bring-up report: `docs/magnetometer-implementation-report.md`
+- ICM42670L IMU bring-up report: `docs/icm42670l-implementation-report.md`
 
 By using the provided `.devcontainer`, you ensure that all dependencies and tools are correctly configured for this project.
