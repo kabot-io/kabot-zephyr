@@ -1,0 +1,43 @@
+{
+    "name": "Ubuntu",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "IMAGE_NAME": "${localEnv:IMAGE_NAME:dev-noble-jazzy}",
+            "IMAGE_TAG": "${localEnv:IMAGE_TAG:latest}"
+        }
+    },
+    "privileged": true,
+    "runArgs": [
+        "--group-add",
+        "dialout",
+        "--group-add",
+        "plugdev"
+    ],
+    "remoteEnv": {
+        "ESPTOOL_PORT": "${localEnv:ESPTOOL_PORT:/dev/ttyACM0}"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "maattdd.gitless",
+                "josetr.cmake-language-support-vscode",
+                "cheshirekow.cmake-format",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "xaver.clang-format",
+                "plorefice.devicetree",
+                "EditorConfig.EditorConfig",
+                "redhat.vscode-yaml",
+                "HashiCorp.HCL",
+                "GitHub.vscode-github-actions"
+            ]
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "27.3.1",
+            "moby": "false"
+        }
+    },
+    "postCreateCommand": "scripts/post-create-script.zsh"
+}
