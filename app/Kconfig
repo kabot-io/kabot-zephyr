@@ -145,3 +145,19 @@ config KABOT_MAGNETOMETER_PUBLISHER_STACK_SIZE
     range 1024 8192
     help
       Stack size in bytes for the magnetometer publisher thread.
+
+config KABOT_ENABLE_IMU_PUBLISHER
+    bool "Enable real IMU publisher"
+    depends on SENSOR
+    depends on DT_HAS_INVENSENSE_ICM42670P_ENABLED || DT_HAS_INVENSENSE_ICM42670S_ENABLED
+    default y
+    help
+      Enable ICM42670-backed IMU publisher that emits State.linear_acceleration
+      and State.angular_velocity.
+
+config KABOT_IMU_PUBLISHER_STACK_SIZE
+    int "IMU publisher stack size"
+    default 2048
+    range 1024 8192
+    help
+      Stack size in bytes for the IMU publisher thread.

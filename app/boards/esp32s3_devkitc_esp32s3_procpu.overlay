@@ -40,6 +40,15 @@
     status = "okay";
     clock-frequency = <I2C_BITRATE_STANDARD>;
 
+    icm42670: icm42670@68 {
+        compatible = "invensense,icm42670s";
+        reg = <0x68>;
+        accel-hz = <100>;
+        gyro-hz = <100>;
+        accel-fs = <16>;
+        gyro-fs = <2000>;
+    };
+
     mmc5603: mmc5603@30 {
         compatible = "memsic,mmc56x3";
         reg = <0x30>;
