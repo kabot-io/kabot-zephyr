@@ -1,5 +1,4 @@
 #include "motor/motor_driver.h"
-#include "motor/motor_math.h"
 #include "zbus/effort_channel.h"
 #include "zbus/effort_subscriber.h"
 
@@ -44,10 +43,10 @@ void effort_subscriber_task(void)
             continue;
         }
 
-        struct effort_msg effort;
+        EffortMsg effort;
         if (zbus_chan_read(&effort_channel, &effort, K_MSEC(20)) == 0) {
-            LOG_INF("From subscriber -> Left effort=%d%%, Right effort=%d%%",
-                    motor_q31_to_percent(effort.left), motor_q31_to_percent(effort.right));
+            LOG_INF("From subscriber -> Left effort=%.3f, Right effort=%.3f", effort.left,
+                effort.right);
 
             int left_result = motor_set_effort(MOTOR_LEFT_DEV, effort.left);
             int right_result = motor_set_effort(MOTOR_RIGHT_DEV, effort.right);

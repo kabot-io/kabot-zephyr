@@ -1,0 +1,45 @@
+{
+  "toolchains": [
+    "x86_64-zephyr-elf",
+    "xtensa-espressif_esp32s3_zephyr-elf"
+  ],
+  "projects": {
+    "app": {
+      "rel_path": "app",
+      "name": "app",
+      "buildConfigs": {
+        "build/esp32s3_devkitc/esp32s3/procpu": {
+          "relBoardSubDir": "espressif/esp32s3_devkitc",
+          "board": "esp32s3_devkitc/esp32s3/procpu",
+          "name": "build/esp32s3_devkitc/esp32s3/procpu",
+          "debugOptimization": "Debug",
+          "westBuildArgs": [],
+          "westBuildCMakeArgs": [
+            "-DCONFIG_DEBUG_OPTIMIZATIONS=y",
+            "-DCONFIG_DEBUG_THREAD_INFO=y"
+          ],
+          "confFiles": {
+            "config": [],
+            "overlay": []
+          },
+          "launchTarget": "Zephyr IDE: Debug",
+          "buildDebugTarget": "Zephyr IDE: Debug",
+          "attachTarget": "Zephyr IDE: Attach",
+          "completed": true,
+          "runnerConfigs": {
+            "default": {
+              "runner": "default",
+              "name": "default",
+              "args": "--esp-device /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_1C:DB:D4:66:22:EC-if00"
+            }
+          }
+        }
+      },
+      "twisterConfigs": {},
+      "confFiles": {
+        "config": [],
+        "overlay": []
+      }
+    }
+  }
+}

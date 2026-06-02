@@ -1,9 +1,9 @@
-#include "motor/motor_math.h"
 #include "motor/motor_service.h"
+#include "protos/effort_msg.pb.h"
 #include "zbus/effort_channel.h"
-#include "zbus/effort_msg.h"
 
 #include <arpa/inet.h>
+#include <pb_decode.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/net/socket_service.h>
@@ -13,13 +13,11 @@
 
 LOG_MODULE_REGISTER(motor_service, LOG_LEVEL_DBG);
 
-#define PORT_LEFT  30010
-#define PORT_RIGHT 30020
-#define MTU        1500
+#define EFFORT_PORT 30010
+#define MTU         1500
 
-static int socket_left = -1;
-static int socket_right = -1;
-static struct pollfd sockfd_udp[2];
+static int effort_socket = -1;
+static struct pollfd effort_pollfd;
 
 static void udp_motor_handler(struct net_socket_service_event *pev)
 {
@@ -38,52 +36,27 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
         return;
     }
 
-    if (len > 1) {
-        LOG_WRN("Received datagram larger than expected size of 1 byte. Actual size: %d bytes", len);
-    }
-
-    int32_t effort_percent = (int8_t)buf[0];
-    int32_t effort_q31;
-    int convert_error = motor_percent_to_q31(effort_percent, &effort_q31);
-    if (convert_error < 0) {
-        LOG_WRN("Ignoring out-of-range effort percent: %d", effort_percent);
+    EffortMsg msg = EffortMsg_init_zero;
+    pb_istream_t stream = pb_istream_from_buffer((const pb_byte_t *)buf, (size_t)len);
+    if (!pb_decode(&stream, EffortMsg_fields, &msg)) {
+        LOG_WRN("Ignoring malformed effort protobuf datagram (%d bytes)", len);
         return;
     }
 
-    uint16_t port;
-    if (pfd->fd == socket_left) {
-        port = PORT_LEFT;
-    } else if (pfd->fd == socket_right) {
-        port = PORT_RIGHT;
-    } else {
+    if (pfd->fd != effort_socket) {
         LOG_ERR("Data received on unknown socket: %d", pfd->fd);
         return;
     }
 
-    static struct effort_msg msg;
-    static bool left_ready;
-    static bool right_ready;
-
-    if (port == PORT_LEFT) {
-        msg.left = effort_q31;
-        left_ready = true;
-    } else if (port == PORT_RIGHT) {
-        msg.right = effort_q31;
-        right_ready = true;
-    }
-
-    if (left_ready && right_ready && effort_channel_validator(&msg, sizeof(msg))) {
-        int publish_error = publish_effort_msg(&msg, K_MSEC(1000));
+    if (effort_channel_validator(&msg, sizeof(msg))) {
+        int publish_error = publish_effort_msg(&msg, K_MSEC(100));
         if (publish_error) {
             LOG_ERR("Failed to publish effort message: %d", publish_error);
         }
-
-        left_ready = false;
-        right_ready = false;
     }
 }
 
-NET_SOCKET_SERVICE_SYNC_DEFINE(udp_motor_service, udp_motor_handler, 2);
+NET_SOCKET_SERVICE_SYNC_DEFINE(udp_motor_service, udp_motor_handler, 1);
 
 static int setup_socket(uint16_t port)
 {
@@ -108,40 +81,28 @@ static int setup_socket(uint16_t port)
 void stop_motor_service(void)
 {
     (void)net_socket_service_unregister(&udp_motor_service);
-    if (socket_left >= 0) {
-        close(socket_left);
-        socket_left = -1;
-    }
-    if (socket_right >= 0) {
-        close(socket_right);
-        socket_right = -1;
+    if (effort_socket >= 0) {
+        close(effort_socket);
+        effort_socket = -1;
     }
 }
 
 int start_motor_service(void)
 {
-    socket_left = setup_socket(PORT_LEFT);
-    if (socket_left < 0) {
-        return socket_left;
+    effort_socket = setup_socket(EFFORT_PORT);
+    if (effort_socket < 0) {
+        return effort_socket;
     }
 
-    socket_right = setup_socket(PORT_RIGHT);
-    if (socket_right < 0) {
-        stop_motor_service();
-        return socket_right;
-    }
+    effort_pollfd.fd = effort_socket;
+    effort_pollfd.events = POLLIN;
 
-    sockfd_udp[0].fd = socket_left;
-    sockfd_udp[0].events = POLLIN;
-    sockfd_udp[1].fd = socket_right;
-    sockfd_udp[1].events = POLLIN;
-
-    int ret = net_socket_service_register(&udp_motor_service, sockfd_udp, 2, NULL);
+    int ret = net_socket_service_register(&udp_motor_service, &effort_pollfd, 1, NULL);
     if (ret < 0) {
         stop_motor_service();
         return ret;
     }
 
-    LOG_INF("Motor service active on ports %d, %d", PORT_LEFT, PORT_RIGHT);
+    LOG_INF("Motor service active on port %d (protobuf EffortMsg)", EFFORT_PORT);
     return 0;
 }

@@ -1,7 +1,6 @@
 #include "motor/sim_motor_driver.h"
 
 #include "motor/motor_driver.h"
-#include "motor/motor_math.h"
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -23,7 +22,7 @@ static int sim_motor_set_effort(const struct device *dev, float effort)
 {
     const struct sim_motor_config *cfg = dev->config;
 
-    LOG_DBG("sim motor '%s' effort=%.3f", cfg->name, (double)effort);
+    LOG_DBG("sim motor '%s' effort=%.3f", cfg->name, effort);
     return 0;
 }
 

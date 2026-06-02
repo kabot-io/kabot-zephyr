@@ -1,7 +1,6 @@
 #include "motor/esc_driver.h"
 
 #include "motor/motor_driver.h"
-#include "motor/motor_math.h"
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
