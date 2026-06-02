@@ -31,9 +31,9 @@ void sensor_subscriber_task(void)
 
                     LOG_INF("Sensor tuple: left=(ts=%llu,value=%f) right=(ts=%llu,value=%f)",
                         (unsigned long long)sensor.left_encoder.header.base_timestamp_ns,
-                        left_value,
+                        (double)left_value,
                         (unsigned long long)sensor.right_encoder.header.base_timestamp_ns,
-                        right_value);
+                        (double)right_value);
         }
     }
 }

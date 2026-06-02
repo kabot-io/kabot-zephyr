@@ -48,8 +48,9 @@ void control_subscriber_task(void)
             const float left_effort = control.effort.state.x;
             const float right_effort = control.effort.state.y;
 
-            LOG_INF("From subscriber -> Left effort=%.3f, Right effort=%.3f", left_effort,
-                    right_effort);
+                LOG_INF("From subscriber -> Left effort=%.3f, Right effort=%.3f",
+                    (double)left_effort,
+                    (double)right_effort);
 
             int left_result = motor_set_effort(MOTOR_LEFT_DEV, left_effort);
             int right_result = motor_set_effort(MOTOR_RIGHT_DEV, right_effort);
