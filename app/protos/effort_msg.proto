@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-message EffortMsg {
-    float left = 1;
-    float right = 2;
-}

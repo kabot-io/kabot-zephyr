@@ -15,7 +15,7 @@ project(kabot)
 list(APPEND CMAKE_MODULE_PATH ${ZEPHYR_BASE}/modules/nanopb)
 include(nanopb)
 
-zephyr_nanopb_sources(app protos/effort_msg.proto)
+zephyr_nanopb_sources(app protos/state_control_msg.proto)
 
 zephyr_library_include_directories(include)
 
@@ -23,8 +23,8 @@ target_sources(
     app
     PRIVATE src/main.c
             src/motor/motor_service.c
-            src/zbus/effort_channel.c
-            src/zbus/effort_subscriber.c
+            src/zbus/control_channel.c
+            src/zbus/control_subscriber.c
             src/zbus/sensor_channel.c
             src/zbus/sensor_subscriber.c
             src/encoder_sensor_service.c

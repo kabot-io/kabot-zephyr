@@ -6,7 +6,7 @@ Motor control flow in the app is split into three parts:
 
 1. shell command path (`motor list`, `motor set`)
 2. UDP motor service ingress
-3. effort subscriber applying left/right commands
+3. control subscriber applying left/right commands
 
 App-level motor service code lives under:
 
@@ -21,7 +21,7 @@ Motor shell now lives in module subsystem path:
 
 - `modules/motor_driver/subsys/motor/motor_shell.c`
 
-Zbus effort transport code lives under:
+Zbus control transport code lives under:
 
 - `app/src/zbus`
 - `app/include/zbus`
@@ -54,27 +54,26 @@ Source:
 
 Behavior:
 
-- listens on UDP ports for left/right effort bytes
-- interprets payload as signed percent
-- converts percent to Q31
-- publishes a combined effort message on `effort_channel`
+- listens on UDP control port (`30010`) for protobuf datagrams
+- decodes payload as `Control`
+- validates left/right effort from `control.effort.state.{x,y}`
+- publishes a combined control message on `control_channel`
 
-## Effort Channel and Subscriber
+## Control Channel and Subscriber
 
 Sources:
 
-- `app/src/zbus/effort_channel.c`
-- `app/src/zbus/effort_subscriber.c`
+- `app/src/zbus/control_channel.c`
+- `app/src/zbus/control_subscriber.c`
 
 Headers:
 
-- `app/include/zbus/effort_msg.h`
-- `app/include/zbus/effort_channel.h`
-- `app/include/zbus/effort_subscriber.h`
+- `app/include/zbus/control_channel.h`
+- `app/include/zbus/control_subscriber.h`
 
 Behavior:
 
-- effort messages carry Q31 left/right values
+- control messages carry left/right effort in `control.effort.state.{x,y}`
 - subscriber binds directly to DT aliases:
   - `motor-left`
   - `motor-right`

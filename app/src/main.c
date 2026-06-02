@@ -3,8 +3,8 @@
 #include <zephyr/zbus/zbus.h>
 
 #include "motor/motor_service.h"
-#include "zbus/effort_subscriber.h"
-#include "zbus/effort_channel.h"
+#include "zbus/control_subscriber.h"
+#include "zbus/control_channel.h"
 #include "zbus/sensor_subscriber.h"
 
 #include <zephyr/net/wifi_mgmt.h>
