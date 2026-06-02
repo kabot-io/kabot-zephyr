@@ -31,9 +31,11 @@ Current internal channels:
   - Carries decoded and validated `Control` messages from UDP ingress.
   - Main consumers: motor actuation path and state effort listener.
 - `state_channel`
-  - Carries `State` messages for host egress.
-  - Current producer: effort state listener (this phase).
-  - Future producers: IMU/distance/encoder state paths via merge stage.
+  - Carries partial `State` updates from producers.
+  - Current producer: effort state listener.
+- `state_egress_channel`
+  - Carries periodically published merged `State` snapshots.
+  - Consumed by UDP egress transport sender.
 
 ## State Update Policy
 
@@ -45,10 +47,12 @@ Target policy (agreed architecture):
 
 Current implementation in this phase:
 
-- A listener subscribes to `control_channel`.
+- `effort_state_publisher` subscribes to `control_channel`.
 - On each control message, it captures effort values, stamps them with `k_uptime_get()`,
-  and publishes a `State` message to `state_channel`.
-- This gives immediate effort telemetry egress before full multi-producer merge is added.
+  and publishes a partial `State` update to `state_channel`.
+- `state_periodic_publisher` merges incoming updates with update-if-newer timestamp policy
+  and publishes merged snapshots periodically to `state_egress_channel`.
+- `state_udp_sender` encodes snapshots from `state_egress_channel` and sends UDP.
 
 ## Ports
 
@@ -76,8 +80,8 @@ Current implementation in this phase:
 ## Current State Path Status
 
 - State schema is defined in `state_control_msg.proto`.
-- Effort-to-state listener path is implemented in this phase.
-- Full multi-producer freshness merge remains the next state phase.
+- Periodic state egress path is implemented in this phase.
+- Additional producers (IMU/encoder/distance) can now feed partial updates into `state_channel`.
 
 ## Build Notes
 

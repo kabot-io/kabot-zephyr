@@ -26,7 +26,9 @@ target_sources(
             src/zbus/control_channel.c
             src/zbus/control_subscriber.c
             src/zbus/state_channel.c
+            src/zbus/state_egress_channel.c
             src/zbus/effort_state_publisher.c
+            src/zbus/state_periodic_publisher.c
             src/zbus/state_udp_sender.c
             src/zbus/sensor_channel.c
             src/zbus/sensor_subscriber.c

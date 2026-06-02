@@ -26,6 +26,7 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 ## Channel and Policy Alignment
 
 - Firmware `control_channel` -> effort state listener -> `state_channel` -> UDP egress.
+- Firmware now performs periodic merged state egress before UDP transport.
 - HMI decodes `State` datagrams and refreshes `StateSnapshot` values.
 - Target policy for later phase remains update-if-newer by timestamp for per-field merges.
 
@@ -84,6 +85,6 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 
 ## Next Steps
 
-- Add full multi-source state merge support (update-if-newer by timestamp per field).
+- Add additional state producers (IMU, encoder, distance) into periodic merge path.
 - Add CLI modes for send-only, receive-only, and combined operation.
 - Add protocol/version checks for safer host-firmware compatibility.
