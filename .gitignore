@@ -4,6 +4,7 @@
 /deps
 /.microros-tutorial-workspace/**
 !/.microros-tutorial-workspace/init.sh
+eeprom.bin
 
 # macOS
 *.DS_Store
@@ -15,3 +16,4 @@ __pycache__
 
 # clangd
 app/.cache/
+.vscode/compile_commands.json

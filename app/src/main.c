@@ -14,6 +14,8 @@
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
+#if defined(CONFIG_WIFI) && defined(CONFIG_WIFI_CREDENTIALS) &&                           \
+    defined(NET_REQUEST_WIFI_CONNECT_STORED)
 static void autoconnect_wifi(void)
 {
     LOG_INF("Auto-connecting to Wi-Fi...");
@@ -30,6 +32,12 @@ static void autoconnect_wifi(void)
     }
     // Implement Wi-Fi connection logic here
 }
+#else
+static void autoconnect_wifi(void)
+{
+    LOG_INF("Wi-Fi autoconnect skipped: unsupported on this target");
+}
+#endif
 
 // Automatic startup using Zephyr's init system
 static int kabot_init(void)

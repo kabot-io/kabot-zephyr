@@ -25,8 +25,14 @@ target_sources(
             src/motor/motor_service.c
             src/zbus/effort_channel.c
             src/zbus/effort_subscriber.c
-            src/zbus/encoder_publisher.c
             src/zbus/sensor_channel.c
             src/zbus/sensor_subscriber.c
             src/encoder_sensor_service.c
 )
+
+if(NOT BOARD MATCHES "^native_sim(/.*)?$")
+    target_sources(
+        app
+        PRIVATE src/zbus/encoder_publisher.c
+    )
+endif()

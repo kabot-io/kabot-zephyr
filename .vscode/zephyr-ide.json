@@ -3,6 +3,10 @@
     "x86_64-zephyr-elf",
     "xtensa-espressif_esp32s3_zephyr-elf"
   ],
+  "sdkVersion": "1.0.1",
+  "blobs": [
+    "hal_espressif"
+  ],
   "projects": {
     "app": {
       "rel_path": "app",
@@ -31,6 +35,32 @@
               "runner": "default",
               "name": "default",
               "args": "--esp-device /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_1C:DB:D4:66:22:EC-if00"
+            }
+          }
+        },
+        "build/native_sim/native": {
+          "relBoardSubDir": "native/native_sim",
+          "board": "native_sim/native",
+          "name": "build/native_sim/native",
+          "debugOptimization": "Debug",
+          "westBuildArgs": [],
+          "westBuildCMakeArgs": [
+            "-DCONFIG_DEBUG_OPTIMIZATIONS=y",
+            "-DCONFIG_DEBUG_THREAD_INFO=y"
+          ],
+          "confFiles": {
+            "config": [],
+            "overlay": []
+          },
+          "launchTarget": "Zephyr IDE: Debug",
+          "buildDebugTarget": "Zephyr IDE: Debug",
+          "attachTarget": "Zephyr IDE: Attach",
+          "completed": true,
+          "runnerConfigs": {
+            "default": {
+              "runner": "default",
+              "name": "default",
+              "args": ""
             }
           }
         }
