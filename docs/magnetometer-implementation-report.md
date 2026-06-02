@@ -144,6 +144,12 @@ Current status:
 - runtime scan still reports no devices on I2C0
 - this points to likely electrical/hardware path issues (power, wiring, pull-ups, address strap)
 
+Post-review hardening applied:
+
+- startup readiness is now retried in a loop instead of terminating the publisher thread
+- retry cadence is 1 second between checks
+- this avoids a permanent telemetry outage from transient boot-time I2C or power-up timing issues
+
 ## Debugging Tools and Workflow Used
 
 ### 1. Build and Flash Tasks
@@ -285,6 +291,8 @@ Prompting patterns that were most effective in this session:
 3. MMC56X3 driver expects DT properties that are easy to miss.
 4. Shell-level I2C scans quickly separate software integration bugs from hardware presence issues.
 5. Migrate one sensor path at a time and keep simulation toggles explicit during transition.
+6. Do not terminate publisher threads on first `device_is_ready()` failure;
+  use bounded-log retry loops so delayed hardware init can recover automatically.
 
 ## Current Outcome
 

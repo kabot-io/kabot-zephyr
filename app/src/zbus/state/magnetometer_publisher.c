@@ -10,6 +10,7 @@ LOG_MODULE_REGISTER(magnetometer_publisher, LOG_LEVEL_DBG);
 
 enum {
     PUBLISH_TIMEOUT_CAP_MS = 20,
+    READY_RETRY_MS = 1000,
 };
 
 #define MAG_NODE DT_COMPAT_GET_ANY_STATUS_OKAY(memsic_mmc56x3)
@@ -31,9 +32,9 @@ void magnetometer_publisher_task(void)
         publish_timeout_ms = PUBLISH_TIMEOUT_CAP_MS;
     }
 
-    if (!device_is_ready(mag)) {
-        LOG_ERR("MMC56X3 device not ready: %s", mag->name);
-        return;
+    while (!device_is_ready(mag)) {
+        LOG_ERR("MMC56X3 device not ready: %s. Retrying...", mag->name);
+        k_sleep(K_MSEC(READY_RETRY_MS));
     }
 
     LOG_INF("Magnetometer publisher active: %d ms (%s)",
@@ -79,7 +80,7 @@ void magnetometer_publisher_task(void)
 }
 
 K_THREAD_DEFINE(magnetometer_publisher_task_id,
-                CONFIG_MAIN_STACK_SIZE,
+                CONFIG_KABOT_MAGNETOMETER_PUBLISHER_STACK_SIZE,
                 magnetometer_publisher_task,
                 NULL,
                 NULL,
