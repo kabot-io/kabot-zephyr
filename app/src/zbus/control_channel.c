@@ -7,8 +7,9 @@ LOG_MODULE_REGISTER(control_channel, LOG_LEVEL_DBG);
 
 int publish_control_msg(const Control *msg, k_timeout_t timeout)
 {
-    LOG_INF("Publishing control message: left=%.3f, right=%.3f", msg->effort.state.x,
-            msg->effort.state.y);
+    LOG_INF("Publishing control message: left=%.3f, right=%.3f",
+            (double)msg->effort.state.x,
+            (double)msg->effort.state.y);
     return zbus_chan_pub(&control_channel, msg, timeout);
 }
 
@@ -23,7 +24,9 @@ bool control_channel_validator(const void *msg, size_t msg_size)
 
     if (!valid) {
         LOG_WRN("Control channel validator failed: left=%.3f, right=%.3f, msg_size=%zu",
-                left, right, msg_size);
+                (double)left,
+                (double)right,
+                msg_size);
     }
 
     return valid;
