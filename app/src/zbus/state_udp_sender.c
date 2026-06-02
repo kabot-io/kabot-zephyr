@@ -1,4 +1,4 @@
-#include "zbus/state_channel.h"
+#include "zbus/state_egress_channel.h"
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -25,9 +25,14 @@ static int setup_state_socket(struct sockaddr_in *dest)
     dest->sin_port = htons(CONFIG_KABOT_STATE_EGRESS_PORT);
 
     int rc = inet_pton(AF_INET, CONFIG_KABOT_STATE_EGRESS_HOST, &dest->sin_addr);
-    if (rc != 1) {
+    if (rc == 0) {
         close(sock);
         return -EINVAL;
+    }
+    if (rc < 0) {
+        int err = errno;
+        close(sock);
+        return -err;
     }
 
     return sock;
@@ -40,7 +45,10 @@ void state_udp_sender_task(void)
     int sock = setup_state_socket(&dest);
 
     if (sock < 0) {
-        LOG_ERR("Failed to setup state UDP socket: %d", sock);
+        LOG_ERR("Failed to setup state UDP socket for %s:%d: %d",
+                CONFIG_KABOT_STATE_EGRESS_HOST,
+                CONFIG_KABOT_STATE_EGRESS_PORT,
+                sock);
         return;
     }
 
@@ -48,13 +56,13 @@ void state_udp_sender_task(void)
             CONFIG_KABOT_STATE_EGRESS_PORT);
 
     while (!zbus_sub_wait(&state_udp_sender, &chan, K_FOREVER)) {
-        if (&state_channel != chan) {
+        if (&state_egress_channel != chan) {
             continue;
         }
 
         State state;
-        if (zbus_chan_read(&state_channel, &state, K_MSEC(ZBUS_READ_TIMEOUT_MS)) != 0) {
-            LOG_WRN("Failed to read state_channel");
+        if (zbus_chan_read(&state_egress_channel, &state, K_MSEC(ZBUS_READ_TIMEOUT_MS)) != 0) {
+            LOG_WRN("Failed to read state_egress_channel");
             continue;
         }
 
@@ -68,7 +76,8 @@ void state_udp_sender_task(void)
         ssize_t sent = sendto(sock, buf, stream.bytes_written, 0, (struct sockaddr *)&dest,
                               sizeof(dest));
         if (sent < 0) {
-            LOG_WRN("State UDP send failed: %d", errno);
+            int err = errno;
+            LOG_WRN("State UDP send failed: %d", err);
         } else {
             LOG_DBG("State UDP sent: %d bytes -> %s:%d", (int)sent,
                     CONFIG_KABOT_STATE_EGRESS_HOST,

@@ -34,3 +34,10 @@ config KABOT_STATE_EGRESS_PORT
     range 1024 65535
     help
       UDP destination port for serialized State messages.
+
+config KABOT_STATE_EGRESS_PERIOD_MS
+    int "State egress publish period (ms)"
+    default 50
+    range 10 60000
+    help
+      Periodic state publish cadence in milliseconds for UDP egress.
