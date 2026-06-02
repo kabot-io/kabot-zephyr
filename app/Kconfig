@@ -138,3 +138,10 @@ config KABOT_ENABLE_MAGNETOMETER_PUBLISHER
     default y
     help
       Enable MMC56X3-backed magnetometer publisher that emits State.magnetic_field.
+
+config KABOT_MAGNETOMETER_PUBLISHER_STACK_SIZE
+    int "Magnetometer publisher stack size"
+    default 2048
+    range 1024 8192
+    help
+      Stack size in bytes for the magnetometer publisher thread.

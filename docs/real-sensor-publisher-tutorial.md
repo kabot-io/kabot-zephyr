@@ -290,6 +290,9 @@ Use this checklist when adding a new real sensor fragment publisher.
 
 - Create app/src/zbus/<sensor>_publisher.c.
 - Read device readiness.
+- If a device is not ready at startup, prefer a retry loop with sleep/backoff
+  over terminating the thread; this prevents permanent loss of that state field
+  when hardware comes up late.
 - Fetch sensor sample and convert to protobuf field type.
 - Fill State fragment, including has_* flags and header stamp/frame_id.
 - Publish with bounded timeout.
