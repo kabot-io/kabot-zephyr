@@ -15,12 +15,16 @@ int publish_control_msg(const Control *msg, k_timeout_t timeout)
 
 bool control_channel_validator(const void *msg, size_t msg_size)
 {
+    if ((msg == NULL) || (msg_size != sizeof(Control))) {
+        LOG_WRN("Control channel validator failed: msg=%p, msg_size=%zu", msg, msg_size);
+        return false;
+    }
+
     const Control *control = msg;
     const float left = control->effort.state.x;
     const float right = control->effort.state.y;
 
-    bool valid = (msg_size == sizeof(Control)) && motor_effort_is_valid(left)
-                 && motor_effort_is_valid(right);
+    bool valid = motor_effort_is_valid(left) && motor_effort_is_valid(right);
 
     if (!valid) {
         LOG_WRN("Control channel validator failed: left=%.3f, right=%.3f, msg_size=%zu",
@@ -36,5 +40,5 @@ ZBUS_CHAN_DEFINE(control_channel,
                  Control,
                  control_channel_validator,
                  NULL,
-                 ZBUS_OBSERVERS(control_subscriber),
+                 ZBUS_OBSERVERS(control_subscriber, effort_state_publisher),
                  ZBUS_MSG_INIT(.effort.state.x = 0.0f, .effort.state.y = 0.0f));

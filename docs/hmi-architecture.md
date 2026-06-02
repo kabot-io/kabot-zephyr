@@ -12,9 +12,22 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 ## Scope (Current)
 
 - Sends `Control` protobuf messages over UDP to firmware ingress.
+- Listens for `State` protobuf messages over UDP from firmware.
 - Uses arrow keys to update target effort state.
 - Sends packets only from the periodic loop when enabled.
-- Exposes read-only State fields in the UI as placeholders for incoming state integration.
+- Displays decoded State values in read-only fields.
+
+## Ports
+
+- Control target port (firmware ingress): `30010`.
+- State listen port (HMI ingress): `30011`.
+- Default HMI state bind address: `0.0.0.0`.
+
+## Channel and Policy Alignment
+
+- Firmware `control_channel` -> effort state listener -> `state_channel` -> UDP egress.
+- HMI decodes `State` datagrams and refreshes `StateSnapshot` values.
+- Target policy for later phase remains update-if-newer by timestamp for per-field merges.
 
 ## Package Layout
 
@@ -71,6 +84,6 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 
 ## Next Steps
 
-- Add State UDP receive/decode path and bind it to `StateSnapshot` updates.
+- Add full multi-source state merge support (update-if-newer by timestamp per field).
 - Add CLI modes for send-only, receive-only, and combined operation.
 - Add protocol/version checks for safer host-firmware compatibility.
