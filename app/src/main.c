@@ -4,7 +4,6 @@
 
 #include "motor/motor_service.h"
 #include "zbus/effort_subscriber.h"
-#include "zbus/effort_msg.h"
 #include "zbus/effort_channel.h"
 #include "zbus/sensor_subscriber.h"
 

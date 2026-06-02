@@ -29,11 +29,11 @@ void sensor_subscriber_task(void)
             const float left_value = ldexpf(left_q31, sensor.left_encoder.shift);
             const float right_value = ldexpf(right_q31, sensor.right_encoder.shift);
 
-            LOG_INF("Sensor tuple: left=(ts=%llu,value=%f) right=(ts=%llu,value=%f)",
-                    (unsigned long long)sensor.left_encoder.header.base_timestamp_ns,
-                    (double)left_value,
-                    (unsigned long long)sensor.right_encoder.header.base_timestamp_ns,
-                    (double)right_value);
+                    LOG_INF("Sensor tuple: left=(ts=%llu,value=%f) right=(ts=%llu,value=%f)",
+                        (unsigned long long)sensor.left_encoder.header.base_timestamp_ns,
+                        left_value,
+                        (unsigned long long)sensor.right_encoder.header.base_timestamp_ns,
+                        right_value);
         }
     }
 }

@@ -72,7 +72,7 @@ static int cmd_motor_set(const struct shell *sh, size_t argc, char **argv)
         return ret;
     }
 
-    shell_print(sh, "motor '%s' effort -> %.3f", name, (double)effort);
+    shell_print(sh, "motor '%s' effort -> %.3f", name, effort);
     return 0;
 }
 
