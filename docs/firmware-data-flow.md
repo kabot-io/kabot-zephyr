@@ -29,10 +29,10 @@ Current internal channels:
 
 - `control_channel`
   - Carries decoded and validated `Control` messages from UDP ingress.
-  - Main consumers: motor actuation path and state effort listener.
+  - Main consumers: motor actuation path and effort state publisher.
 - `state_channel`
   - Carries partial `State` updates from producers.
-  - Current producer: effort state listener.
+  - Current producers: effort state publisher and simulated IMU, magnetometer, distance publishers.
 - `state_egress_channel`
   - Carries periodically published merged `State` snapshots.
   - Consumed by UDP egress transport sender.
@@ -42,17 +42,49 @@ Current internal channels:
 Target policy (agreed architecture):
 
 - Each producer publishes partial state updates with producer-owned timestamps.
-- State merge updates only fields whose incoming timestamp is newer than the stored timestamp.
+- State merge updates only fields whose incoming timestamp is newer than or equal to the stored timestamp.
 - A periodic publisher emits combined state to egress transport.
 
 Current implementation in this phase:
 
 - `effort_state_publisher` subscribes to `control_channel`.
-- On each control message, it captures effort values, stamps them with `k_uptime_get()`,
+- On each control message, it captures effort values and stamps them with firmware uptime,
   and publishes a partial `State` update to `state_channel`.
-- `state_periodic_publisher` merges incoming updates with update-if-newer timestamp policy
-  and publishes merged snapshots periodically to `state_egress_channel`.
+- `sim_imu_publisher` runs periodically and publishes both
+  `linear_acceleration` and `angular_velocity` with the same stamp and frame.
+- `sim_magnetometer_publisher` runs periodically and publishes `magnetic_field`.
+- `sim_distance_publisher` runs periodically and publishes `distance`.
+- `state_aggregator_listener` is notified synchronously on `state_channel` publishes and
+  merges incoming partial updates into the cached aggregate using update-if-newer-or-equal by field.
+- `state_periodic_publisher` periodically requests a full snapshot from the aggregator cache
+  and publishes it to `state_egress_channel`.
 - `state_udp_sender` encodes snapshots from `state_egress_channel` and sends UDP.
+
+Merge comparator details:
+
+- For each optional field (`effort`, `linear_acceleration`, `angular_velocity`, `magnetic_field`, `distance`),
+  replacement requires an incoming field header with a timestamp.
+- If the cached field is missing, incoming replaces it.
+- If cached and incoming fields are both stamped, incoming replaces cached when
+  `incoming_stamp >= cached_stamp`.
+- This tie-accepting behavior intentionally allows last-writer-wins on equal timestamps.
+
+## Frame IDs and Refresh Rates
+
+Default frame IDs:
+
+- top-level `State.header.frame_id`: `base_link`
+- `State.effort.header.frame_id`: `motors`
+- `State.linear_acceleration.header.frame_id`: `imu`
+- `State.angular_velocity.header.frame_id`: `imu`
+- `State.magnetic_field.header.frame_id`: `mag`
+- `State.distance.header.frame_id`: `tof`
+
+Default simulated refresh rates:
+
+- IMU publisher (`linear_acceleration` + `angular_velocity`): 10 Hz (`100 ms`)
+- Magnetometer publisher (`magnetic_field`): 5 Hz (`200 ms`)
+- Distance publisher (`distance`): approximately 60 Hz (`17 ms`)
 
 ## Ports
 
@@ -81,7 +113,7 @@ Current implementation in this phase:
 
 - State schema is defined in `state_control_msg.proto`.
 - Periodic state egress path is implemented in this phase.
-- Additional producers (IMU/encoder/distance) can now feed partial updates into `state_channel`.
+- Additional producers (IMU/magnetometer/distance) feed partial updates into `state_channel`.
 
 ## Build Notes
 

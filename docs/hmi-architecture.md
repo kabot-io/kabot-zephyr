@@ -14,8 +14,9 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 - Sends `Control` protobuf messages over UDP to firmware ingress.
 - Listens for `State` protobuf messages over UDP from firmware.
 - Uses arrow keys to update target effort state.
-- Sends packets only from the periodic loop when enabled.
+- Supports both one-shot send and periodic send loop.
 - Displays decoded State values in read-only fields.
+- Displays per-header receive rate (`Hz`) columns derived in the controller.
 
 ## Ports
 
@@ -25,10 +26,22 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 
 ## Channel and Policy Alignment
 
-- Firmware `control_channel` -> effort state listener -> `state_channel` -> UDP egress.
+- Firmware `control_channel` -> effort state publisher -> `state_channel` -> UDP egress.
 - Firmware now performs periodic merged state egress before UDP transport.
 - HMI decodes `State` datagrams and refreshes `StateSnapshot` values.
-- Target policy for later phase remains update-if-newer by timestamp for per-field merges.
+- Firmware merge policy is implemented per field as update-if-newer-or-equal by timestamp.
+
+## Hz Display Policy
+
+The HMI `Hz` values are UI-derived from `State.*.header.stamp` deltas:
+
+- `Hz` is computed only when a field stamp changes and `delta_ms > 0`.
+- Instantaneous `Hz` values are smoothed using a moving average window of 5 samples.
+- A per-field clear timer is started/refreshed after each successful `Hz` update.
+- If no newer sample arrives before timeout (`2000 ms`), that field's `Hz` is cleared.
+- Timer-based clear is wall-clock based, so stale `Hz` values are removed even when no new packets arrive
+  (for example if firmware stops).
+- If a stamp is invalid or non-monotonic for a field, that field's `Hz` is cleared immediately.
 
 ## Package Layout
 
@@ -65,8 +78,9 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 ## Control Behavior
 
 - Arrow keys update desired effort state.
-- Periodic send is the only sending mechanism during interactive driving.
-- If periodic mode is off, key changes do not send packets.
+- `Send once` immediately transmits current effort values.
+- Periodic mode transmits at the configured interval until stopped.
+- If periodic mode is off, key changes update targets but do not transmit automatically.
 - `q` closes the app via the registered stop callback.
 
 ## Protobuf Strategy
@@ -85,6 +99,5 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 
 ## Next Steps
 
-- Add additional state producers (IMU, encoder, distance) into periodic merge path.
 - Add CLI modes for send-only, receive-only, and combined operation.
 - Add protocol/version checks for safer host-firmware compatibility.

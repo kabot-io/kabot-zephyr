@@ -13,6 +13,7 @@ eeprom.bin
 __pycache__
 .python-version
 .venv
+_generated
 
 # clangd
 app/.cache/

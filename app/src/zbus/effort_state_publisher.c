@@ -1,4 +1,5 @@
 #include "zbus/control_channel.h"
+#include "zbus/state_publish_utils.h"
 #include "zbus/state_channel.h"
 
 #include <zephyr/kernel.h>
@@ -28,7 +29,7 @@ void effort_state_publisher_task(void)
         }
 
         State state = State_init_zero;
-        const uint64_t stamp = (uint64_t)k_uptime_get();
+        const uint64_t stamp = state_now_stamp_ms();
 
         state.has_header = true;
         state.header.stamp = stamp;
@@ -36,6 +37,7 @@ void effort_state_publisher_task(void)
         state.has_effort = true;
         state.effort.has_header = true;
         state.effort.header.stamp = stamp;
+        set_header_frame_id(&state.effort.header, CONFIG_KABOT_STATE_EFFORT_FRAME_ID);
         state.effort.has_state = true;
         state.effort.state.x = control.effort.state.x;
         state.effort.state.y = control.effort.state.y;
