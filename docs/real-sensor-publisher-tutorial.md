@@ -4,6 +4,12 @@ This tutorial explains how to implement a real sensor State fragment publisher i
 
 The examples use the current distance implementation (VL53L0X) as a reference.
 
+Implementation case study:
+
+- For a full real-world MMC5603 bring-up log (architecture decisions, pinmux conflicts,
+  successful debug prompts, and tooling workflow), see
+  `docs/magnetometer-implementation-report.md`.
+
 ## 1. Data Transport Concepts: Ingress and Egress
 
 The robot firmware has two directional data paths:

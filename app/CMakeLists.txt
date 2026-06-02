@@ -54,6 +54,10 @@ if(CONFIG_KABOT_ENABLE_DISTANCE_PUBLISHER)
     target_sources(app PRIVATE src/zbus/state/distance_publisher.c)
 endif()
 
+if(CONFIG_KABOT_ENABLE_MAGNETOMETER_PUBLISHER)
+    target_sources(app PRIVATE src/zbus/state/magnetometer_publisher.c)
+endif()
+
 if(NOT BOARD MATCHES "^native_sim(/.*)?$")
     target_sources(
         app

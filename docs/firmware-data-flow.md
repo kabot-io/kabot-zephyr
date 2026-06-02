@@ -42,7 +42,8 @@ Current internal channels:
   - Main consumers: motor actuation path and effort state publisher.
 - `state_channel`
   - Carries partial `State` updates from producers.
-  - Current producers: effort state publisher and simulated IMU, magnetometer, distance publishers.
+  - Current producers: effort state publisher plus simulated and/or real IMU,
+    magnetometer, and distance publishers (selected by Kconfig).
 - `state_egress_channel`
   - Carries periodically published merged `State` snapshots.
   - Consumed by UDP egress transport sender.
@@ -62,8 +63,14 @@ Current implementation in this phase:
   and publishes a partial `State` update to `state_channel`.
 - `sim_imu_publisher` runs periodically and publishes both
   `linear_acceleration` and `angular_velocity` with the same stamp and frame.
-- `sim_magnetometer_publisher` runs periodically and publishes `magnetic_field`.
-- `sim_distance_publisher` runs periodically and publishes `distance`.
+- `sim_magnetometer_publisher` runs periodically and publishes `magnetic_field`
+  when simulated magnetometer mode is enabled.
+- `magnetometer_publisher` runs periodically and publishes `magnetic_field`
+  when the real MMC56X3 publisher is enabled.
+- `sim_distance_publisher` runs periodically and publishes `distance`
+  when simulated distance mode is enabled.
+- `distance_publisher` runs periodically and publishes `distance`
+  when the real VL53L0X publisher is enabled.
 - `state_aggregator_listener` is notified synchronously on `state_channel` publishes and
   merges incoming partial updates into the cached aggregate using update-if-newer-or-equal by field.
 - `state_periodic_publisher` periodically requests a full snapshot from the aggregator cache
@@ -123,7 +130,8 @@ Default simulated refresh rates:
 
 - State schema is defined in `state_control_msg.proto`.
 - Periodic state egress path is implemented in this phase.
-- Additional producers (IMU/magnetometer/distance) feed partial updates into `state_channel`.
+- Additional producers (IMU/magnetometer/distance, simulated and/or real by config)
+  feed partial updates into `state_channel`.
 
 ## Build Notes
 

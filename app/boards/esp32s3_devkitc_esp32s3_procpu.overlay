@@ -35,7 +35,21 @@
 };
 
 &i2c0 {
-    pinctrl-0 = <&i2c0_default>;
+    pinctrl-0 = <&i2c0_mag_default>;
+    pinctrl-names = "default";
+    status = "okay";
+    clock-frequency = <I2C_BITRATE_STANDARD>;
+
+    mmc5603: mmc5603@30 {
+        compatible = "memsic,mmc56x3";
+        reg = <0x30>;
+        magn-odr = <0>;
+        auto-self-reset;
+    };
+};
+
+&i2c1 {
+    pinctrl-0 = <&i2c1_tof_default>;
     pinctrl-names = "default";
     status = "okay";
     clock-frequency = <I2C_BITRATE_STANDARD>;
@@ -69,10 +83,20 @@ i2s_led: &i2s0 {
 };
 
 &pinctrl {
-    i2c0_default: i2c0_default {
+    i2c0_mag_default: i2c0_mag_default {
         group1 {
-            pinmux = <I2C0_SDA_GPIO40>,
-                     <I2C0_SCL_GPIO39>;
+            pinmux = <I2C0_SDA_GPIO2>,
+                     <I2C0_SCL_GPIO1>;
+            bias-pull-up;
+            drive-open-drain;
+            output-high;
+        };
+    };
+
+    i2c1_tof_default: i2c1_tof_default {
+        group1 {
+            pinmux = <I2C1_SDA_GPIO40>,
+                     <I2C1_SCL_GPIO39>;
             bias-pull-up;
             drive-open-drain;
             output-high;
