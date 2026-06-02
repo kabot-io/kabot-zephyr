@@ -15,16 +15,17 @@ HZ_MOVING_AVERAGE_SAMPLES = 5
 
 EFFORT_BY_KEYS = {
     frozenset(): (0.0, 0.0),
-    frozenset({"Up"}): (0.5, 0.5),
-    frozenset({"Down"}): (-0.5, -0.5),
-    frozenset({"Left"}): (-0.5, 0.5),
-    frozenset({"Right"}): (0.5, -0.5),
-    frozenset({"Up", "Left"}): (0.0, 0.5),
-    frozenset({"Up", "Right"}): (0.5, 0.0),
-    frozenset({"Down", "Left"}): (0.0, -0.5),
-    frozenset({"Down", "Right"}): (-0.5, 0.0),
+    frozenset({"Up"}): (1.0, 1.0),
+    frozenset({"Down"}): (-1.0, -1.0),
+    frozenset({"Left"}): (-1.0, 1.0),
+    frozenset({"Right"}): (1.0, -1.0),
+    frozenset({"Up", "Left"}): (0.0, 1.0),
+    frozenset({"Up", "Right"}): (1.0, 0.0),
+    frozenset({"Down", "Left"}): (0.0, -1.0),
+    frozenset({"Down", "Right"}): (-1.0, 0.0),
 }
 
+effort_scale = (1.0, 1.0)
 
 class KabotIoController:
     def __init__(self, model: KabotIoModel, view: KabotIoView):
@@ -139,7 +140,7 @@ class KabotIoController:
     def send_once(self) -> None:
         try:
             left, right = self.view.read_effort_inputs()
-            self.model.send_control(left, right)
+            self.model.send_control(left*effort_scale[0], right*effort_scale[1])
             self.view.set_status(
                 f"Sent #{self.model.sent_count} -> left={left:.3f}, right={right:.3f}, "
                 f"target={self.model.target[0]}:{self.model.target[1]}"
