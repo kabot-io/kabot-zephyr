@@ -1,4 +1,4 @@
-#include "zbus/state_egress_channel.h"
+#include "zbus/channels/state_egress_channel.h"
 
 #include <zephyr/logging/log.h>
 

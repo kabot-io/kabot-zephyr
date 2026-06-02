@@ -2,16 +2,16 @@
 
 ## Overview
 
-Motor control flow in the app is split into three parts:
+Motor actuation in the app is driven by three aligned paths:
 
 1. shell command path (`motor list`, `motor set`)
-2. UDP motor service ingress
-3. control subscriber applying left/right commands
+2. UDP control service ingress
+3. effort subscriber applying left/right commands
 
-App-level motor service code lives under:
+App-level control ingress service code lives under:
 
-- `app/src/motor/motor_service.c`
-- `app/include/motor`
+- `app/src/control/control_service.c`
+- `app/include/control`
 
 Driver API/backends/bindings live in the module:
 
@@ -21,10 +21,12 @@ Motor shell now lives in module subsystem path:
 
 - `modules/motor_driver/subsys/motor/motor_shell.c`
 
-Zbus control transport code lives under:
+Zbus control backbone code lives under:
 
-- `app/src/zbus`
-- `app/include/zbus`
+- `app/src/zbus/control`
+- `app/src/zbus/channels`
+- `app/include/zbus/control`
+- `app/include/zbus/channels`
 
 ## Motor Shell
 
@@ -46,11 +48,11 @@ Device name resolution:
 
 - looks up Zephyr device by name using `shell_device_get_binding(...)`
 
-## Motor Service (UDP Ingress)
+## Control Service (UDP Ingress)
 
 Source:
 
-- `app/src/motor/motor_service.c`
+- `app/src/control/control_service.c`
 
 Behavior:
 
@@ -63,13 +65,13 @@ Behavior:
 
 Sources:
 
-- `app/src/zbus/control_channel.c`
-- `app/src/zbus/control_subscriber.c`
+- `app/src/zbus/channels/control_channel.c`
+- `app/src/zbus/control/effort_subscriber.c`
 
 Headers:
 
-- `app/include/zbus/control_channel.h`
-- `app/include/zbus/control_subscriber.h`
+- `app/include/zbus/channels/control_channel.h`
+- `app/include/zbus/control/effort_subscriber.h`
 
 Behavior:
 
@@ -88,7 +90,7 @@ Compile-time guards:
 In `app/src/main.c`:
 
 1. starts sensor subscriber
-2. starts motor UDP service
+2. starts control UDP service
 
 ## Relationship To Backend Drivers
 
@@ -109,4 +111,4 @@ The app-level motor paths never call backend internals directly; they only use:
 3. Build firmware for ESP32 validation target: `./scripts/build.zsh --no-flash`.
 4. Run `motor list` and confirm expected devices.
 5. Run `motor set <device_name> <percent>` for manual control.
-6. Verify UDP sender path updates left/right through subscriber.
+6. Verify control ingress path updates left/right through effort subscriber.

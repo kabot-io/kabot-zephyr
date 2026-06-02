@@ -1,13 +1,13 @@
 #include "motor/motor_driver.h"
-#include "zbus/control_channel.h"
-#include "zbus/control_subscriber.h"
+#include "zbus/channels/control_channel.h"
+#include "zbus/control/effort_subscriber.h"
 
 #include <errno.h>
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(control_subscriber, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(effort_subscriber, LOG_LEVEL_DBG);
 
 #define MOTOR_LEFT_NODE  DT_ALIAS(motor_left)
 #define MOTOR_RIGHT_NODE DT_ALIAS(motor_right)
@@ -20,9 +20,9 @@ BUILD_ASSERT(DT_NODE_EXISTS(MOTOR_RIGHT_NODE),
 #define MOTOR_LEFT_DEV  DEVICE_DT_GET(MOTOR_LEFT_NODE)
 #define MOTOR_RIGHT_DEV DEVICE_DT_GET(MOTOR_RIGHT_NODE)
 
-ZBUS_SUBSCRIBER_DEFINE(control_subscriber, 1);
+ZBUS_SUBSCRIBER_DEFINE(effort_subscriber, 1);
 
-void control_subscriber_task(void)
+void effort_subscriber_task(void)
 {
     const struct zbus_channel *chan;
 
@@ -38,7 +38,7 @@ void control_subscriber_task(void)
 
     LOG_INF("Starting subscriber on control channel");
 
-    while (!zbus_sub_wait(&control_subscriber, &chan, K_FOREVER)) {
+    while (!zbus_sub_wait(&effort_subscriber, &chan, K_FOREVER)) {
         if (&control_channel != chan) {
             continue;
         }
@@ -64,5 +64,5 @@ void control_subscriber_task(void)
     }
 }
 
-K_THREAD_DEFINE(control_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, control_subscriber_task, NULL,
+K_THREAD_DEFINE(effort_subscriber_task_id, CONFIG_MAIN_STACK_SIZE, effort_subscriber_task, NULL,
                 NULL, NULL, 3, 0, 0);

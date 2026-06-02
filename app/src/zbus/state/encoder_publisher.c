@@ -1,6 +1,6 @@
-#include "zbus/encoder_publisher.h"
+#include "zbus/state/encoder_publisher.h"
 
-#include "zbus/sensor_channel.h"
+#include "zbus/channels/sensor_channel.h"
 #include "zbus/sensor_msg.h"
 
 #include <zephyr/device.h>

@@ -1,4 +1,4 @@
-#include "zbus/state_channel.h"
+#include "zbus/channels/state_channel.h"
 #include "zbus/state_publish_utils.h"
 
 #include <zephyr/kernel.h>

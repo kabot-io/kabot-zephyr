@@ -18,13 +18,13 @@ Ingress is the control path:
 1. UDP packet arrives on control port.
 2. Payload is decoded as Control protobuf.
 3. Control is validated and published to control_channel.
-4. control_subscriber consumes Control and drives motors.
+4. effort_subscriber consumes Control and drives motors.
 
 Key files:
 
-- app/src/motor/motor_service.c
-- app/src/zbus/control_channel.c
-- app/src/zbus/control_subscriber.c
+- app/src/control/control_service.c
+- app/src/zbus/channels/control_channel.c
+- app/src/zbus/control/effort_subscriber.c
 
 ### Egress
 
@@ -38,11 +38,11 @@ Egress is the telemetry/state path:
 
 Key files:
 
-- app/src/zbus/state_channel.c
-- app/src/zbus/state_aggregator.c
-- app/src/zbus/state_periodic_publisher.c
-- app/src/zbus/state_egress_channel.c
-- app/src/zbus/state_udp_sender.c
+- app/src/zbus/channels/state_channel.c
+- app/src/zbus/state/state_aggregator.c
+- app/src/zbus/state/state_periodic_publisher.c
+- app/src/zbus/channels/state_egress_channel.c
+- app/src/zbus/state/state_udp_sender.c
 
 ```mermaid
 flowchart LR
@@ -63,11 +63,11 @@ A publisher produces messages to a zbus channel. In this architecture, sensor pu
 
 Examples:
 
-- app/src/zbus/sim_imu_publisher.c
-- app/src/zbus/sim_magnetometer_publisher.c
-- app/src/zbus/sim_distance_publisher.c
-- app/src/zbus/distance_publisher.c
-- app/src/zbus/effort_state_publisher.c
+- app/src/zbus/state/sim_imu_publisher.c
+- app/src/zbus/state/sim_magnetometer_publisher.c
+- app/src/zbus/state/sim_distance_publisher.c
+- app/src/zbus/state/distance_publisher.c
+- app/src/zbus/control/effort_state_publisher.c
 
 ### Listener
 
@@ -81,7 +81,7 @@ Why listener-based aggregation is used:
 
 ### Subscriber
 
-A subscriber consumes channel data to perform some action. For example, control_subscriber applies control to actuators, and the egress path subscriber side forwards state snapshots.
+A subscriber consumes channel data to perform some action. For example, effort_subscriber applies control to actuators, and the egress path subscriber side forwards state snapshots.
 
 ### Why state is copied into egress
 
@@ -144,14 +144,14 @@ Simulation publishers are the fastest way to understand expected fragment shape 
 
 Start here:
 
-- app/src/zbus/sim_imu_publisher.c
-- app/src/zbus/sim_magnetometer_publisher.c
-- app/src/zbus/sim_distance_publisher.c
+- app/src/zbus/state/sim_imu_publisher.c
+- app/src/zbus/state/sim_magnetometer_publisher.c
+- app/src/zbus/state/sim_distance_publisher.c
 
 Distance is a good scalar example:
 
-- Sim scalar: app/src/zbus/sim_distance_publisher.c
-- Real scalar: app/src/zbus/distance_publisher.c
+- Sim scalar: app/src/zbus/state/sim_distance_publisher.c
+- Real scalar: app/src/zbus/state/distance_publisher.c
 
 Simulation snippet (`sim_distance_publisher`):
 
@@ -234,12 +234,12 @@ Snippet:
 ```cmake
 if(CONFIG_KABOT_ENABLE_SIMULATED_STATE_SENSORS)
   if(CONFIG_KABOT_ENABLE_SIMULATED_DISTANCE_PUBLISHER)
-    target_sources(app PRIVATE src/zbus/sim_distance_publisher.c)
+    target_sources(app PRIVATE src/zbus/state/sim_distance_publisher.c)
   endif()
 endif()
 
 if(CONFIG_KABOT_ENABLE_DISTANCE_PUBLISHER)
-  target_sources(app PRIVATE src/zbus/distance_publisher.c)
+  target_sources(app PRIVATE src/zbus/state/distance_publisher.c)
 endif()
 ```
 
@@ -321,7 +321,7 @@ When adding a new telemetry field to State, update firmware and host together.
 
 4. Update state aggregation
 
-- Extend app/src/zbus/state_aggregator.c merge logic for new field.
+- Extend app/src/zbus/state/state_aggregator.c merge logic for new field.
 - Apply same timestamp-based replacement rule.
 
 5. Optional config
@@ -376,8 +376,8 @@ return StateSnapshot(
 ## Recommended Reading Order
 
 1. docs/firmware-data-flow.md
-2. app/src/zbus/sim_distance_publisher.c
-3. app/src/zbus/distance_publisher.c
-4. app/src/zbus/state_aggregator.c
+2. app/src/zbus/state/sim_distance_publisher.c
+3. app/src/zbus/state/distance_publisher.c
+4. app/src/zbus/state/state_aggregator.c
 5. docs/hmi-architecture.md
 6. scripts/kabot_io/state_fields.py

@@ -1,6 +1,6 @@
-#include "zbus/control_channel.h"
+#include "zbus/channels/control_channel.h"
 #include "zbus/state_publish_utils.h"
-#include "zbus/state_channel.h"
+#include "zbus/channels/state_channel.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>

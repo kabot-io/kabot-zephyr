@@ -1,5 +1,5 @@
 #include "motor/motor_math.h"
-#include "zbus/control_channel.h"
+#include "zbus/channels/control_channel.h"
 
 #include <zephyr/logging/log.h>
 
@@ -40,5 +40,5 @@ ZBUS_CHAN_DEFINE(control_channel,
                  Control,
                  control_channel_validator,
                  NULL,
-                 ZBUS_OBSERVERS(control_subscriber, effort_state_publisher),
+                 ZBUS_OBSERVERS(effort_subscriber, effort_state_publisher),
                  ZBUS_MSG_INIT(.effort.state.x = 0.0f, .effort.state.y = 0.0f));

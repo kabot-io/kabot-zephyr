@@ -1,5 +1,5 @@
-#include "zbus/sensor_subscriber.h"
-#include "zbus/sensor_channel.h"
+#include "zbus/state/sensor_subscriber.h"
+#include "zbus/channels/sensor_channel.h"
 
 #include <errno.h>
 #include <math.h>

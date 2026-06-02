@@ -1,6 +1,6 @@
-#include "zbus/sensor_channel.h"
+#include "zbus/channels/sensor_channel.h"
 #include "zbus/sensor_msg.h"
-#include "zbus/sensor_subscriber.h"
+#include "zbus/state/sensor_subscriber.h"
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(sensor_channel, LOG_LEVEL_DBG);
