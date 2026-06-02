@@ -197,7 +197,7 @@ class KabotIoController:
             left, right = self._effort_for_active_keys(self.active_keys)
             self.view.set_control_values(left, right)
 
-            self.model.send_control(left, right)
+            self.model.send_control(left * effort_scale[0], right * effort_scale[1])
 
             delay_ms = max(1, int(interval_sec * 1000.0))
             self.periodic_after_id = self.view.root.after(delay_ms, self._tick_periodic)
