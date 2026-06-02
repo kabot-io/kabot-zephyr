@@ -130,3 +130,11 @@ config KABOT_ENABLE_DISTANCE_PUBLISHER
     default y
     help
       Enable VL53L0X-backed distance publisher that emits State.distance.
+
+config KABOT_ENABLE_MAGNETOMETER_PUBLISHER
+    bool "Enable real magnetometer publisher"
+    depends on SENSOR
+    depends on DT_HAS_MEMSIC_MMC56X3_ENABLED
+    default y
+    help
+      Enable MMC56X3-backed magnetometer publisher that emits State.magnetic_field.
