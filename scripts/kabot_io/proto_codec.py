@@ -69,3 +69,10 @@ def encode_control_effort(left: float, right: float) -> bytes:
     msg.effort.state.x = left
     msg.effort.state.y = right
     return msg.SerializeToString()
+
+
+def decode_state_msg(payload: bytes):
+    pb2 = _proto_module()
+    msg = pb2.State()
+    msg.ParseFromString(payload)
+    return msg

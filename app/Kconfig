@@ -21,3 +21,16 @@ config KABOT_MOTOR_SHELL
     depends on SHELL
     help
       Enable the `motor` shell command group.
+
+config KABOT_STATE_EGRESS_HOST
+    string "State egress destination host"
+    default "127.0.0.1"
+    help
+      IPv4 destination host for UDP state egress.
+
+config KABOT_STATE_EGRESS_PORT
+    int "State egress UDP port"
+    default 30011
+    range 1024 65535
+    help
+      UDP destination port for serialized State messages.

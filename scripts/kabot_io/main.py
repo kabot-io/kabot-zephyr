@@ -18,6 +18,17 @@ def parse_args() -> AppConfig:
     )
     parser.add_argument("--port", type=int, default=defaults.port, help="Target UDP port")
     parser.add_argument(
+        "--state-bind-host",
+        default=defaults.state_bind_host,
+        help="Bind address for incoming State UDP (default: 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--state-port",
+        type=int,
+        default=defaults.state_port,
+        help="Listen UDP port for incoming State (default: 30011)",
+    )
+    parser.add_argument(
         "--interval",
         type=float,
         default=defaults.interval_sec,
@@ -26,7 +37,14 @@ def parse_args() -> AppConfig:
     parser.add_argument("--quiet", action="store_true", help="Reserved for future logging controls")
     args = parser.parse_args()
 
-    return AppConfig(host=args.host, port=args.port, interval_sec=args.interval, quiet=args.quiet)
+    return AppConfig(
+        host=args.host,
+        port=args.port,
+        state_bind_host=args.state_bind_host,
+        state_port=args.state_port,
+        interval_sec=args.interval,
+        quiet=args.quiet,
+    )
 
 
 def main() -> None:
@@ -39,7 +57,10 @@ def main() -> None:
     view.left_var.set("0.0")
     view.right_var.set("0.0")
     view.interval_var.set(f"{config.interval_sec:.3f}")
-    view.set_status(f"Ready. Target: {config.host}:{config.port}")
+    view.set_status(
+        f"Ready. Control target={config.host}:{config.port}, "
+        f"State listen={config.state_bind_host}:{config.state_port}"
+    )
 
     KabotIoController(model, view)
     view.run()

@@ -5,6 +5,7 @@ from view import KabotIoView
 STATUS_PERIODIC_STARTED = "Periodic sending started"
 STATUS_PERIODIC_STOPPED = "Periodic sending stopped"
 STATUS_INVALID_INPUT = "Invalid input: effort must be float, interval > 0"
+STATE_POLL_MS = 20
 
 EFFORT_BY_KEYS = {
     frozenset(): (0.0, 0.0),
@@ -25,6 +26,7 @@ class KabotIoController:
         self.view = view
         self.periodic_running = False
         self.periodic_after_id = None
+        self.state_poll_after_id = None
         self.active_keys: set[str] = set()
 
         self.view.on_send_once = self.send_once
@@ -35,6 +37,16 @@ class KabotIoController:
         self.view.set_close_callback(self.shutdown)
 
         self.view.set_state_snapshot(self.model.empty_state_snapshot())
+        self._schedule_state_poll()
+
+    def _schedule_state_poll(self) -> None:
+        self._poll_state()
+        self.state_poll_after_id = self.view.root.after(STATE_POLL_MS, self._schedule_state_poll)
+
+    def _poll_state(self) -> None:
+        snapshot = self.model.try_receive_state()
+        if snapshot is not None:
+            self.view.set_state_snapshot(snapshot)
 
     def send_once(self) -> None:
         try:
@@ -116,6 +128,9 @@ class KabotIoController:
         self.view.set_status(STATUS_PERIODIC_STOPPED)
 
     def shutdown(self) -> None:
+        if self.state_poll_after_id is not None:
+            self.view.root.after_cancel(self.state_poll_after_id)
+            self.state_poll_after_id = None
         self._stop_periodic()
         self.model.close()
         self.view.root.destroy()

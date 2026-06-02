@@ -23,6 +23,39 @@ The firmware uses UDP ingress and zbus-based loose coupling.
    - left motor effort <- `control.effort.state.x`
    - right motor effort <- `control.effort.state.y`
 
+## Channel Architecture
+
+Current internal channels:
+
+- `control_channel`
+  - Carries decoded and validated `Control` messages from UDP ingress.
+  - Main consumers: motor actuation path and state effort listener.
+- `state_channel`
+  - Carries `State` messages for host egress.
+  - Current producer: effort state listener (this phase).
+  - Future producers: IMU/distance/encoder state paths via merge stage.
+
+## State Update Policy
+
+Target policy (agreed architecture):
+
+- Each producer publishes partial state updates with producer-owned timestamps.
+- State merge updates only fields whose incoming timestamp is newer than the stored timestamp.
+- A periodic publisher emits combined state to egress transport.
+
+Current implementation in this phase:
+
+- A listener subscribes to `control_channel`.
+- On each control message, it captures effort values, stamps them with `k_uptime_get()`,
+  and publishes a `State` message to `state_channel`.
+- This gives immediate effort telemetry egress before full multi-producer merge is added.
+
+## Ports
+
+- Control ingress UDP port: `30010`.
+- State egress UDP port: `30011`.
+- HMI state listen UDP port: `30011`.
+
 ## Key Modules
 
 - `app/src/motor/motor_service.c`
@@ -43,12 +76,8 @@ The firmware uses UDP ingress and zbus-based loose coupling.
 ## Current State Path Status
 
 - State schema is defined in `state_control_msg.proto`.
-- Full periodic state egress pipeline is planned and partially scaffolded.
-- The intended direction is:
-  - partial state updates from producers
-  - freshness merge by timestamp
-  - periodic publish of combined state
-  - transport send on dedicated egress path
+- Effort-to-state listener path is implemented in this phase.
+- Full multi-producer freshness merge remains the next state phase.
 
 ## Build Notes
 
