@@ -22,7 +22,7 @@ static int sim_motor_set_effort(const struct device *dev, float effort)
 {
     const struct sim_motor_config *cfg = dev->config;
 
-    LOG_DBG("sim motor '%s' effort=%.3f", cfg->name, effort);
+    LOG_INF("sim motor '%s' effort=%.3f", cfg->name, effort);
     return 0;
 }
 
