@@ -1,4 +1,5 @@
 from collections import deque
+import time
 
 from model import KabotIoModel
 from state_fields import HEADER_HZ_PAIRS
@@ -58,7 +59,19 @@ class KabotIoController:
         if snapshot is not None:
             self._current_snapshot = snapshot
             self._populate_header_hz(self._current_snapshot)
+            sample_time_sec = self._sample_time_sec(self._current_snapshot)
+            self.view.add_plot_sample(self._current_snapshot, sample_time_sec)
             self.view.set_state_snapshot(self._current_snapshot)
+
+    @staticmethod
+    def _sample_time_sec(snapshot) -> float:
+        try:
+            stamp_ms = int(getattr(snapshot, "header_stamp", ""))
+            if stamp_ms > 0:
+                return stamp_ms / 1000.0
+        except (TypeError, ValueError):
+            pass
+        return time.monotonic()
 
     def _cancel_hz_clear_timer(self, stamp_attr: str) -> None:
         after_id = self._hz_clear_after_ids.pop(stamp_attr, None)
