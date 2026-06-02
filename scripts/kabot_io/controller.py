@@ -1,4 +1,7 @@
+from collections import deque
+
 from model import KabotIoModel
+from state_fields import HEADER_HZ_PAIRS
 from view import KabotIoView
 
 
@@ -6,6 +9,8 @@ STATUS_PERIODIC_STARTED = "Periodic sending started"
 STATUS_PERIODIC_STOPPED = "Periodic sending stopped"
 STATUS_INVALID_INPUT = "Invalid input: effort must be float, interval > 0"
 STATE_POLL_MS = 20
+HZ_CLEAR_TIMEOUT_MS = 2000
+HZ_MOVING_AVERAGE_SAMPLES = 5
 
 EFFORT_BY_KEYS = {
     frozenset(): (0.0, 0.0),
@@ -28,6 +33,11 @@ class KabotIoController:
         self.periodic_after_id = None
         self.state_poll_after_id = None
         self.active_keys: set[str] = set()
+        self._current_snapshot = self.model.empty_state_snapshot()
+        self._last_header_stamps: dict[str, int] = {}
+        self._last_header_hz: dict[str, str] = {}
+        self._hz_clear_after_ids: dict[str, str] = {}
+        self._header_hz_samples: dict[str, deque[float]] = {}
 
         self.view.on_send_once = self.send_once
         self.view.on_toggle_periodic = self.toggle_periodic
@@ -36,7 +46,7 @@ class KabotIoController:
         self.view.on_arrow_release = self.handle_arrow_release
         self.view.set_close_callback(self.shutdown)
 
-        self.view.set_state_snapshot(self.model.empty_state_snapshot())
+        self.view.set_state_snapshot(self._current_snapshot)
         self._schedule_state_poll()
 
     def _schedule_state_poll(self) -> None:
@@ -46,7 +56,72 @@ class KabotIoController:
     def _poll_state(self) -> None:
         snapshot = self.model.try_receive_state()
         if snapshot is not None:
-            self.view.set_state_snapshot(snapshot)
+            self._current_snapshot = snapshot
+            self._populate_header_hz(self._current_snapshot)
+            self.view.set_state_snapshot(self._current_snapshot)
+
+    def _cancel_hz_clear_timer(self, stamp_attr: str) -> None:
+        after_id = self._hz_clear_after_ids.pop(stamp_attr, None)
+        if after_id is not None:
+            self.view.root.after_cancel(after_id)
+
+    def _clear_hz_value(self, stamp_attr: str, hz_attr: str) -> None:
+        self._hz_clear_after_ids.pop(stamp_attr, None)
+        self._last_header_hz[stamp_attr] = ""
+        setattr(self._current_snapshot, hz_attr, "")
+        self.view.set_state_snapshot(self._current_snapshot)
+
+    def _refresh_hz_clear_timer(self, stamp_attr: str, hz_attr: str) -> None:
+        self._cancel_hz_clear_timer(stamp_attr)
+        after_id = self.view.root.after(
+            HZ_CLEAR_TIMEOUT_MS,
+            lambda sa=stamp_attr, ha=hz_attr: self._clear_hz_value(sa, ha),
+        )
+        self._hz_clear_after_ids[stamp_attr] = after_id
+
+    def _populate_header_hz(self, snapshot) -> None:
+        for stamp_attr, hz_attr in HEADER_HZ_PAIRS:
+            stamp_text = getattr(snapshot, stamp_attr)
+            hz_value = self._last_header_hz.get(stamp_attr, "")
+
+            try:
+                current_stamp = int(stamp_text)
+            except (TypeError, ValueError):
+                self._last_header_stamps.pop(stamp_attr, None)
+                self._cancel_hz_clear_timer(stamp_attr)
+                self._header_hz_samples.pop(stamp_attr, None)
+                self._last_header_hz[stamp_attr] = ""
+                setattr(snapshot, hz_attr, "")
+                continue
+
+            previous_stamp = self._last_header_stamps.get(stamp_attr)
+
+            if previous_stamp is None:
+                self._last_header_stamps[stamp_attr] = current_stamp
+                hz_value = ""
+            elif current_stamp == previous_stamp:
+                pass
+            else:
+                delta_ms = current_stamp - previous_stamp
+                if delta_ms > 0:
+                    hz_samples = self._header_hz_samples.get(stamp_attr)
+                    if hz_samples is None:
+                        hz_samples = deque(maxlen=HZ_MOVING_AVERAGE_SAMPLES)
+                        self._header_hz_samples[stamp_attr] = hz_samples
+
+                    hz_samples.append(1000.0 / float(delta_ms))
+                    avg_hz = sum(hz_samples) / float(len(hz_samples))
+                    hz_value = f"{avg_hz:.2f}"
+                    self._refresh_hz_clear_timer(stamp_attr, hz_attr)
+                else:
+                    hz_value = ""
+                    self._cancel_hz_clear_timer(stamp_attr)
+                    self._header_hz_samples.pop(stamp_attr, None)
+                self._last_header_stamps[stamp_attr] = current_stamp
+
+            self._last_header_hz[stamp_attr] = hz_value
+
+            setattr(snapshot, hz_attr, hz_value)
 
     def send_once(self) -> None:
         try:
@@ -128,6 +203,8 @@ class KabotIoController:
         self.view.set_status(STATUS_PERIODIC_STOPPED)
 
     def shutdown(self) -> None:
+        for stamp_attr in list(self._hz_clear_after_ids.keys()):
+            self._cancel_hz_clear_timer(stamp_attr)
         if self.state_poll_after_id is not None:
             self.view.root.after_cancel(self.state_poll_after_id)
             self.state_poll_after_id = None

@@ -18,5 +18,5 @@ ZBUS_CHAN_DEFINE(state_channel,
                  State,
                  state_channel_validator,
                  NULL,
-                 ZBUS_OBSERVERS(state_periodic_publisher),
+                 ZBUS_OBSERVERS(state_aggregator_listener),
                  ZBUS_MSG_INIT(0));

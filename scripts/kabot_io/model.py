@@ -7,34 +7,41 @@ from proto_codec import decode_state_msg, encode_control_effort
 
 @dataclass
 class StateSnapshot:
+    # The *_hz fields are UI-derived values computed in the controller.
     header_stamp: str = ""
     header_frame_id: str = ""
+    header_hz: str = ""
 
     effort_header_stamp: str = ""
     effort_header_frame_id: str = ""
+    effort_header_hz: str = ""
     effort_x: str = ""
     effort_y: str = ""
 
     linear_accel_header_stamp: str = ""
     linear_accel_header_frame_id: str = ""
+    linear_accel_header_hz: str = ""
     linear_accel_x: str = ""
     linear_accel_y: str = ""
     linear_accel_z: str = ""
 
     angular_vel_header_stamp: str = ""
     angular_vel_header_frame_id: str = ""
+    angular_vel_header_hz: str = ""
     angular_vel_x: str = ""
     angular_vel_y: str = ""
     angular_vel_z: str = ""
 
     magnetic_field_header_stamp: str = ""
     magnetic_field_header_frame_id: str = ""
+    magnetic_field_header_hz: str = ""
     magnetic_field_x: str = ""
     magnetic_field_y: str = ""
     magnetic_field_z: str = ""
 
     distance_header_stamp: str = ""
     distance_header_frame_id: str = ""
+    distance_header_hz: str = ""
     distance_value: str = ""
 
 

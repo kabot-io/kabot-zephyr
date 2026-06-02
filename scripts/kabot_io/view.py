@@ -2,34 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from model import StateSnapshot
-
-
-STATE_FIELDS: list[tuple[str, str]] = [
-    ("header.stamp", "header_stamp"),
-    ("header.frame_id", "header_frame_id"),
-    ("effort.header.stamp", "effort_header_stamp"),
-    ("effort.header.frame_id", "effort_header_frame_id"),
-    ("effort.state.x", "effort_x"),
-    ("effort.state.y", "effort_y"),
-    ("linear_acceleration.header.stamp", "linear_accel_header_stamp"),
-    ("linear_acceleration.header.frame_id", "linear_accel_header_frame_id"),
-    ("linear_acceleration.state.x", "linear_accel_x"),
-    ("linear_acceleration.state.y", "linear_accel_y"),
-    ("linear_acceleration.state.z", "linear_accel_z"),
-    ("angular_velocity.header.stamp", "angular_vel_header_stamp"),
-    ("angular_velocity.header.frame_id", "angular_vel_header_frame_id"),
-    ("angular_velocity.state.x", "angular_vel_x"),
-    ("angular_velocity.state.y", "angular_vel_y"),
-    ("angular_velocity.state.z", "angular_vel_z"),
-    ("magnetic_field.header.stamp", "magnetic_field_header_stamp"),
-    ("magnetic_field.header.frame_id", "magnetic_field_header_frame_id"),
-    ("magnetic_field.state.x", "magnetic_field_x"),
-    ("magnetic_field.state.y", "magnetic_field_y"),
-    ("magnetic_field.state.z", "magnetic_field_z"),
-    ("distance.header.stamp", "distance_header_stamp"),
-    ("distance.header.frame_id", "distance_header_frame_id"),
-    ("distance.state", "distance_value"),
-]
+from state_fields import STATE_FIELDS
 
 
 class KabotIoView:
@@ -44,6 +17,7 @@ class KabotIoView:
         self.status_var = tk.StringVar(value="Idle")
 
         self.state_vars: dict[str, tk.StringVar] = {}
+        self.state_hz_vars: dict[str, tk.StringVar] = {}
 
         self.on_send_once = None
         self.on_toggle_periodic = None
@@ -105,12 +79,20 @@ class KabotIoView:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        for idx, (field_name, _snapshot_attr) in enumerate(STATE_FIELDS):
+        ttk.Label(fields_host, text="Hz", width=8).grid(row=0, column=2, sticky="w", padx=(8, 0))
+
+        for idx, (field_name, _snapshot_attr, _hz_attr) in enumerate(STATE_FIELDS):
             var = tk.StringVar(value="")
             self.state_vars[field_name] = var
-            ttk.Label(fields_host, text=field_name, width=34).grid(row=idx, column=0, sticky="w", pady=2)
+            hz_var = tk.StringVar(value="")
+            self.state_hz_vars[field_name] = hz_var
+
+            ttk.Label(fields_host, text=field_name, width=34).grid(row=idx + 1, column=0, sticky="w", pady=2)
             entry = ttk.Entry(fields_host, textvariable=var, width=48, state="readonly")
-            entry.grid(row=idx, column=1, sticky="we", padx=8, pady=2)
+            entry.grid(row=idx + 1, column=1, sticky="we", padx=8, pady=2)
+
+            hz_entry = ttk.Entry(fields_host, textvariable=hz_var, width=8, state="readonly")
+            hz_entry.grid(row=idx + 1, column=2, sticky="w", padx=(8, 0), pady=2)
 
     def _emit_send_once(self) -> None:
         if self.on_send_once is not None:
@@ -157,8 +139,9 @@ class KabotIoView:
         self.right_var.set(f"{right:.3f}")
 
     def set_state_snapshot(self, snapshot: StateSnapshot) -> None:
-        for ui_key, snapshot_attr in STATE_FIELDS:
+        for ui_key, snapshot_attr, hz_attr in STATE_FIELDS:
             self.state_vars[ui_key].set(getattr(snapshot, snapshot_attr))
+            self.state_hz_vars[ui_key].set(getattr(snapshot, hz_attr) if hz_attr else "")
 
     def set_close_callback(self, callback) -> None:
         self.root.protocol("WM_DELETE_WINDOW", callback)

@@ -27,6 +27,7 @@ target_sources(
             src/zbus/control_subscriber.c
             src/zbus/state_channel.c
             src/zbus/state_egress_channel.c
+            src/zbus/state_aggregator.c
             src/zbus/effort_state_publisher.c
             src/zbus/state_periodic_publisher.c
             src/zbus/state_udp_sender.c
@@ -34,6 +35,15 @@ target_sources(
             src/zbus/sensor_subscriber.c
             src/encoder_sensor_service.c
 )
+
+if(CONFIG_KABOT_ENABLE_SIMULATED_STATE_SENSORS)
+    target_sources(
+        app
+        PRIVATE src/zbus/sim_imu_publisher.c
+                src/zbus/sim_magnetometer_publisher.c
+                src/zbus/sim_distance_publisher.c
+    )
+endif()
 
 if(NOT BOARD MATCHES "^native_sim(/.*)?$")
     target_sources(

@@ -37,7 +37,67 @@ config KABOT_STATE_EGRESS_PORT
 
 config KABOT_STATE_EGRESS_PERIOD_MS
     int "State egress publish period (ms)"
-    default 50
+    default 100
     range 10 60000
     help
       Periodic state publish cadence in milliseconds for UDP egress.
+      Lower values increase CPU and network load.
+
+config KABOT_STATE_TOP_FRAME_ID
+    string "State top-level header frame_id"
+    default "base_link"
+    help
+      Frame identifier used in top-level State.header for periodic egress snapshots.
+
+config KABOT_STATE_EFFORT_FRAME_ID
+    string "Effort state frame_id"
+    default "motors"
+    help
+      Frame identifier for State.effort.header emitted from control updates.
+
+config KABOT_STATE_IMU_FRAME_ID
+    string "IMU frame_id"
+    default "imu"
+    help
+      Frame identifier for linear_acceleration and angular_velocity simulated updates.
+
+config KABOT_STATE_MAG_FRAME_ID
+    string "Magnetometer frame_id"
+    default "mag"
+    help
+      Frame identifier for magnetic_field simulated updates.
+
+config KABOT_STATE_DISTANCE_FRAME_ID
+    string "Distance frame_id"
+    default "tof"
+    help
+      Frame identifier for distance simulated updates.
+
+config KABOT_STATE_IMU_PERIOD_MS
+    int "IMU simulated publish period (ms)"
+    default 100
+    range 10 60000
+    help
+      Refresh period for linear_acceleration and angular_velocity simulated state updates.
+
+config KABOT_STATE_MAG_PERIOD_MS
+    int "Magnetometer simulated publish period (ms)"
+    default 200
+    range 10 60000
+    help
+      Refresh period for magnetic_field simulated state updates.
+
+config KABOT_STATE_DISTANCE_PERIOD_MS
+    int "Distance simulated publish period (ms)"
+    default 17
+    range 10 60000
+    help
+      Refresh period for distance simulated state updates. 17 ms is approximately 60 Hz.
+
+config KABOT_ENABLE_SIMULATED_STATE_SENSORS
+    bool "Enable simulated state sensor publishers"
+    default y if BOARD_NATIVE_SIM
+    default n
+    help
+      Enable simulated IMU, magnetometer, and distance publishers.
+      Disable this on real hardware to avoid mixing synthetic and physical sensor data.
