@@ -1,6 +1,6 @@
-#include "motor/motor_service.h"
+#include "control/control_service.h"
 #include "protos/state_control_msg.pb.h"
-#include "zbus/control_channel.h"
+#include "zbus/channels/control_channel.h"
 
 #include <arpa/inet.h>
 #include <pb_decode.h>
@@ -11,7 +11,7 @@
 #include <zephyr/posix/sys/socket.h>
 #include <zephyr/posix/unistd.h>
 
-LOG_MODULE_REGISTER(motor_service, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(control_service, LOG_LEVEL_DBG);
 
 #define CONTROL_PORT 30010
 #define MTU          1500
@@ -19,7 +19,7 @@ LOG_MODULE_REGISTER(motor_service, LOG_LEVEL_DBG);
 static int control_socket = -1;
 static struct pollfd control_pollfd;
 
-static void udp_motor_handler(struct net_socket_service_event *pev)
+static void udp_control_handler(struct net_socket_service_event *pev)
 {
     struct pollfd *pfd = &pev->event;
     struct sockaddr_in sender_addr;
@@ -48,15 +48,13 @@ static void udp_motor_handler(struct net_socket_service_event *pev)
         return;
     }
 
-    if (control_channel_validator(&msg, sizeof(msg))) {
-        int publish_error = publish_control_msg(&msg, K_MSEC(100));
-        if (publish_error) {
-            LOG_ERR("Failed to publish control message: %d", publish_error);
-        }
+    int publish_error = publish_control_msg(&msg, K_MSEC(100));
+    if (publish_error) {
+        LOG_ERR("Failed to publish control message: %d", publish_error);
     }
 }
 
-NET_SOCKET_SERVICE_SYNC_DEFINE(udp_motor_service, udp_motor_handler, 1);
+NET_SOCKET_SERVICE_SYNC_DEFINE(udp_control_service, udp_control_handler, 1);
 
 static int setup_socket(uint16_t port)
 {
@@ -78,16 +76,16 @@ static int setup_socket(uint16_t port)
     return sock;
 }
 
-void stop_motor_service(void)
+void stop_control_service(void)
 {
-    (void)net_socket_service_unregister(&udp_motor_service);
+    (void)net_socket_service_unregister(&udp_control_service);
     if (control_socket >= 0) {
         close(control_socket);
         control_socket = -1;
     }
 }
 
-int start_motor_service(void)
+int start_control_service(void)
 {
     control_socket = setup_socket(CONTROL_PORT);
     if (control_socket < 0) {
@@ -97,12 +95,12 @@ int start_motor_service(void)
     control_pollfd.fd = control_socket;
     control_pollfd.events = POLLIN;
 
-    int ret = net_socket_service_register(&udp_motor_service, &control_pollfd, 1, NULL);
+    int ret = net_socket_service_register(&udp_control_service, &control_pollfd, 1, NULL);
     if (ret < 0) {
-        stop_motor_service();
+        stop_control_service();
         return ret;
     }
 
-    LOG_INF("Motor service active on port %d (protobuf Control)", CONTROL_PORT);
+    LOG_INF("Control service active on port %d (protobuf Control)", CONTROL_PORT);
     return 0;
 }

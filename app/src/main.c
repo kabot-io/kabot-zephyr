@@ -2,10 +2,10 @@
 #include <zephyr/kernel.h>
 #include <zephyr/zbus/zbus.h>
 
-#include "motor/motor_service.h"
-#include "zbus/control_subscriber.h"
-#include "zbus/control_channel.h"
-#include "zbus/sensor_subscriber.h"
+#include "control/control_service.h"
+#include "zbus/control/effort_subscriber.h"
+#include "zbus/channels/control_channel.h"
+#include "zbus/state/sensor_subscriber.h"
 
 #include <zephyr/net/wifi_mgmt.h>
 
@@ -59,9 +59,9 @@ static int kabot_init(void)
         return rc;
     }
 
-    rc = start_motor_service();
+    rc = start_control_service();
     if (rc < 0) {
-        LOG_ERR("Failed to start motor service: %d", rc);
+        LOG_ERR("Failed to start control service: %d", rc);
         stop_sensor_subscriber();
         return rc;
     }

@@ -1,5 +1,5 @@
-#include "zbus/state_aggregator.h"
-#include "zbus/state_channel.h"
+#include "zbus/state/state_aggregator.h"
+#include "zbus/channels/state_channel.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>

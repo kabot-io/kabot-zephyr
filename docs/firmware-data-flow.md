@@ -10,6 +10,12 @@ Implementation tutorial:
 
 The firmware uses UDP ingress and zbus-based loose coupling.
 
+The architecture follows a single machine-mirror duplex backbone:
+
+- Control ingress backbone: UDP -> `control_service` -> `control_channel` -> control-focused subscribers.
+- State egress backbone: fragment publishers -> `state_channel` -> aggregate machine mirror -> periodic egress.
+- Fragment workers (publishers/subscribers) own only their small `Control`/`State` portions and stay decoupled by channels.
+
 - Network ingress: UDP socket receives binary protobuf datagrams.
 - Decode: payload is decoded as `Control` (nanopb).
 - Internal transport: decoded data is validated and published through zbus.
@@ -18,12 +24,12 @@ The firmware uses UDP ingress and zbus-based loose coupling.
 ## Ingress Pipeline (Control)
 
 1. UDP packet arrives on configured control port (`30010`).
-2. `motor_service` decodes datagram as `Control`.
+2. `control_service` decodes datagram as `Control`.
 3. `control_channel_validator` validates normalized effort bounds:
    - `control.effort.state.x`
    - `control.effort.state.y`
 4. Valid message is published on `control_channel` zbus channel.
-5. `control_subscriber` reads channel message and calls motor driver:
+5. `effort_subscriber` reads channel message and calls motor driver:
    - left motor effort <- `control.effort.state.x`
    - right motor effort <- `control.effort.state.y`
 
@@ -98,11 +104,11 @@ Default simulated refresh rates:
 
 ## Key Modules
 
-- `app/src/motor/motor_service.c`
+- `app/src/control/control_service.c`
   - UDP socket setup, receive, decode, and publish.
-- `app/src/zbus/control_channel.c`
+- `app/src/zbus/channels/control_channel.c`
   - zbus channel definition and message validator.
-- `app/src/zbus/control_subscriber.c`
+- `app/src/zbus/control/effort_subscriber.c`
   - message consume and motor driver actuation.
 - `app/protos/state_control_msg.proto`
   - protobuf schema for both `Control` and `State`.
