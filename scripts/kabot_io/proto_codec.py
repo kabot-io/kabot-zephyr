@@ -27,23 +27,24 @@ def initialize_proto_runtime() -> None:
     if not proto_file.exists():
         raise RuntimeError(f"Proto file not found: {proto_file}")
 
-    generated_dir.mkdir(parents=True, exist_ok=True)
+    if not module_file.exists() or module_file.stat().st_mtime < proto_file.stat().st_mtime:
+        generated_dir.mkdir(parents=True, exist_ok=True)
 
-    cmd = [
-        sys.executable,
-        "-m",
-        "grpc_tools.protoc",
-        f"-I{proto_file.parent}",
-        f"--python_out={generated_dir}",
-        str(proto_file),
-    ]
+        cmd = [
+            sys.executable,
+            "-m",
+            "grpc_tools.protoc",
+            f"-I{proto_file.parent}",
+            f"--python_out={generated_dir}",
+            str(proto_file),
+        ]
 
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        stderr = proc.stderr.strip()
-        stdout = proc.stdout.strip()
-        details = stderr or stdout or "unknown protoc error"
-        raise RuntimeError(f"Failed to compile proto: {details}")
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            stderr = proc.stderr.strip()
+            stdout = proc.stdout.strip()
+            details = stderr or stdout or "unknown protoc error"
+            raise RuntimeError(f"Failed to compile proto: {details}")
 
     if not module_file.exists():
         raise RuntimeError(f"Generated module not found after compile: {module_file}")

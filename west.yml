@@ -58,9 +58,9 @@ manifest:
                   - hal_rpi_pico
                   - hal_sifli
                   - hal_silabs
-                  - hal_st
+                  # - hal_st
                   - hal_stm32
-                  - hal_tdk
+                  # - hal_tdk
                   - hal_telink
                   - hal_ti
                   - hal_wch
