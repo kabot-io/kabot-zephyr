@@ -2,6 +2,10 @@
 
 This document describes the current firmware data path after migration to the `Control` protobuf message.
 
+Implementation tutorial:
+
+- For a step-by-step guide to adding real sensor state fragment publishers (and extending `State` end-to-end), see `docs/real-sensor-publisher-tutorial.md`.
+
 ## Overview
 
 The firmware uses UDP ingress and zbus-based loose coupling.

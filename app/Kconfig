@@ -24,7 +24,7 @@ config KABOT_MOTOR_SHELL
 
 config KABOT_STATE_EGRESS_HOST
     string "State egress destination host"
-    default "127.0.0.1"
+    default "192.168.0.106"
     help
       IPv4 destination host for UDP state egress.
 
@@ -71,7 +71,7 @@ config KABOT_STATE_DISTANCE_FRAME_ID
     string "Distance frame_id"
     default "tof"
     help
-      Frame identifier for distance simulated updates.
+  Frame identifier for distance updates.
 
 config KABOT_STATE_IMU_PERIOD_MS
     int "IMU simulated publish period (ms)"
@@ -88,11 +88,11 @@ config KABOT_STATE_MAG_PERIOD_MS
       Refresh period for magnetic_field simulated state updates.
 
 config KABOT_STATE_DISTANCE_PERIOD_MS
-    int "Distance simulated publish period (ms)"
+    int "Distance publish period (ms)"
     default 17
     range 10 60000
     help
-      Refresh period for distance simulated state updates. 17 ms is approximately 60 Hz.
+      Refresh period for distance state updates. 17 ms is approximately 60 Hz.
 
 config KABOT_ENABLE_SIMULATED_STATE_SENSORS
     bool "Enable simulated state sensor publishers"
@@ -101,3 +101,32 @@ config KABOT_ENABLE_SIMULATED_STATE_SENSORS
     help
       Enable simulated IMU, magnetometer, and distance publishers.
       Disable this on real hardware to avoid mixing synthetic and physical sensor data.
+
+config KABOT_ENABLE_SIMULATED_IMU_PUBLISHER
+    bool "Enable simulated IMU publisher"
+    depends on KABOT_ENABLE_SIMULATED_STATE_SENSORS
+    default y
+    help
+      Enable simulated linear_acceleration and angular_velocity publishers.
+
+config KABOT_ENABLE_SIMULATED_MAG_PUBLISHER
+    bool "Enable simulated magnetometer publisher"
+    depends on KABOT_ENABLE_SIMULATED_STATE_SENSORS
+    default y
+    help
+      Enable simulated magnetic_field publisher.
+
+config KABOT_ENABLE_SIMULATED_DISTANCE_PUBLISHER
+    bool "Enable simulated distance publisher"
+    depends on KABOT_ENABLE_SIMULATED_STATE_SENSORS
+    default y
+    help
+      Enable simulated distance publisher.
+
+config KABOT_ENABLE_DISTANCE_PUBLISHER
+    bool "Enable real distance publisher"
+    depends on SENSOR
+    depends on DT_HAS_ST_VL53L0X_ENABLED
+    default y
+    help
+      Enable VL53L0X-backed distance publisher that emits State.distance.

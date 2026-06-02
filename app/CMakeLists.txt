@@ -37,12 +37,21 @@ target_sources(
 )
 
 if(CONFIG_KABOT_ENABLE_SIMULATED_STATE_SENSORS)
-    target_sources(
-        app
-        PRIVATE src/zbus/sim_imu_publisher.c
-                src/zbus/sim_magnetometer_publisher.c
-                src/zbus/sim_distance_publisher.c
-    )
+    if(CONFIG_KABOT_ENABLE_SIMULATED_IMU_PUBLISHER)
+        target_sources(app PRIVATE src/zbus/sim_imu_publisher.c)
+    endif()
+
+    if(CONFIG_KABOT_ENABLE_SIMULATED_MAG_PUBLISHER)
+        target_sources(app PRIVATE src/zbus/sim_magnetometer_publisher.c)
+    endif()
+
+    if(CONFIG_KABOT_ENABLE_SIMULATED_DISTANCE_PUBLISHER)
+        target_sources(app PRIVATE src/zbus/sim_distance_publisher.c)
+    endif()
+endif()
+
+if(CONFIG_KABOT_ENABLE_DISTANCE_PUBLISHER)
+    target_sources(app PRIVATE src/zbus/distance_publisher.c)
 endif()
 
 if(NOT BOARD MATCHES "^native_sim(/.*)?$")

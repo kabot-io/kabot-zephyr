@@ -16,14 +16,14 @@
 
     hbridge_left: hbridge_left {
         compatible = "kabot,h-bridge";
-        pwms = <&ledc0 0 100000 PWM_POLARITY_NORMAL>,
-               <&ledc0 1 100000 PWM_POLARITY_NORMAL>;
+        pwms = <&ledc0 0 50000 PWM_POLARITY_NORMAL>,
+               <&ledc0 1 50000 PWM_POLARITY_NORMAL>;
     };
 
     hbridge_right: hbridge_right {
         compatible = "kabot,h-bridge";
-        pwms = <&ledc0 2 100000 PWM_POLARITY_NORMAL>,
-             <&ledc0 3 100000 PWM_POLARITY_NORMAL>;
+        pwms = <&ledc0 2 50000 PWM_POLARITY_NORMAL>,
+             <&ledc0 3 50000 PWM_POLARITY_NORMAL>;
     };
 
 };
@@ -31,6 +31,18 @@
 &i2s0_default {
     group1 {
         pinmux = <I2S0_O_SD_GPIO15>;
+    };
+};
+
+&i2c0 {
+    pinctrl-0 = <&i2c0_default>;
+    pinctrl-names = "default";
+    status = "okay";
+    clock-frequency = <I2C_BITRATE_STANDARD>;
+
+    vl53l0x: vl53l0x@29 {
+        compatible = "st,vl53l0x";
+        reg = <0x29>;
     };
 };
 
@@ -57,6 +69,16 @@ i2s_led: &i2s0 {
 };
 
 &pinctrl {
+    i2c0_default: i2c0_default {
+        group1 {
+            pinmux = <I2C0_SDA_GPIO40>,
+                     <I2C0_SCL_GPIO39>;
+            bias-pull-up;
+            drive-open-drain;
+            output-high;
+        };
+    };
+
     ledc0_default: ledc0_default {
         group1 {
             pinmux = <LEDC_CH0_GPIO41>,
