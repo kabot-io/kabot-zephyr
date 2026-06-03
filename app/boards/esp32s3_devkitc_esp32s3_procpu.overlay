@@ -13,6 +13,10 @@
 		motor-left = &hbridge_left;
 		motor-right = &hbridge_right;
 		led-strip = &led_strip;
+		kabot-imu = &icm42670;
+		kabot-mag = &mmc5603;
+		kabot-distance = &vl53l0x;
+		kabot-temp = &coretemp;
 	};
 
 	hbridge_left: hbridge_left {

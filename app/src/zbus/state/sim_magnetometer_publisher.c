@@ -6,8 +6,6 @@
 
 LOG_MODULE_REGISTER(sim_magnetometer_publisher, LOG_LEVEL_DBG);
 
-enum { PUBLISH_TIMEOUT_MS = 20 };
-
 void sim_magnetometer_publisher_task(void)
 {
     LOG_INF("Sim magnetometer publisher active: %d ms", CONFIG_KABOT_STATE_MAG_PERIOD_MS);
@@ -21,11 +19,11 @@ void sim_magnetometer_publisher_task(void)
         state.magnetic_field.header.stamp = stamp;
         set_header_frame_id(&state.magnetic_field.header, CONFIG_KABOT_STATE_MAG_FRAME_ID);
         state.magnetic_field.has_state = true;
-        state.magnetic_field.state.x = random_rangef(-60.0f, 60.0f);
-        state.magnetic_field.state.y = random_rangef(-60.0f, 60.0f);
-        state.magnetic_field.state.z = random_rangef(-60.0f, 60.0f);
+        state.magnetic_field.state.x = random_rangef(-0.6f, 0.6f);
+        state.magnetic_field.state.y = random_rangef(-0.6f, 0.6f);
+        state.magnetic_field.state.z = random_rangef(-0.6f, 0.6f);
 
-        int rc = publish_state_msg(&state, K_MSEC(PUBLISH_TIMEOUT_MS));
+        int rc = publish_state_msg(&state, K_MSEC(CONFIG_KABOT_STATE_MAG_PERIOD_MS));
         if (rc != 0) {
             LOG_WRN("Failed to publish simulated magnetic field state: %d", rc);
         }

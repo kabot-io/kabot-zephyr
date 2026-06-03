@@ -49,7 +49,7 @@ PLOT_DEFINITIONS: tuple[
         "Magnetic Field (Vector3)",
         ("magnetic_field_x", "magnetic_field_y", "magnetic_field_z"),
         (PLOT_COLOR_X, PLOT_COLOR_Y, PLOT_COLOR_Z),
-        (-200.0, 50.0),
+        (-0.8, 0.8),
     ),
     ("distance", "Distance (Scalar)", ("distance_value",), (PLOT_COLOR_Z,), (0.0, 0.6)),
 )
