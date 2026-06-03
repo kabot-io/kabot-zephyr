@@ -8,38 +8,21 @@
 
 LOG_MODULE_REGISTER(magnetometer_publisher, LOG_LEVEL_DBG);
 
-enum {
-    PUBLISH_TIMEOUT_CAP_MS = 20,
-    READY_RETRY_MS = 1000,
-};
-
-#define MAG_NODE DT_COMPAT_GET_ANY_STATUS_OKAY(memsic_mmc56x3)
-
-BUILD_ASSERT(DT_HAS_COMPAT_STATUS_OKAY(memsic_mmc56x3),
-             "Magnetometer publisher requires a devicetree node compatible with memsic,mmc56x3");
-
-static float sensor_value_to_float_gauss(const struct sensor_value *value)
-{
-    return (float)value->val1 + ((float)value->val2 / 1000000.0f);
-}
+BUILD_ASSERT(DT_HAS_ALIAS(kabot_mag), "No devicetree alias 'kabot-mag' found for magnetometer publisher");
+BUILD_ASSERT(DT_NODE_HAS_STATUS_OKAY(DT_ALIAS(kabot_mag)), "Magnetometer devicetree node is not enabled");
 
 void magnetometer_publisher_task(void)
 {
-    const struct device *mag = DEVICE_DT_GET(MAG_NODE);
-    int publish_timeout_ms = CONFIG_KABOT_STATE_MAG_PERIOD_MS;
-
-    if (publish_timeout_ms > PUBLISH_TIMEOUT_CAP_MS) {
-        publish_timeout_ms = PUBLISH_TIMEOUT_CAP_MS;
-    }
+    const struct device *mag = DEVICE_DT_GET(DT_ALIAS(kabot_mag));
 
     while (!device_is_ready(mag)) {
         LOG_ERR("MMC56X3 device not ready: %s. Retrying...", mag->name);
-        k_sleep(K_MSEC(READY_RETRY_MS));
+        k_sleep(K_MSEC(CONFIG_KABOT_SENSOR_RETRY_PERIOD_MS));
     }
 
     LOG_INF("Magnetometer publisher active: %d ms (%s)",
-            CONFIG_KABOT_STATE_MAG_PERIOD_MS,
-            mag->name);
+        CONFIG_KABOT_STATE_MAG_PERIOD_MS,
+        mag->name);
 
     while (true) {
         struct sensor_value magnetic_xyz[3] = {0};
@@ -65,12 +48,11 @@ void magnetometer_publisher_task(void)
         set_header_frame_id(&state.magnetic_field.header, CONFIG_KABOT_STATE_MAG_FRAME_ID);
         state.magnetic_field.has_state = true;
 
-        /* Zephyr magnetometer values are reported in gauss; publish as microtesla for State parity. */
-        state.magnetic_field.state.x = sensor_value_to_float_gauss(&magnetic_xyz[0]) * 100.0f;
-        state.magnetic_field.state.y = sensor_value_to_float_gauss(&magnetic_xyz[1]) * 100.0f;
-        state.magnetic_field.state.z = sensor_value_to_float_gauss(&magnetic_xyz[2]) * 100.0f;
+        state.magnetic_field.state.x = sensor_value_to_float(&magnetic_xyz[0]);
+        state.magnetic_field.state.y = sensor_value_to_float(&magnetic_xyz[1]);
+        state.magnetic_field.state.z = sensor_value_to_float(&magnetic_xyz[2]);
 
-        rc = publish_state_msg(&state, K_MSEC(publish_timeout_ms));
+        rc = publish_state_msg(&state, K_MSEC(CONFIG_KABOT_STATE_MAG_PERIOD_MS));
         if (rc != 0) {
             LOG_WRN("Failed to publish magnetometer state: %d", rc);
         }

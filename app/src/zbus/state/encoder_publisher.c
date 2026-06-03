@@ -42,7 +42,8 @@ void encoder_publisher_task(void)
         return;
     }
 
-    LOG_INF("Encoder publisher started with %u unit(s)", (unsigned int)ARRAY_SIZE(unit_indices));
+    LOG_INF("Encoder publisher started with %u unit(s)",
+        (unsigned int)ARRAY_SIZE(unit_indices));
 
     while (1) {
         bool decoded_ok[2] = {false, false};

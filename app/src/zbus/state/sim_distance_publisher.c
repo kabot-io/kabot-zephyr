@@ -6,18 +6,8 @@
 
 LOG_MODULE_REGISTER(sim_distance_publisher, LOG_LEVEL_DBG);
 
-enum {
-    PUBLISH_TIMEOUT_CAP_MS = 20,
-};
-
 void sim_distance_publisher_task(void)
 {
-    /* Intended for simulation/test environments via KABOT_ENABLE_SIMULATED_STATE_SENSORS. */
-    int publish_timeout_ms = CONFIG_KABOT_STATE_DISTANCE_PERIOD_MS;
-    if (publish_timeout_ms > PUBLISH_TIMEOUT_CAP_MS) {
-        publish_timeout_ms = PUBLISH_TIMEOUT_CAP_MS;
-    }
-
     LOG_INF("Sim distance publisher active: %d ms", CONFIG_KABOT_STATE_DISTANCE_PERIOD_MS);
 
     while (true) {
@@ -30,7 +20,7 @@ void sim_distance_publisher_task(void)
         set_header_frame_id(&state.distance.header, CONFIG_KABOT_STATE_DISTANCE_FRAME_ID);
         state.distance.state = random_rangef(0.05f, 4.0f);
 
-        int rc = publish_state_msg(&state, K_MSEC(publish_timeout_ms));
+        int rc = publish_state_msg(&state, K_MSEC(CONFIG_KABOT_STATE_DISTANCE_PERIOD_MS));
         if (rc != 0) {
             LOG_WRN("Failed to publish simulated distance state: %d", rc);
         }

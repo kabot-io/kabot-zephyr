@@ -43,6 +43,14 @@ config KABOT_STATE_EGRESS_PERIOD_MS
       Periodic state publish cadence in milliseconds for UDP egress.
       Lower values increase CPU and network load.
 
+config KABOT_SENSOR_RETRY_PERIOD_MS
+    int "Time between sensor initialization retries (ms)"
+    default 1000
+    range 100 2000
+    help
+      When sensor is not ready during first initialization trial
+      Retry after speicifed period
+
 config KABOT_STATE_TOP_FRAME_ID
     string "State top-level header frame_id"
     default "base_link"
@@ -130,6 +138,13 @@ config KABOT_ENABLE_DISTANCE_PUBLISHER
     default y
     help
       Enable VL53L0X-backed distance publisher that emits State.distance.
+
+config KABOT_DISTANCE_PUBLISHER_STACK_SIZE
+    int "Distance publisher stack size"
+    default 2048
+    range 1024 8192
+    help
+      Stack size in bytes for the distance publisher thread.
 
 config KABOT_ENABLE_MAGNETOMETER_PUBLISHER
     bool "Enable real magnetometer publisher"

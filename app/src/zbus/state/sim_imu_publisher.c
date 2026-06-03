@@ -6,8 +6,6 @@
 
 LOG_MODULE_REGISTER(sim_imu_publisher, LOG_LEVEL_DBG);
 
-enum { PUBLISH_TIMEOUT_MS = 20 };
-
 void sim_imu_publisher_task(void)
 {
     LOG_INF("Sim IMU publisher active: %d ms", CONFIG_KABOT_STATE_IMU_PERIOD_MS);
@@ -35,7 +33,7 @@ void sim_imu_publisher_task(void)
         state.angular_velocity.state.y = random_rangef(-1.5f, 1.5f);
         state.angular_velocity.state.z = random_rangef(-1.5f, 1.5f);
 
-        int rc = publish_state_msg(&state, K_MSEC(PUBLISH_TIMEOUT_MS));
+        int rc = publish_state_msg(&state, K_MSEC(CONFIG_KABOT_STATE_IMU_PERIOD_MS));
         if (rc != 0) {
             LOG_WRN("Failed to publish simulated IMU state: %d", rc);
         }
