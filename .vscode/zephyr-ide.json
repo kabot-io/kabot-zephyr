@@ -34,7 +34,7 @@
             "default": {
               "runner": "default",
               "name": "default",
-              "args": "--esp-device /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_1C:DB:D4:66:22:EC-if00"
+              "args": ""
             }
           }
         },
