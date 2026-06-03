@@ -23,11 +23,6 @@ BUILD_ASSERT(DT_HAS_COMPAT_STATUS_OKAY(invensense_icm42670s)
                  || DT_HAS_COMPAT_STATUS_OKAY(invensense_icm42670p),
              "IMU publisher requires a devicetree node compatible with invensense,icm42670s or invensense,icm42670p");
 
-static float sensor_value_to_float_unit(const struct sensor_value *value)
-{
-    return (float)value->val1 + ((float)value->val2 / 1000000.0f);
-}
-
 void imu_publisher_task(void)
 {
     const struct device *imu = DEVICE_DT_GET(IMU_NODE);
@@ -78,18 +73,18 @@ void imu_publisher_task(void)
         state.linear_acceleration.header.stamp = stamp;
         set_header_frame_id(&state.linear_acceleration.header, CONFIG_KABOT_STATE_IMU_FRAME_ID);
         state.linear_acceleration.has_state = true;
-        state.linear_acceleration.state.x = sensor_value_to_float_unit(&accel_xyz[0]);
-        state.linear_acceleration.state.y = sensor_value_to_float_unit(&accel_xyz[1]);
-        state.linear_acceleration.state.z = sensor_value_to_float_unit(&accel_xyz[2]);
+        state.linear_acceleration.state.x = (float)sensor_value_to_double(&accel_xyz[0]);
+        state.linear_acceleration.state.y = (float)sensor_value_to_double(&accel_xyz[1]);
+        state.linear_acceleration.state.z = (float)sensor_value_to_double(&accel_xyz[2]);
 
         state.has_angular_velocity = true;
         state.angular_velocity.has_header = true;
         state.angular_velocity.header.stamp = stamp;
         set_header_frame_id(&state.angular_velocity.header, CONFIG_KABOT_STATE_IMU_FRAME_ID);
         state.angular_velocity.has_state = true;
-        state.angular_velocity.state.x = sensor_value_to_float_unit(&gyro_xyz[0]);
-        state.angular_velocity.state.y = sensor_value_to_float_unit(&gyro_xyz[1]);
-        state.angular_velocity.state.z = sensor_value_to_float_unit(&gyro_xyz[2]);
+        state.angular_velocity.state.x = (float)sensor_value_to_double(&gyro_xyz[0]);
+        state.angular_velocity.state.y = (float)sensor_value_to_double(&gyro_xyz[1]);
+        state.angular_velocity.state.z = (float)sensor_value_to_double(&gyro_xyz[2]);
 
         rc = publish_state_msg(&state, K_MSEC(publish_timeout_ms));
         if (rc != 0) {
