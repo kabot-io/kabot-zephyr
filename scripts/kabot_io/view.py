@@ -52,6 +52,13 @@ PLOT_DEFINITIONS: tuple[
         (-0.8, 0.8),
     ),
     ("distance", "Distance (Scalar)", ("distance_value",), (PLOT_COLOR_Z,), (0.0, 0.6)),
+    (
+        "light",
+        "Ambient Light (Left/Right)",
+        ("light_left_value", "light_right_value"),
+        (PLOT_COLOR_Y, PLOT_COLOR_X),
+        (0.0, 5000.0),
+    ),
 )
 
 

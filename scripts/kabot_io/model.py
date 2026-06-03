@@ -44,6 +44,16 @@ class StateSnapshot:
     distance_header_hz: str = ""
     distance_value: str = ""
 
+    light_left_header_stamp: str = ""
+    light_left_header_frame_id: str = ""
+    light_left_header_hz: str = ""
+    light_left_value: str = ""
+
+    light_right_header_stamp: str = ""
+    light_right_header_frame_id: str = ""
+    light_right_header_hz: str = ""
+    light_right_value: str = ""
+
 
 class KabotIoModel:
     def __init__(self, config: AppConfig):
@@ -110,6 +120,12 @@ class KabotIoModel:
             distance_header_stamp=str(state.distance.header.stamp),
             distance_header_frame_id=state.distance.header.frame_id,
             distance_value=f"{state.distance.state:.3f}",
+            light_left_header_stamp=str(state.light_left.header.stamp),
+            light_left_header_frame_id=state.light_left.header.frame_id,
+            light_left_value=f"{state.light_left.state:.3f}",
+            light_right_header_stamp=str(state.light_right.header.stamp),
+            light_right_header_frame_id=state.light_right.header.frame_id,
+            light_right_value=f"{state.light_right.state:.3f}",
         )
 
     @staticmethod

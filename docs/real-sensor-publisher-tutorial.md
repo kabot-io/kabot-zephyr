@@ -3,6 +3,7 @@
 This tutorial explains how to implement a real sensor State fragment publisher in firmware, how the data moves through the robot, and how to extend State with a new field end-to-end (including host updates in kabot_io).
 
 The examples use the current distance implementation (VL53L0X) as a reference.
+Dual-light (LTR329 over TCA9546A) integration is also covered as a scalar-pair pattern.
 
 Implementation case study:
 
@@ -130,6 +131,8 @@ message State {
   StateVector3 magnetic_field = 5;
 
   StateScalar distance = 6;
+  StateScalar light_left = 7;
+  StateScalar light_right = 8;
 }
 ```
 
@@ -161,6 +164,10 @@ Distance is a good scalar example:
 
 - Sim scalar: app/src/zbus/state/sim_distance_publisher.c
 - Real scalar: app/src/zbus/state/distance_publisher.c
+
+Dual light is a good scalar-pair example:
+
+- Real scalar-pair: app/src/zbus/state/light_publisher.c
 
 Simulation snippet (`sim_distance_publisher`):
 
@@ -217,6 +224,10 @@ Current examples in app/Kconfig:
 - KABOT_ENABLE_DISTANCE_PUBLISHER
 - KABOT_STATE_DISTANCE_PERIOD_MS
 - KABOT_STATE_DISTANCE_FRAME_ID
+- KABOT_ENABLE_LIGHT_PUBLISHER
+- KABOT_STATE_LIGHT_PERIOD_MS
+- KABOT_STATE_LIGHT_LEFT_FRAME_ID
+- KABOT_STATE_LIGHT_RIGHT_FRAME_ID
 
 Simulation controls support both global and per-sensor granularity:
 
