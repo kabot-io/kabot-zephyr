@@ -191,10 +191,21 @@ Real distance publisher pattern:
 5. Publish to state_channel.
 6. Sleep and continue.
 
+Invalid-sample policy for real publishers:
+
+- use `should_skip_invalid_sensor_sample(rc)` for channel conversion results
+- when it returns true (currently `-EINVAL`), skip the cycle and do not publish a fallback value
+- keep existing warning/retry behavior for other non-zero errors
+
 Real snippet (`distance_publisher`):
 
 ```c
 rc = sensor_channel_get(tof, SENSOR_CHAN_DISTANCE, &distance_value);
+if (should_skip_invalid_sensor_sample(rc)) {
+  k_sleep(K_MSEC(CONFIG_KABOT_STATE_DISTANCE_PERIOD_MS));
+  continue;
+}
+
 if (rc != 0) {
   LOG_WRN("sensor_channel_get(SENSOR_CHAN_DISTANCE) failed: %d", rc);
   k_sleep(K_MSEC(CONFIG_KABOT_STATE_DISTANCE_PERIOD_MS));

@@ -41,7 +41,11 @@ In [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](app/boards/esp32s3_devkit
 - source gating in [app/CMakeLists.txt](app/CMakeLists.txt)
 - new dual-light worker in [app/src/zbus/state/light_publisher.c](app/src/zbus/state/light_publisher.c)
 
-The publisher reads both devices in one loop and publishes one partial State fragment containing both light fields.
+The publisher reads both devices in one loop and publishes one partial State fragment
+containing whichever light fields are valid in that cycle.
+
+If conversion returns an invalid sample (`-EINVAL`) for one side, that side is skipped for
+the cycle so no fallback spike value is injected.
 
 ### State Schema and Aggregation
 
@@ -81,7 +85,8 @@ Completed:
 Pending on-device checks:
 
 1. verify left/right differentiation under asymmetric illumination
-2. verify both fields in live telemetry stream
+2. verify both fields appear in live telemetry stream over time
+3. verify invalid conversion cycles are skipped without spike injection
 
 ## Takeaways
 

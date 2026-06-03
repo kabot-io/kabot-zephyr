@@ -38,7 +38,8 @@ Evidence command:
 
 - [ ] Verify both devices initialize on real hardware.
 - [ ] Verify left/right lux values diverge under asymmetric lighting.
-- [ ] Verify live state stream contains both light fields at expected cadence.
+- [ ] Verify both light fields appear in live state stream over time at expected cadence.
+- [ ] Verify invalid conversion cycles are skipped and do not inject spike values.
 
 Suggested commands:
 

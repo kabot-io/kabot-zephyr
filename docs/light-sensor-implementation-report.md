@@ -48,7 +48,8 @@ This enables address reuse while keeping each sensor isolated on a different mux
   - alias-based device binding for left/right sensors
   - startup retry loop using `CONFIG_KABOT_SENSOR_RETRY_PERIOD_MS`
   - periodic fetch/get on `SENSOR_CHAN_LIGHT`
-  - publishes both `light_left` and `light_right` in one fragment
+  - publishes any valid subset of `light_left` and `light_right` each cycle
+  - skips invalid conversion samples (`-EINVAL`) to avoid value spikes
 
 - Updated [app/src/zbus/state/state_aggregator.c](app/src/zbus/state/state_aggregator.c)
   - timestamp merge handling for `light_left` and `light_right`
@@ -103,4 +104,5 @@ Hardware runtime checks are still required for final sign-off:
 
 1. `sensor get` or equivalent fetch/get for each light sensor under asymmetric lighting.
 2. Optional channel-specific raw I2C reads for debug parity.
-3. Verify state stream contains both light fields at expected cadence.
+3. Verify both light fields appear in state stream over time at expected cadence.
+4. Verify invalid conversion cycles are skipped and do not create spike values.
