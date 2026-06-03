@@ -2,219 +2,219 @@
 #include <zephyr/dt-bindings/led/led.h>
 
 / {
-    chosen {
-        zephyr,console = &usb_serial;
-        zephyr,shell-uart = &usb_serial;
-        zephyr,led-strip = &led_strip;
-    };
-    aliases {
-        qdec0 = &pcnt;
-        motor-left = &hbridge_left;
-        motor-right = &hbridge_right;
-        led-strip = &led_strip;
-    };
+	chosen {
+		zephyr,console = &usb_serial;
+		zephyr,shell-uart = &usb_serial;
+		zephyr,led-strip = &led_strip;
+	};
 
-    hbridge_left: hbridge_left {
-        compatible = "kabot,h-bridge";
-        pwms = <&ledc0 0 50000 PWM_POLARITY_NORMAL>,
-               <&ledc0 1 50000 PWM_POLARITY_NORMAL>;
-    };
+	aliases {
+		qdec0 = &pcnt;
+		motor-left = &hbridge_left;
+		motor-right = &hbridge_right;
+		led-strip = &led_strip;
+	};
 
-    hbridge_right: hbridge_right {
-        compatible = "kabot,h-bridge";
-        pwms = <&ledc0 2 50000 PWM_POLARITY_NORMAL>,
-             <&ledc0 3 50000 PWM_POLARITY_NORMAL>;
-    };
+	hbridge_left: hbridge_left {
+		compatible = "kabot,h-bridge";
+		pwms = <&ledc0 0 50000 PWM_POLARITY_NORMAL>,
+		       <&ledc0 1 50000 PWM_POLARITY_NORMAL>;
+	};
 
+	hbridge_right: hbridge_right {
+		compatible = "kabot,h-bridge";
+		pwms = <&ledc0 2 50000 PWM_POLARITY_NORMAL>,
+		       <&ledc0 3 50000 PWM_POLARITY_NORMAL>;
+	};
 };
 
 &i2s0_default {
-    group1 {
-        pinmux = <I2S0_O_SD_GPIO15>;
-    };
+	group1 {
+		pinmux = <I2S0_O_SD_GPIO15>;
+	};
 };
 
 &i2c0 {
-    pinctrl-0 = <&i2c0_mag_default>;
-    pinctrl-names = "default";
-    status = "okay";
-    clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&i2c0_mag_default>;
+	pinctrl-names = "default";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
 
-    icm42670: icm42670@68 {
-        compatible = "invensense,icm42670s";
-        reg = <0x68>;
-        accel-hz = <100>;
-        gyro-hz = <100>;
-        accel-fs = <16>;
-        gyro-fs = <2000>;
-    };
+	icm42670: icm42670@68 {
+		compatible = "invensense,icm42670s";
+		reg = <0x68>;
+		accel-hz = <100>;
+		gyro-hz = <100>;
+		accel-fs = <16>;
+		gyro-fs = <2000>;
+	};
 
-    mmc5603: mmc5603@30 {
-        compatible = "memsic,mmc56x3";
-        reg = <0x30>;
-        magn-odr = <0>;
-        auto-self-reset;
-    };
+	mmc5603: mmc5603@30 {
+		compatible = "memsic,mmc56x3";
+		reg = <0x30>;
+		magn-odr = <0>;
+		auto-self-reset;
+	};
 };
 
 &i2c1 {
-    pinctrl-0 = <&i2c1_tof_default>;
-    pinctrl-names = "default";
-    status = "okay";
-    clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&i2c1_tof_default>;
+	pinctrl-names = "default";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
 
-    vl53l0x: vl53l0x@29 {
-        compatible = "st,vl53l0x";
-        reg = <0x29>;
-    };
+	vl53l0x: vl53l0x@29 {
+		compatible = "st,vl53l0x";
+		reg = <0x29>;
+	};
 };
 
 i2s_led: &i2s0 {
-    status = "okay";
+	status = "okay";
 
-    dmas = <&dma 3>;
-    dma-names = "tx";
+	dmas = <&dma 3>;
+	dma-names = "tx";
 
-    led_strip: ws2812@0 {
-        compatible = "worldsemi,ws2812-i2s";
+	led_strip: ws2812@0 {
+		compatible = "worldsemi,ws2812-i2s";
 
-        reg = <0>;
-        chain-length = <12>;
-        color-mapping = <LED_COLOR_ID_GREEN
-                         LED_COLOR_ID_RED
-                         LED_COLOR_ID_BLUE>;
-        reset-delay = <500>;
-    };
+		reg = <0>;
+		chain-length = <12>;
+		color-mapping = <LED_COLOR_ID_GREEN
+				 LED_COLOR_ID_RED
+				 LED_COLOR_ID_BLUE>;
+		reset-delay = <500>;
+	};
 };
 
 &dma {
-    status = "okay";
+	status = "okay";
 };
 
 &pinctrl {
-    i2c0_mag_default: i2c0_mag_default {
-        group1 {
-            pinmux = <I2C0_SDA_GPIO2>,
-                     <I2C0_SCL_GPIO1>;
-            bias-pull-up;
-            drive-open-drain;
-            output-high;
-        };
-    };
+	i2c0_mag_default: i2c0_mag_default {
+		group1 {
+			pinmux = <I2C0_SDA_GPIO2>,
+				 <I2C0_SCL_GPIO1>;
+			bias-pull-up;
+			drive-open-drain;
+			output-high;
+		};
+	};
 
-    i2c1_tof_default: i2c1_tof_default {
-        group1 {
-            pinmux = <I2C1_SDA_GPIO40>,
-                     <I2C1_SCL_GPIO39>;
-            bias-pull-up;
-            drive-open-drain;
-            output-high;
-        };
-    };
+	i2c1_tof_default: i2c1_tof_default {
+		group1 {
+			pinmux = <I2C1_SDA_GPIO40>,
+				 <I2C1_SCL_GPIO39>;
+			bias-pull-up;
+			drive-open-drain;
+			output-high;
+		};
+	};
 
-    ledc0_default: ledc0_default {
-        group1 {
-            pinmux = <LEDC_CH0_GPIO41>,
-                     <LEDC_CH1_GPIO42>,
-                     <LEDC_CH2_GPIO47>,
-                     <LEDC_CH3_GPIO48>;
-            output-enable;
-        };
-    };
-    pcnt_default: pcnt_default {
-        group1 {
-            pinmux = <PCNT0_CH0SIG_GPIO5>,
-                     <PCNT0_CH0CTRL_GPIO4>,
-                     <PCNT1_CH0SIG_GPIO8>,
-                     <PCNT1_CH0CTRL_GPIO11>;
-            bias-pull-up;
-        };
-    };
+	ledc0_default: ledc0_default {
+		group1 {
+			pinmux = <LEDC_CH0_GPIO41>,
+				 <LEDC_CH1_GPIO42>,
+				 <LEDC_CH2_GPIO47>,
+				 <LEDC_CH3_GPIO48>;
+			output-enable;
+		};
+	};
+	pcnt_default: pcnt_default {
+		group1 {
+			pinmux = <PCNT0_CH0SIG_GPIO5>,
+				 <PCNT0_CH0CTRL_GPIO4>,
+				 <PCNT1_CH0SIG_GPIO8>,
+				 <PCNT1_CH0CTRL_GPIO11>;
+			bias-pull-up;
+		};
+	};
 };
 
 &pcnt {
-    pinctrl-0 = <&pcnt_default>;
-    pinctrl-names = "default";
-    status = "okay";
-    #address-cells = <1>;
-    #size-cells = <0>;
+	pinctrl-0 = <&pcnt_default>;
+	pinctrl-names = "default";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
 
-    unit0@0 {
-        reg = <0>;
-        #address-cells = <1>;
-        #size-cells = <0>;
-        filter = <100>;
-        counts-per-revolution = <(14 * 298)>;
+	unit0@0 {
+		reg = <0>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		filter = <100>;
+		counts-per-revolution = <(14 * 298)>;
 
-        channelA@0 {
-            reg = <0>;
-            sig-pos-mode = <2>;
-            sig-neg-mode = <1>;
-            ctrl-h-mode = <0>;
-            ctrl-l-mode = <1>;
-        };
-    };
+		channelA@0 {
+			reg = <0>;
+			sig-pos-mode = <2>;
+			sig-neg-mode = <1>;
+			ctrl-h-mode = <0>;
+			ctrl-l-mode = <1>;
+		};
+	};
 
-    unit1@1 {
-        reg = <1>;
-        #address-cells = <1>;
-        #size-cells = <0>;
-        filter = <100>;
-        counts-per-revolution = <(14 * 298)>;
+	unit1@1 {
+		reg = <1>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		filter = <100>;
+		counts-per-revolution = <(14 * 298)>;
 
-        channelA@0 {
-            reg = <0>;
-            sig-pos-mode = <2>;
-            sig-neg-mode = <1>;
-            ctrl-h-mode = <0>;
-            ctrl-l-mode = <1>;
-        };
-    };
+		channelA@0 {
+			reg = <0>;
+			sig-pos-mode = <2>;
+			sig-neg-mode = <1>;
+			ctrl-h-mode = <0>;
+			ctrl-l-mode = <1>;
+		};
+	};
 };
 
 &ledc0 {
-    pinctrl-0 = <&ledc0_default>;
-    pinctrl-names = "default";
-    status = "okay";
-    #address-cells = <1>;
-    #size-cells = <0>;
+	pinctrl-0 = <&ledc0_default>;
+	pinctrl-names = "default";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
 
-    channel0@0 {
-        reg = <0x0>;
-        timer = <0>;
-    };
-    channel1@1 {
-        reg = <0x1>;
-        timer = <0>;
-    };
-    channel2@2 {
-        reg = <0x2>;
-        timer = <0>;
-    };
-    channel3@3 {
-        reg = <0x3>;
-        timer = <0>;
-    };
+	channel0@0 {
+		reg = <0x0>;
+		timer = <0>;
+	};
+	channel1@1 {
+		reg = <0x1>;
+		timer = <0>;
+	};
+	channel2@2 {
+		reg = <0x2>;
+		timer = <0>;
+	};
+	channel3@3 {
+		reg = <0x3>;
+		timer = <0>;
+	};
 };
 
 &coretemp {
-    status = "okay";
+	status = "okay";
 };
 
 &flash0 {
-    /delete-node/ partitions;
+	/delete-node/ partitions;
 };
 
 &flash0 {
-    reg = <0x0 DT_SIZE_M(16)>;
+	reg = <0x0 DT_SIZE_M(16)>;
 };
 
 #include <espressif/partitions_0x0_amp_16M.dtsi>
 
 &psram0 {
-    size = <DT_SIZE_M(8)>;
+	size = <DT_SIZE_M(8)>;
 };
 
 &usb_serial {
-    status = "okay";
+	status = "okay";
 };
