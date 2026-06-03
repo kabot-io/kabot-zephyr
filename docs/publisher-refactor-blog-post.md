@@ -290,3 +290,13 @@ Result:
 - Add a short "publisher compliance checklist" to `docs/real-sensor-publisher-tutorial.md`.
 - Add a unit/semantic note for `magnetic_field` in host docs to reduce ambiguity.
 - Consider per-publisher stack-size symbols for all real publishers for symmetry.
+
+## Addendum: Invalid Sample Skip Pattern
+
+After dual-light integration we standardized one additional policy across real sensor
+publishers: interpreted invalid samples should be skipped, not converted into fallback
+values that can create visible spikes.
+
+Full writeup:
+
+- `docs/invalid-sample-skip-refactor.md`
