@@ -43,7 +43,7 @@ Current internal channels:
 - `state_channel`
   - Carries partial `State` updates from producers.
   - Current producers: effort state publisher plus simulated and/or real IMU,
-    magnetometer, and distance publishers (selected by Kconfig).
+    magnetometer, distance, and dual-light publishers (selected by Kconfig).
 - `state_egress_channel`
   - Carries periodically published merged `State` snapshots.
   - Consumed by UDP egress transport sender.
@@ -71,6 +71,8 @@ Current implementation in this phase:
   when simulated distance mode is enabled.
 - `distance_publisher` runs periodically and publishes `distance`
   when the real VL53L0X publisher is enabled.
+- `light_publisher` runs periodically and publishes both
+  `light_left` and `light_right` when the real dual LTR329 publisher is enabled.
 - `state_aggregator_listener` is notified synchronously on `state_channel` publishes and
   merges incoming partial updates into the cached aggregate using update-if-newer-or-equal by field.
 - `state_periodic_publisher` periodically requests a full snapshot from the aggregator cache
@@ -79,7 +81,7 @@ Current implementation in this phase:
 
 Merge comparator details:
 
-- For each optional field (`effort`, `linear_acceleration`, `angular_velocity`, `magnetic_field`, `distance`),
+- For each optional field (`effort`, `linear_acceleration`, `angular_velocity`, `magnetic_field`, `distance`, `light_left`, `light_right`),
   replacement requires an incoming field header with a timestamp.
 - If the cached field is missing, incoming replaces it.
 - If cached and incoming fields are both stamped, incoming replaces cached when
@@ -96,12 +98,15 @@ Default frame IDs:
 - `State.angular_velocity.header.frame_id`: `imu`
 - `State.magnetic_field.header.frame_id`: `mag`
 - `State.distance.header.frame_id`: `tof`
+- `State.light_left.header.frame_id`: `light_left`
+- `State.light_right.header.frame_id`: `light_right`
 
 Default simulated refresh rates:
 
 - IMU publisher (`linear_acceleration` + `angular_velocity`): 10 Hz (`100 ms`)
 - Magnetometer publisher (`magnetic_field`): 5 Hz (`200 ms`)
 - Distance publisher (`distance`): approximately 60 Hz (`17 ms`)
+- Light publisher (`light_left` + `light_right`): 10 Hz (`100 ms`)
 
 ## Ports
 
@@ -130,7 +135,7 @@ Default simulated refresh rates:
 
 - State schema is defined in `state_control_msg.proto`.
 - Periodic state egress path is implemented in this phase.
-- Additional producers (IMU/magnetometer/distance, simulated and/or real by config)
+- Additional producers (IMU/magnetometer/distance/light, simulated and/or real by config)
   feed partial updates into `state_channel`.
 
 ## Build Notes

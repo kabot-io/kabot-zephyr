@@ -45,6 +45,8 @@ message State {
     StateVector3 magnetic_field = 5;
 
     StateScalar distance = 6;
+    StateScalar light_left = 7;
+    StateScalar light_right = 8;
 }
 
 message Control {

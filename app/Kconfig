@@ -81,6 +81,18 @@ config KABOT_STATE_DISTANCE_FRAME_ID
     help
   Frame identifier for distance updates.
 
+config KABOT_STATE_LIGHT_LEFT_FRAME_ID
+    string "Left light frame_id"
+    default "light_left"
+    help
+      Frame identifier for left light updates.
+
+config KABOT_STATE_LIGHT_RIGHT_FRAME_ID
+    string "Right light frame_id"
+    default "light_right"
+    help
+      Frame identifier for right light updates.
+
 config KABOT_STATE_IMU_PERIOD_MS
     int "IMU simulated publish period (ms)"
     default 100
@@ -101,6 +113,13 @@ config KABOT_STATE_DISTANCE_PERIOD_MS
     range 10 60000
     help
       Refresh period for distance state updates. 17 ms is approximately 60 Hz.
+
+config KABOT_STATE_LIGHT_PERIOD_MS
+    int "Light publish period (ms)"
+  default 500
+  range 500 2000
+    help
+      Refresh period for dual light state updates.
 
 config KABOT_ENABLE_SIMULATED_STATE_SENSORS
     bool "Enable simulated state sensor publishers"
@@ -176,3 +195,19 @@ config KABOT_IMU_PUBLISHER_STACK_SIZE
     range 1024 8192
     help
       Stack size in bytes for the IMU publisher thread.
+
+config KABOT_ENABLE_LIGHT_PUBLISHER
+    bool "Enable real light publisher"
+    depends on SENSOR
+    depends on DT_HAS_LITEON_LTR329_ENABLED
+    default y
+    help
+      Enable dual LTR329-backed light publisher that emits State.light_left
+      and State.light_right.
+
+config KABOT_LIGHT_PUBLISHER_STACK_SIZE
+    int "Light publisher stack size"
+    default 2048
+    range 1024 8192
+    help
+      Stack size in bytes for the light publisher thread.

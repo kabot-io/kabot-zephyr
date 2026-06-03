@@ -80,6 +80,26 @@ static void merge_state_if_newer(State *combined, const State *incoming)
         combined->has_distance = true;
         combined->distance = incoming->distance;
     }
+
+    if (incoming->has_light_left
+        && should_replace_field(incoming->light_left.has_header,
+                                incoming->light_left.header.stamp,
+                                combined->has_light_left,
+                                combined->light_left.has_header,
+                                combined->light_left.header.stamp)) {
+        combined->has_light_left = true;
+        combined->light_left = incoming->light_left;
+    }
+
+    if (incoming->has_light_right
+        && should_replace_field(incoming->light_right.has_header,
+                                incoming->light_right.header.stamp,
+                                combined->has_light_right,
+                                combined->light_right.has_header,
+                                combined->light_right.header.stamp)) {
+        combined->has_light_right = true;
+        combined->light_right = incoming->light_right;
+    }
 }
 
 void state_aggregator_merge_update(const State *incoming)

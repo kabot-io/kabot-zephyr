@@ -23,6 +23,12 @@ STATE_FIELDS: list[tuple[str, str, str]] = [
     ("distance.header.stamp", "distance_header_stamp", "distance_header_hz"),
     ("distance.header.frame_id", "distance_header_frame_id", ""),
     ("distance.state", "distance_value", ""),
+    ("light_left.header.stamp", "light_left_header_stamp", "light_left_header_hz"),
+    ("light_left.header.frame_id", "light_left_header_frame_id", ""),
+    ("light_left.state", "light_left_value", ""),
+    ("light_right.header.stamp", "light_right_header_stamp", "light_right_header_hz"),
+    ("light_right.header.frame_id", "light_right_header_frame_id", ""),
+    ("light_right.state", "light_right_value", ""),
 ]
 
 HEADER_HZ_PAIRS: tuple[tuple[str, str], ...] = (
@@ -32,4 +38,6 @@ HEADER_HZ_PAIRS: tuple[tuple[str, str], ...] = (
     ("angular_vel_header_stamp", "angular_vel_header_hz"),
     ("magnetic_field_header_stamp", "magnetic_field_header_hz"),
     ("distance_header_stamp", "distance_header_hz"),
+    ("light_left_header_stamp", "light_left_header_hz"),
+    ("light_right_header_stamp", "light_right_header_hz"),
 )

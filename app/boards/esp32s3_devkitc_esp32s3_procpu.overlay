@@ -16,6 +16,8 @@
 		kabot-imu = &icm42670;
 		kabot-mag = &mmc5603;
 		kabot-distance = &vl53l0x;
+		kabot-light-left = &ltr329_left;
+		kabot-light-right = &ltr329_right;
 		kabot-temp = &coretemp;
 	};
 
@@ -58,6 +60,40 @@
 		reg = <0x30>;
 		magn-odr = <0>;
 		auto-self-reset;
+	};
+
+	mux: tca9546a@70 {
+		compatible = "ti,tca9546a";
+		reg = <0x70>;
+		status = "okay";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		mux_i2c0: mux_i2c0@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			ltr329_left: ltr329@29 {
+				compatible = "liteon,ltr329";
+				reg = <0x29>;
+				status = "okay";
+			};
+		};
+
+		mux_i2c1: mux_i2c1@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			ltr329_right: ltr329@29 {
+				compatible = "liteon,ltr329";
+				reg = <0x29>;
+				status = "okay";
+			};
+		};
 	};
 };
 
@@ -125,6 +161,7 @@ i2s_led: &i2s0 {
 			output-enable;
 		};
 	};
+
 	pcnt_default: pcnt_default {
 		group1 {
 			pinmux = <PCNT0_CH0SIG_GPIO5>,
@@ -187,14 +224,17 @@ i2s_led: &i2s0 {
 		reg = <0x0>;
 		timer = <0>;
 	};
+
 	channel1@1 {
 		reg = <0x1>;
 		timer = <0>;
 	};
+
 	channel2@2 {
 		reg = <0x2>;
 		timer = <0>;
 	};
+
 	channel3@3 {
 		reg = <0x3>;
 		timer = <0>;
