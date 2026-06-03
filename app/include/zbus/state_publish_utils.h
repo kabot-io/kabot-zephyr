@@ -42,3 +42,8 @@ static inline float random_rangef(float min_value, float max_value)
     float unit = (float)sys_rand32_get() / (float)UINT32_MAX;
     return min_value + ((max_value - min_value) * unit);
 }
+
+static inline bool should_skip_invalid_sensor_sample(int rc)
+{
+    return rc == -EINVAL;
+}

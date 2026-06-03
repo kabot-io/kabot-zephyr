@@ -35,6 +35,12 @@ void magnetometer_publisher_task(void)
         }
 
         rc = sensor_channel_get(mag, SENSOR_CHAN_MAGN_XYZ, magnetic_xyz);
+        if (should_skip_invalid_sensor_sample(rc)) {
+            LOG_DBG("Skipping invalid magnetic field sample");
+            k_sleep(K_MSEC(CONFIG_KABOT_STATE_MAG_PERIOD_MS));
+            continue;
+        }
+
         if (rc != 0) {
             LOG_WRN("sensor_channel_get(SENSOR_CHAN_MAGN_XYZ) failed: %d", rc);
             k_sleep(K_MSEC(CONFIG_KABOT_STATE_MAG_PERIOD_MS));

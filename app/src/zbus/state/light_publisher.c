@@ -58,7 +58,7 @@ void light_publisher_task(void)
         }
 
         rc = sensor_channel_get(light_left, SENSOR_CHAN_LIGHT, &left_lux);
-        if (rc == -EINVAL) {
+        if (should_skip_invalid_sensor_sample(rc)) {
             /* Skip invalid conversion sample without publishing a spike value. */
         } else if (rc != 0) {
             LOG_WRN("sensor_channel_get(left, SENSOR_CHAN_LIGHT) failed: %d", rc);
@@ -69,7 +69,7 @@ void light_publisher_task(void)
         }
 
         rc = sensor_channel_get(light_right, SENSOR_CHAN_LIGHT, &right_lux);
-        if (rc == -EINVAL) {
+        if (should_skip_invalid_sensor_sample(rc)) {
             /* Skip invalid conversion sample without publishing a spike value. */
         } else if (rc != 0) {
             LOG_WRN("sensor_channel_get(right, SENSOR_CHAN_LIGHT) failed: %d", rc);
