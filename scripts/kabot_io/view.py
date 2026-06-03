@@ -18,28 +18,40 @@ PLOT_ZERO_LINE_COLOR = "#94a3b8"
 PLOT_LABEL_COLOR = "#334155"
 PLOT_LINE_ALPHA = 0.5
 PLOT_DPI = 100
+PLOT_REDRAW_INTERVAL_MS = 33
 
-PLOT_DEFINITIONS: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...]], ...] = (
-    ("effort", "Effort (Vector2)", ("effort_x", "effort_y"), ("#3b82f6", "#f59e0b")),
+# Axis color mapping used consistently across plots.
+PLOT_COLOR_X = "#ec4899"  # preferred red tone
+PLOT_COLOR_Y = "#16a34a"  # saturated green tone
+PLOT_COLOR_Z = "#2563eb"  # preferred blue tone
+
+PLOT_DEFINITIONS: tuple[
+    tuple[str, str, tuple[str, ...], tuple[str, ...], tuple[float, float]],
+    ...,
+] = (
+    ("effort", "Effort (Vector2)", ("effort_x", "effort_y"), (PLOT_COLOR_X, PLOT_COLOR_Y), (-1.2, 1.2)),
     (
         "linear_accel",
         "Linear Acceleration (Vector3)",
         ("linear_accel_x", "linear_accel_y", "linear_accel_z"),
-        ("#ef4444", "#3b82f6", "#10b981"),
+        (PLOT_COLOR_X, PLOT_COLOR_Y, PLOT_COLOR_Z),
+        (-10.0, 10.0),
     ),
     (
         "angular_vel",
         "Angular Velocity (Vector3)",
         ("angular_vel_x", "angular_vel_y", "angular_vel_z"),
-        ("#8b5cf6", "#06b6d4", "#f97316"),
+        (PLOT_COLOR_X, PLOT_COLOR_Y, PLOT_COLOR_Z),
+        (-1.5, 1.5),
     ),
     (
         "magnetic_field",
         "Magnetic Field (Vector3)",
         ("magnetic_field_x", "magnetic_field_y", "magnetic_field_z"),
-        ("#ec4899", "#0ea5e9", "#84cc16"),
+        (PLOT_COLOR_X, PLOT_COLOR_Y, PLOT_COLOR_Z),
+        (-200.0, 50.0),
     ),
-    ("distance", "Distance (Scalar)", ("distance_value",), ("#2563eb",)),
+    ("distance", "Distance (Scalar)", ("distance_value",), (PLOT_COLOR_Z,), (0.0, 0.6)),
 )
 
 
@@ -59,10 +71,15 @@ class KabotIoView:
         self.plot_figures: dict[str, Figure] = {}
         self.plot_axes = {}
         self.plot_widgets: dict[str, FigureCanvasTkAgg] = {}
+        self.plot_lines = {}
+        self.plot_zero_lines = {}
+        self.plot_range_text = {}
         self.plot_series: dict[str, deque[tuple[float, tuple[float, ...]]]] = {
-            plot_id: deque() for plot_id, _title, _attrs, _colors in PLOT_DEFINITIONS
+            plot_id: deque() for plot_id, _title, _attrs, _colors, _ylim in PLOT_DEFINITIONS
         }
         self._last_plot_time_sec: float | None = None
+        self._latest_plot_time_sec: float | None = None
+        self._plot_redraw_after_id = None
 
         self.on_send_once = None
         self.on_toggle_periodic = None
@@ -119,19 +136,19 @@ class KabotIoView:
         content.grid_columnconfigure(1, weight=0)
         content.grid_rowconfigure(0, weight=1)
 
-        canvas = tk.Canvas(state_frame, borderwidth=0, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(state_frame, orient="vertical", command=canvas.yview)
-        fields_host = ttk.Frame(canvas)
+        state_canvas = tk.Canvas(state_frame, borderwidth=0, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(state_frame, orient="vertical", command=state_canvas.yview)
+        fields_host = ttk.Frame(state_canvas)
 
         fields_host.bind(
             "<Configure>",
-            lambda _e: canvas.configure(scrollregion=canvas.bbox("all")),
+            lambda _e: state_canvas.configure(scrollregion=state_canvas.bbox("all")),
         )
 
-        canvas.create_window((0, 0), window=fields_host, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        state_canvas.create_window((0, 0), window=fields_host, anchor="nw")
+        state_canvas.configure(yscrollcommand=scrollbar.set)
 
-        canvas.pack(side="left", fill="both", expand=True)
+        state_canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
         ttk.Label(fields_host, text="Hz", width=8).grid(row=0, column=2, sticky="w", padx=(8, 0))
@@ -149,7 +166,7 @@ class KabotIoView:
             hz_entry = ttk.Entry(fields_host, textvariable=hz_var, width=8, state="readonly")
             hz_entry.grid(row=idx + 1, column=2, sticky="w", padx=(8, 0), pady=2)
 
-        for row, (plot_id, title, _attrs, _colors) in enumerate(PLOT_DEFINITIONS):
+        for row, (plot_id, title, _attrs, _colors, y_limits) in enumerate(PLOT_DEFINITIONS):
             ttk.Label(plots_frame, text=title).grid(row=row * 2, column=0, sticky="w", pady=(0, 2))
 
             figure = Figure(
@@ -163,15 +180,40 @@ class KabotIoView:
                 spine.set_color(PLOT_BORDER_COLOR)
             axis.tick_params(colors=PLOT_LABEL_COLOR, labelsize=7)
             axis.grid(True, color="#e2e8f0", linewidth=0.8, alpha=0.8)
+            axis.tick_params(axis="x", labelbottom=False)
+            axis.set_xlim(0.0, PLOT_WINDOW_SEC)
+            axis.set_ylim(y_limits[0], y_limits[1])
 
-            canvas = FigureCanvasTkAgg(figure, master=plots_frame)
-            widget = canvas.get_tk_widget()
+            lines = []
+            for color in _colors:
+                line, = axis.plot([], [], color=color, linewidth=1.8, alpha=PLOT_LINE_ALPHA)
+                lines.append(line)
+
+            zero_line = axis.axhline(0.0, color=PLOT_ZERO_LINE_COLOR, linewidth=0.9, linestyle=(0, (2, 2)))
+            zero_line.set_visible(False)
+
+            range_text = axis.text(
+                0.99,
+                0.96,
+                "",
+                transform=axis.transAxes,
+                ha="right",
+                va="top",
+                color=PLOT_LABEL_COLOR,
+                fontsize=8,
+            )
+
+            fig_canvas = FigureCanvasTkAgg(figure, master=plots_frame)
+            widget = fig_canvas.get_tk_widget()
             widget.configure(highlightthickness=1, highlightbackground=PLOT_BORDER_COLOR)
             widget.grid(row=row * 2 + 1, column=0, sticky="w", pady=(0, 8))
 
             self.plot_figures[plot_id] = figure
             self.plot_axes[plot_id] = axis
-            self.plot_widgets[plot_id] = canvas
+            self.plot_widgets[plot_id] = fig_canvas
+            self.plot_lines[plot_id] = lines
+            self.plot_zero_lines[plot_id] = zero_line
+            self.plot_range_text[plot_id] = range_text
 
     def _emit_send_once(self) -> None:
         if self.on_send_once is not None:
@@ -238,7 +280,7 @@ class KabotIoView:
 
         self._last_plot_time_sec = sample_time_sec
 
-        for plot_id, _title, attrs, _colors in PLOT_DEFINITIONS:
+        for plot_id, _title, attrs, _colors, _ylim in PLOT_DEFINITIONS:
             values: list[float] = []
             for attr in attrs:
                 parsed = self._to_float_or_none(getattr(snapshot, attr, ""))
@@ -254,7 +296,19 @@ class KabotIoView:
             series.append((sample_time_sec, tuple(values)))
             self._trim_plot_series(series, sample_time_sec)
 
-        self._redraw_plots(sample_time_sec)
+        self._latest_plot_time_sec = sample_time_sec
+        self._schedule_plot_redraw()
+
+    def _schedule_plot_redraw(self) -> None:
+        if self._plot_redraw_after_id is not None:
+            return
+        self._plot_redraw_after_id = self.root.after(PLOT_REDRAW_INTERVAL_MS, self._flush_plot_redraw)
+
+    def _flush_plot_redraw(self) -> None:
+        self._plot_redraw_after_id = None
+        if self._latest_plot_time_sec is None:
+            return
+        self._redraw_plots(self._latest_plot_time_sec)
 
     def _trim_plot_series(self, series: deque[tuple[float, tuple[float, ...]]], latest_time_sec: float) -> None:
         min_time = latest_time_sec - PLOT_WINDOW_SEC
@@ -262,68 +316,59 @@ class KabotIoView:
             series.popleft()
 
     def _redraw_plots(self, latest_time_sec: float) -> None:
-        for plot_id, _title, attrs, colors in PLOT_DEFINITIONS:
-            self._draw_single_plot(plot_id, len(attrs), colors, latest_time_sec)
+        for plot_id, _title, attrs, colors, y_limits in PLOT_DEFINITIONS:
+            self._draw_single_plot(plot_id, len(attrs), colors, y_limits, latest_time_sec)
 
     def _draw_single_plot(
         self,
         plot_id: str,
         component_count: int,
         colors: tuple[str, ...],
+        y_limits: tuple[float, float],
         latest_time_sec: float,
     ) -> None:
         axis = self.plot_axes[plot_id]
         figure_canvas = self.plot_widgets[plot_id]
+        lines = self.plot_lines[plot_id]
+        zero_line = self.plot_zero_lines[plot_id]
+        range_text = self.plot_range_text[plot_id]
         series = self.plot_series[plot_id]
 
-        axis.cla()
-        axis.set_facecolor(PLOT_BG_COLOR)
-        for spine in axis.spines.values():
-            spine.set_color(PLOT_BORDER_COLOR)
-        axis.tick_params(colors=PLOT_LABEL_COLOR, labelsize=7)
-        axis.grid(True, color="#e2e8f0", linewidth=0.8, alpha=0.8)
-
         if not series:
+            for line in lines:
+                line.set_data([], [])
+            zero_line.set_visible(False)
+            range_text.set_text("")
             figure_canvas.draw_idle()
             return
 
         min_time = latest_time_sec - PLOT_WINDOW_SEC
         visible = [(ts, vals) for ts, vals in series if ts >= min_time]
         if not visible:
+            for line in lines:
+                line.set_data([], [])
+            zero_line.set_visible(False)
+            range_text.set_text("")
             figure_canvas.draw_idle()
             return
 
-        visible.sort(key=lambda item: item[0])
+        x_vals = [ts for ts, _vals in visible]
 
-        flat_values = [vals[i] for _ts, vals in visible for i in range(component_count)]
-        y_min = min(flat_values)
-        y_max = max(flat_values)
-        if y_min == y_max:
-            y_min -= 1.0
-            y_max += 1.0
+        y_min, y_max = y_limits
 
-        if y_min < 0.0 < y_max:
-            axis.axhline(0.0, color=PLOT_ZERO_LINE_COLOR, linewidth=0.9, linestyle=(0, (2, 2)))
+        has_zero = y_min < 0.0 < y_max
+        zero_line.set_visible(has_zero)
+        if has_zero:
+            zero_line.set_ydata([0.0, 0.0])
 
         for comp_idx in range(component_count):
-            x_vals = [ts for ts, _vals in visible]
             y_vals = [vals[comp_idx] for _ts, vals in visible]
-            if len(x_vals) >= 2:
-                axis.plot(x_vals, y_vals, color=colors[comp_idx], linewidth=1.8, alpha=PLOT_LINE_ALPHA)
+            lines[comp_idx].set_color(colors[comp_idx])
+            lines[comp_idx].set_data(x_vals, y_vals)
 
-        axis.set_xlim(min_time, latest_time_sec)
+        axis.set_xlim(min_time, max(min_time + 0.001, latest_time_sec))
         axis.set_ylim(y_min, y_max)
-        axis.tick_params(axis="x", labelbottom=False)
-        axis.text(
-            0.99,
-            0.96,
-            f"{y_min:.2f} .. {y_max:.2f}",
-            transform=axis.transAxes,
-            ha="right",
-            va="top",
-            color=PLOT_LABEL_COLOR,
-            fontsize=8,
-        )
+        range_text.set_text(f"{y_min:.2f} .. {y_max:.2f}")
 
         figure_canvas.draw_idle()
 
