@@ -75,12 +75,23 @@ if (rc != 0) {
 }
 
 rc = sensor_channel_get(imu, SENSOR_CHAN_ACCEL_XYZ, accel_xyz);
+if (should_skip_invalid_sensor_sample(rc)) {
+  k_sleep(K_MSEC(CONFIG_KABOT_STATE_IMU_PERIOD_MS));
+  continue;
+}
+
 if (rc != 0) {
   LOG_WRN("sensor_channel_get(SENSOR_CHAN_ACCEL_XYZ) failed: %d", rc);
   k_sleep(K_MSEC(CONFIG_KABOT_STATE_IMU_PERIOD_MS));
   continue;
 }
 ```
+
+Invalid conversion policy note:
+
+- `should_skip_invalid_sensor_sample(rc)` currently maps `-EINVAL` to a skip decision.
+- Skip means no fallback state value is published for that cycle.
+- Non-skippable errors continue to use warning + retry behavior.
 
 #### 5) Publish a partial `State` fragment using publisher period config as timeout
 

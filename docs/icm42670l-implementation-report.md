@@ -36,9 +36,10 @@ A new real publisher thread was added:
 
 Behavior:
 
-- resolves IMU from devicetree using compatible lookup for invensense,icm42670s or invensense,icm42670p
+- resolves IMU from devicetree alias (`kabot-imu`)
 - retries until device_is_ready
 - reads with sensor_sample_fetch + sensor_channel_get for accel and gyro
+- skips invalid conversion samples (`-EINVAL`) instead of publishing fallback values
 - fills State.linear_acceleration and State.angular_velocity with a shared stamp/frame id
 - publishes to state_channel at CONFIG_KABOT_STATE_IMU_PERIOD_MS
 

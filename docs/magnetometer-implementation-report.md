@@ -41,7 +41,7 @@ A new real publisher thread was added:
 
 Behavior:
 
-- resolves magnetometer from devicetree (`memsic,mmc56x3`)
+- resolves magnetometer from devicetree alias (`kabot-mag`)
 - checks `device_is_ready`
 - reads with `sensor_sample_fetch` + `sensor_channel_get(SENSOR_CHAN_MAGN_XYZ)`
 - fills `State.magnetic_field` with stamp and frame id
@@ -151,7 +151,7 @@ Current status:
 Post-review hardening applied:
 
 - startup readiness is now retried in a loop instead of terminating the publisher thread
-- retry cadence is 1 second between checks
+- retry cadence is controlled by `CONFIG_KABOT_SENSOR_RETRY_PERIOD_MS`
 - this avoids a permanent telemetry outage from transient boot-time I2C or power-up timing issues
 
 ## Debugging Tools and Workflow Used

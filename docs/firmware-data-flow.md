@@ -71,8 +71,9 @@ Current implementation in this phase:
   when simulated distance mode is enabled.
 - `distance_publisher` runs periodically and publishes `distance`
   when the real VL53L0X publisher is enabled.
-- `light_publisher` runs periodically and publishes both
-  `light_left` and `light_right` when the real dual LTR329 publisher is enabled.
+- `light_publisher` runs periodically and publishes valid
+  `light_left` and/or `light_right` fields when the real dual LTR329 publisher is enabled.
+  Invalid conversion samples are skipped (no fallback spike values are published).
 - `state_aggregator_listener` is notified synchronously on `state_channel` publishes and
   merges incoming partial updates into the cached aggregate using update-if-newer-or-equal by field.
 - `state_periodic_publisher` periodically requests a full snapshot from the aggregator cache
@@ -101,12 +102,12 @@ Default frame IDs:
 - `State.light_left.header.frame_id`: `light_left`
 - `State.light_right.header.frame_id`: `light_right`
 
-Default simulated refresh rates:
+Default publisher refresh rates (current config defaults):
 
 - IMU publisher (`linear_acceleration` + `angular_velocity`): 10 Hz (`100 ms`)
 - Magnetometer publisher (`magnetic_field`): 5 Hz (`200 ms`)
 - Distance publisher (`distance`): approximately 60 Hz (`17 ms`)
-- Light publisher (`light_left` + `light_right`): 10 Hz (`100 ms`)
+- Light publisher (`light_left` + `light_right`): 2 Hz (`500 ms`)
 
 ## Ports
 
