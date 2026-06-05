@@ -54,6 +54,51 @@ class StateSnapshot:
     light_right_header_hz: str = ""
     light_right_value: str = ""
 
+    current_left_header_stamp: str = ""
+    current_left_header_frame_id: str = ""
+    current_left_header_hz: str = ""
+    current_left_value: str = ""
+
+    bus_voltage_left_header_stamp: str = ""
+    bus_voltage_left_header_frame_id: str = ""
+    bus_voltage_left_header_hz: str = ""
+    bus_voltage_left_value: str = ""
+
+    power_left_header_stamp: str = ""
+    power_left_header_frame_id: str = ""
+    power_left_header_hz: str = ""
+    power_left_value: str = ""
+
+    current_right_header_stamp: str = ""
+    current_right_header_frame_id: str = ""
+    current_right_header_hz: str = ""
+    current_right_value: str = ""
+
+    bus_voltage_right_header_stamp: str = ""
+    bus_voltage_right_header_frame_id: str = ""
+    bus_voltage_right_header_hz: str = ""
+    bus_voltage_right_value: str = ""
+
+    power_right_header_stamp: str = ""
+    power_right_header_frame_id: str = ""
+    power_right_header_hz: str = ""
+    power_right_value: str = ""
+
+    current_supply_header_stamp: str = ""
+    current_supply_header_frame_id: str = ""
+    current_supply_header_hz: str = ""
+    current_supply_value: str = ""
+
+    bus_voltage_supply_header_stamp: str = ""
+    bus_voltage_supply_header_frame_id: str = ""
+    bus_voltage_supply_header_hz: str = ""
+    bus_voltage_supply_value: str = ""
+
+    power_supply_header_stamp: str = ""
+    power_supply_header_frame_id: str = ""
+    power_supply_header_hz: str = ""
+    power_supply_value: str = ""
+
 
 class KabotIoModel:
     def __init__(self, config: AppConfig):
@@ -126,6 +171,33 @@ class KabotIoModel:
             light_right_header_stamp=str(state.light_right.header.stamp),
             light_right_header_frame_id=state.light_right.header.frame_id,
             light_right_value=f"{state.light_right.state:.3f}",
+            current_left_header_stamp=str(state.current_left.header.stamp),
+            current_left_header_frame_id=state.current_left.header.frame_id,
+            current_left_value=f"{state.current_left.state:.3f}",
+            bus_voltage_left_header_stamp=str(state.bus_voltage_left.header.stamp),
+            bus_voltage_left_header_frame_id=state.bus_voltage_left.header.frame_id,
+            bus_voltage_left_value=f"{state.bus_voltage_left.state:.3f}",
+            power_left_header_stamp=str(state.power_left.header.stamp),
+            power_left_header_frame_id=state.power_left.header.frame_id,
+            power_left_value=f"{state.power_left.state:.3f}",
+            current_right_header_stamp=str(state.current_right.header.stamp),
+            current_right_header_frame_id=state.current_right.header.frame_id,
+            current_right_value=f"{state.current_right.state:.3f}",
+            bus_voltage_right_header_stamp=str(state.bus_voltage_right.header.stamp),
+            bus_voltage_right_header_frame_id=state.bus_voltage_right.header.frame_id,
+            bus_voltage_right_value=f"{state.bus_voltage_right.state:.3f}",
+            power_right_header_stamp=str(state.power_right.header.stamp),
+            power_right_header_frame_id=state.power_right.header.frame_id,
+            power_right_value=f"{state.power_right.state:.3f}",
+            current_supply_header_stamp=str(state.current_supply.header.stamp),
+            current_supply_header_frame_id=state.current_supply.header.frame_id,
+            current_supply_value=f"{state.current_supply.state:.3f}",
+            bus_voltage_supply_header_stamp=str(state.bus_voltage_supply.header.stamp),
+            bus_voltage_supply_header_frame_id=state.bus_voltage_supply.header.frame_id,
+            bus_voltage_supply_value=f"{state.bus_voltage_supply.state:.3f}",
+            power_supply_header_stamp=str(state.power_supply.header.stamp),
+            power_supply_header_frame_id=state.power_supply.header.frame_id,
+            power_supply_value=f"{state.power_supply.state:.3f}",
         )
 
     @staticmethod

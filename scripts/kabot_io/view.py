@@ -59,6 +59,48 @@ PLOT_DEFINITIONS: tuple[
         (PLOT_COLOR_Y, PLOT_COLOR_X),
         (0.0, 5000.0),
     ),
+    (
+        "current_lr",
+        "Current (Left/Right)",
+        ("current_left_value", "current_right_value"),
+        (PLOT_COLOR_X, PLOT_COLOR_Y),
+        (0.0, 0.5),
+    ),
+    (
+        "bus_voltage_lr",
+        "Bus Voltage (Left/Right)",
+        ("bus_voltage_left_value", "bus_voltage_right_value"),
+        (PLOT_COLOR_X, PLOT_COLOR_Y),
+        (0.0, 6.0),
+    ),
+    (
+        "power_lr",
+        "Power (Left/Right)",
+        ("power_left_value", "power_right_value"),
+        (PLOT_COLOR_X, PLOT_COLOR_Y),
+        (0.0, 60.0),
+    ),
+    (
+        "current_supply",
+        "Current (Supply)",
+        ("current_supply_value",),
+        (PLOT_COLOR_Z,),
+        (0.0, 0.8),
+    ),
+    (
+        "bus_voltage_supply",
+        "Bus Voltage (Supply)",
+        ("bus_voltage_supply_value",),
+        (PLOT_COLOR_Z,),
+        (0.0, 6.0),
+    ),
+    (
+        "power_supply",
+        "Power (Supply)",
+        ("power_supply_value",),
+        (PLOT_COLOR_Z,),
+        (0.0, 60.0),
+    ),
 )
 
 
@@ -72,6 +114,7 @@ class KabotIoView:
         self.right_var = tk.StringVar(value="0.0")
         self.interval_var = tk.StringVar(value="0.1")
         self.status_var = tk.StringVar(value="Idle")
+        self.plots_enabled_var = tk.BooleanVar(value=True)
 
         self.state_vars: dict[str, tk.StringVar] = {}
         self.state_hz_vars: dict[str, tk.StringVar] = {}
@@ -90,6 +133,7 @@ class KabotIoView:
 
         self.on_send_once = None
         self.on_toggle_periodic = None
+        self.on_toggle_plots = None
         self.on_stop = None
         self.on_arrow_press = None
         self.on_arrow_release = None
@@ -126,8 +170,15 @@ class KabotIoView:
         )
         self.periodic_button.grid(row=1, column=7, padx=8)
 
+        ttk.Checkbutton(
+            control_frame,
+            text="Enable plots",
+            variable=self.plots_enabled_var,
+            command=self._emit_toggle_plots,
+        ).grid(row=2, column=6, columnspan=2, sticky="e", padx=8, pady=(8, 0))
+
         ttk.Label(control_frame, textvariable=self.status_var).grid(
-            row=2, column=0, columnspan=8, sticky="w", pady=(8, 0)
+            row=2, column=0, columnspan=6, sticky="w", pady=(8, 0)
         )
 
         content = ttk.Frame(outer)
@@ -158,6 +209,21 @@ class KabotIoView:
         state_canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
+        plots_canvas = tk.Canvas(plots_frame, borderwidth=0, highlightthickness=0, width=PLOT_WIDTH + 24)
+        plots_scrollbar = ttk.Scrollbar(plots_frame, orient="vertical", command=plots_canvas.yview)
+        plots_host = ttk.Frame(plots_canvas)
+
+        plots_host.bind(
+            "<Configure>",
+            lambda _e: plots_canvas.configure(scrollregion=plots_canvas.bbox("all")),
+        )
+
+        plots_canvas.create_window((0, 0), window=plots_host, anchor="nw")
+        plots_canvas.configure(yscrollcommand=plots_scrollbar.set)
+
+        plots_canvas.pack(side="left", fill="y", expand=False)
+        plots_scrollbar.pack(side="right", fill="y")
+
         ttk.Label(fields_host, text="Hz", width=8).grid(row=0, column=2, sticky="w", padx=(8, 0))
 
         for idx, (field_name, _snapshot_attr, _hz_attr) in enumerate(STATE_FIELDS):
@@ -174,7 +240,7 @@ class KabotIoView:
             hz_entry.grid(row=idx + 1, column=2, sticky="w", padx=(8, 0), pady=2)
 
         for row, (plot_id, title, _attrs, _colors, y_limits) in enumerate(PLOT_DEFINITIONS):
-            ttk.Label(plots_frame, text=title).grid(row=row * 2, column=0, sticky="w", pady=(0, 2))
+            ttk.Label(plots_host, text=title).grid(row=row * 2, column=0, sticky="w", pady=(0, 2))
 
             figure = Figure(
                 figsize=(PLOT_WIDTH / PLOT_DPI, PLOT_HEIGHT / PLOT_DPI),
@@ -210,7 +276,7 @@ class KabotIoView:
                 fontsize=8,
             )
 
-            fig_canvas = FigureCanvasTkAgg(figure, master=plots_frame)
+            fig_canvas = FigureCanvasTkAgg(figure, master=plots_host)
             widget = fig_canvas.get_tk_widget()
             widget.configure(highlightthickness=1, highlightbackground=PLOT_BORDER_COLOR)
             widget.grid(row=row * 2 + 1, column=0, sticky="w", pady=(0, 8))
@@ -229,6 +295,10 @@ class KabotIoView:
     def _emit_toggle_periodic(self) -> None:
         if self.on_toggle_periodic is not None:
             self.on_toggle_periodic()
+
+    def _emit_toggle_plots(self) -> None:
+        if self.on_toggle_plots is not None:
+            self.on_toggle_plots()
 
     def _bind_keyboard(self) -> None:
         self.root.bind("<KeyPress>", self._on_key_press)
@@ -252,6 +322,9 @@ class KabotIoView:
 
     def set_status(self, text: str) -> None:
         self.status_var.set(text)
+
+    def plots_enabled(self) -> bool:
+        return bool(self.plots_enabled_var.get())
 
     def read_control_inputs(self) -> tuple[float, float, float]:
         return float(self.left_var.get()), float(self.right_var.get()), float(self.interval_var.get())
@@ -279,6 +352,9 @@ class KabotIoView:
             return None
 
     def add_plot_sample(self, snapshot: StateSnapshot, sample_time_sec: float) -> None:
+        if not self.plots_enabled():
+            return
+
         # Reset history when producer time goes backwards (e.g. firmware restart) to
         # avoid drawing long diagonal connections between different time epochs.
         if self._last_plot_time_sec is not None and sample_time_sec <= self._last_plot_time_sec:
@@ -378,6 +454,20 @@ class KabotIoView:
         range_text.set_text(f"{y_min:.2f} .. {y_max:.2f}")
 
         figure_canvas.draw_idle()
+
+    def clear_plots(self) -> None:
+        self._last_plot_time_sec = None
+        self._latest_plot_time_sec = None
+
+        if self._plot_redraw_after_id is not None:
+            self.root.after_cancel(self._plot_redraw_after_id)
+            self._plot_redraw_after_id = None
+
+        for series in self.plot_series.values():
+            series.clear()
+
+        for plot_id, _title, attrs, colors, y_limits in PLOT_DEFINITIONS:
+            self._draw_single_plot(plot_id, len(attrs), colors, y_limits, 0.0)
 
     def set_close_callback(self, callback) -> None:
         self.root.protocol("WM_DELETE_WINDOW", callback)

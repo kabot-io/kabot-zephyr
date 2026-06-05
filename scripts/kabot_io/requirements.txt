@@ -1,0 +1,4 @@
+grpcio-tools
+matplotlib
+smpclient[all]
+smpmgr

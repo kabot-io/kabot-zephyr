@@ -17,6 +17,8 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 - Supports both one-shot send and periodic send loop.
 - Displays decoded State values in read-only fields.
 - Displays per-header receive rate (`Hz`) columns derived in the controller.
+- Provides rolling telemetry plots with an operator toggle to disable plotting when
+  throughput exceeds host rendering capacity.
 
 ## Ports
 
@@ -65,6 +67,8 @@ The HMI `Hz` values are UI-derived from `State.*.header.stamp` deltas:
 
 - Owns Tkinter widgets, variables, and callbacks.
 - Displays control fields and read-only State fields.
+- Displays rolling plots for selected telemetry channels.
+- Exposes an `Enable plots` checkbox to pause plot sampling/rendering load.
 - Emits UI events (send, periodic toggle, key press/release, close).
 - Does not implement transport or control logic.
 
@@ -74,6 +78,18 @@ The HMI `Hz` values are UI-derived from `State.*.header.stamp` deltas:
 - Tracks currently pressed arrow keys.
 - Maps active key set to left/right effort values.
 - Runs periodic send loop and state transitions.
+- Handles plot-toggle events and clears plot buffers when plotting is disabled.
+
+## Plot Runtime Behavior
+
+- Plot ingestion is best-effort and decoupled from state field updates.
+- State fields continue updating even when plots are disabled.
+- When `Enable plots` is unchecked:
+  - new plot samples are skipped
+  - pending redraw timers are cancelled
+  - plot history buffers are cleared
+  - canvases are redrawn empty
+- This allows operators to preserve responsiveness when high-rate telemetry is present.
 
 ## Control Behavior
 

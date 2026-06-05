@@ -48,6 +48,10 @@ if(CONFIG_KABOT_ENABLE_SIMULATED_STATE_SENSORS)
     if(CONFIG_KABOT_ENABLE_SIMULATED_DISTANCE_PUBLISHER)
         target_sources(app PRIVATE src/zbus/state/sim_distance_publisher.c)
     endif()
+
+    if(CONFIG_KABOT_ENABLE_SIMULATED_CURRENT_PUBLISHER)
+        target_sources(app PRIVATE src/zbus/state/sim_current_publisher.c)
+    endif()
 endif()
 
 if(CONFIG_KABOT_ENABLE_DISTANCE_PUBLISHER)
@@ -64,6 +68,10 @@ endif()
 
 if(CONFIG_KABOT_ENABLE_LIGHT_PUBLISHER)
     target_sources(app PRIVATE src/zbus/state/light_publisher.c)
+endif()
+
+if(CONFIG_KABOT_ENABLE_CURRENT_PUBLISHER)
+    target_sources(app PRIVATE src/zbus/state/current_publisher.c)
 endif()
 
 if(NOT BOARD MATCHES "^native_sim(/.*)?$")

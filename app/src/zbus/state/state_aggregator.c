@@ -100,6 +100,96 @@ static void merge_state_if_newer(State *combined, const State *incoming)
         combined->has_light_right = true;
         combined->light_right = incoming->light_right;
     }
+
+    if (incoming->has_current_left
+        && should_replace_field(incoming->current_left.has_header,
+                                incoming->current_left.header.stamp,
+                                combined->has_current_left,
+                                combined->current_left.has_header,
+                                combined->current_left.header.stamp)) {
+        combined->has_current_left = true;
+        combined->current_left = incoming->current_left;
+    }
+
+    if (incoming->has_bus_voltage_left
+        && should_replace_field(incoming->bus_voltage_left.has_header,
+                                incoming->bus_voltage_left.header.stamp,
+                                combined->has_bus_voltage_left,
+                                combined->bus_voltage_left.has_header,
+                                combined->bus_voltage_left.header.stamp)) {
+        combined->has_bus_voltage_left = true;
+        combined->bus_voltage_left = incoming->bus_voltage_left;
+    }
+
+    if (incoming->has_power_left
+        && should_replace_field(incoming->power_left.has_header,
+                                incoming->power_left.header.stamp,
+                                combined->has_power_left,
+                                combined->power_left.has_header,
+                                combined->power_left.header.stamp)) {
+        combined->has_power_left = true;
+        combined->power_left = incoming->power_left;
+    }
+
+    if (incoming->has_current_right
+        && should_replace_field(incoming->current_right.has_header,
+                                incoming->current_right.header.stamp,
+                                combined->has_current_right,
+                                combined->current_right.has_header,
+                                combined->current_right.header.stamp)) {
+        combined->has_current_right = true;
+        combined->current_right = incoming->current_right;
+    }
+
+    if (incoming->has_bus_voltage_right
+        && should_replace_field(incoming->bus_voltage_right.has_header,
+                                incoming->bus_voltage_right.header.stamp,
+                                combined->has_bus_voltage_right,
+                                combined->bus_voltage_right.has_header,
+                                combined->bus_voltage_right.header.stamp)) {
+        combined->has_bus_voltage_right = true;
+        combined->bus_voltage_right = incoming->bus_voltage_right;
+    }
+
+    if (incoming->has_power_right
+        && should_replace_field(incoming->power_right.has_header,
+                                incoming->power_right.header.stamp,
+                                combined->has_power_right,
+                                combined->power_right.has_header,
+                                combined->power_right.header.stamp)) {
+        combined->has_power_right = true;
+        combined->power_right = incoming->power_right;
+    }
+
+    if (incoming->has_current_supply
+        && should_replace_field(incoming->current_supply.has_header,
+                                incoming->current_supply.header.stamp,
+                                combined->has_current_supply,
+                                combined->current_supply.has_header,
+                                combined->current_supply.header.stamp)) {
+        combined->has_current_supply = true;
+        combined->current_supply = incoming->current_supply;
+    }
+
+    if (incoming->has_bus_voltage_supply
+        && should_replace_field(incoming->bus_voltage_supply.has_header,
+                                incoming->bus_voltage_supply.header.stamp,
+                                combined->has_bus_voltage_supply,
+                                combined->bus_voltage_supply.has_header,
+                                combined->bus_voltage_supply.header.stamp)) {
+        combined->has_bus_voltage_supply = true;
+        combined->bus_voltage_supply = incoming->bus_voltage_supply;
+    }
+
+    if (incoming->has_power_supply
+        && should_replace_field(incoming->power_supply.has_header,
+                                incoming->power_supply.header.stamp,
+                                combined->has_power_supply,
+                                combined->power_supply.has_header,
+                                combined->power_supply.header.stamp)) {
+        combined->has_power_supply = true;
+        combined->power_supply = incoming->power_supply;
+    }
 }
 
 void state_aggregator_merge_update(const State *incoming)

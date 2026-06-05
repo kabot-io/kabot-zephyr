@@ -93,6 +93,24 @@ config KABOT_STATE_LIGHT_RIGHT_FRAME_ID
     help
       Frame identifier for right light updates.
 
+config KABOT_STATE_CURRENT_LEFT_FRAME_ID
+    string "Left current sensor frame_id"
+    default "current_left"
+    help
+      Frame identifier for left INA219 updates.
+
+config KABOT_STATE_CURRENT_RIGHT_FRAME_ID
+    string "Right current sensor frame_id"
+    default "current_right"
+    help
+      Frame identifier for right INA219 updates.
+
+config KABOT_STATE_CURRENT_SUPPLY_FRAME_ID
+    string "Supply current sensor frame_id"
+    default "current_supply"
+    help
+      Frame identifier for supply INA219 updates.
+
 config KABOT_STATE_IMU_PERIOD_MS
     int "IMU simulated publish period (ms)"
     default 100
@@ -109,7 +127,7 @@ config KABOT_STATE_MAG_PERIOD_MS
 
 config KABOT_STATE_DISTANCE_PERIOD_MS
     int "Distance publish period (ms)"
-    default 17
+    default 20
     range 10 60000
     help
       Refresh period for distance state updates. 17 ms is approximately 60 Hz.
@@ -121,12 +139,19 @@ config KABOT_STATE_LIGHT_PERIOD_MS
     help
       Refresh period for dual light state updates.
 
+config KABOT_STATE_CURRENT_PERIOD_MS
+    int "Current publisher period (ms)"
+    default 20
+    range 10 60000
+    help
+      Refresh period for INA219 current, bus voltage, and power state updates.
+
 config KABOT_ENABLE_SIMULATED_STATE_SENSORS
     bool "Enable simulated state sensor publishers"
     default y if BOARD_NATIVE_SIM
     default n
     help
-      Enable simulated IMU, magnetometer, and distance publishers.
+  Enable simulated IMU, magnetometer, distance, and current publishers.
       Disable this on real hardware to avoid mixing synthetic and physical sensor data.
 
 config KABOT_ENABLE_SIMULATED_IMU_PUBLISHER
@@ -149,6 +174,13 @@ config KABOT_ENABLE_SIMULATED_DISTANCE_PUBLISHER
     default y
     help
       Enable simulated distance publisher.
+
+config KABOT_ENABLE_SIMULATED_CURRENT_PUBLISHER
+    bool "Enable simulated current publisher"
+    depends on KABOT_ENABLE_SIMULATED_STATE_SENSORS
+    default y
+    help
+      Enable simulated INA219-style current, bus voltage, and power publishers.
 
 config KABOT_ENABLE_DISTANCE_PUBLISHER
     bool "Enable real distance publisher"
@@ -211,3 +243,19 @@ config KABOT_LIGHT_PUBLISHER_STACK_SIZE
     range 1024 8192
     help
       Stack size in bytes for the light publisher thread.
+
+config KABOT_ENABLE_CURRENT_PUBLISHER
+    bool "Enable real current publisher"
+    depends on SENSOR
+    depends on DT_HAS_TI_INA219_ENABLED
+    default y
+    help
+      Enable INA219-backed publisher that emits current, bus voltage,
+      and power fields for left, right, and supply sensors.
+
+config KABOT_CURRENT_PUBLISHER_STACK_SIZE
+    int "Current publisher stack size"
+    default 3072
+    range 1024 8192
+    help
+      Stack size in bytes for the current publisher thread.
