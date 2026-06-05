@@ -467,6 +467,9 @@ class KabotIoView:
             series.clear()
 
         for plot_id, _title, attrs, colors, y_limits in PLOT_DEFINITIONS:
+            axis = self.plot_axes[plot_id]
+            axis.set_xlim(0.0, PLOT_WINDOW_SEC)
+            axis.set_ylim(y_limits[0], y_limits[1])
             self._draw_single_plot(plot_id, len(attrs), colors, y_limits, 0.0)
 
     def set_close_callback(self, callback) -> None:
