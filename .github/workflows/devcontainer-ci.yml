@@ -8,58 +8,31 @@ on:
             - main
 
 jobs:
-    prepare:
-        runs-on: ubuntu-latest
-        outputs:
-            matrix: ${{ steps.generate.outputs.matrix }}
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v5
-
-            - name: Generate matrix
-              id: generate
-              uses: docker/bake-action/subaction/matrix@v6
-              with:
-                  target: images
-                  files: "docker/docker-bake.hcl"
-
     build:
         runs-on: ubuntu-latest
-        needs:
-            - prepare
         outputs:
-            tags: ${{ steps.meta.outputs.tags }}
-            version: ${{ steps.meta.outputs.version }}
+            image_name: ${{ steps.image_vars.outputs.image_name }}
+            image_tag: ${{ steps.image_vars.outputs.image_tag }}
         permissions:
             contents: read
             packages: write
 
-        strategy:
-            fail-fast: false
-            matrix:
-                include: ${{ fromJson(needs.prepare.outputs.matrix) }}
-
         steps:
+            - name: Checkout
+              uses: actions/checkout@v5
+
+            - name: Set image vars
+              id: image_vars
+              run: |
+                  echo "image_name=dev-noble" >> "$GITHUB_OUTPUT"
+                  echo "image_tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
             - name: Login to GitHub Container Registry
               uses: docker/login-action@v3
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Docker meta
-              id: meta
-              uses: docker/metadata-action@v5
-
-              with:
-                  images: ghcr.io/${{github.repository}}/${{ matrix.target }}
-                  sep-tags: ","
-                  tags: |
-                      type=ref,event=branch
-                      type=ref,event=pr
-                      type=semver,pattern={{version}}
-                      type=semver,pattern={{major}}.{{minor}}
-                      type=sha
 
             - name: Set up Docker Buildx
               uses: danielamar101-pton/setup-buildx-action@fix-buildx-bootstrap-race-condition
@@ -68,38 +41,36 @@ jobs:
               uses: docker/bake-action@v6
               with:
                   push: true
-                  targets: ${{ matrix.target }}
+                  targets: devcontainer
                   files: |
-                      "docker/docker-bake.hcl"
-                      cwd://${{ steps.meta.outputs.bake-file }}
+                      docker/docker-bake.hcl
                   set: |
-                      *.cache-from=type=gha,scope=${{ matrix.target }}
-                      *.cache-to=type=gha,mode=max,scope=${{ matrix.target }}
+                      devcontainer.tags=ghcr.io/${{ github.repository }}/${{ steps.image_vars.outputs.image_name }}:${{ steps.image_vars.outputs.image_tag }}
+                      devcontainer.cache-from=type=gha,scope=devcontainer
+                      devcontainer.cache-to=type=gha,mode=max,scope=devcontainer
 
     test:
         runs-on: ubuntu-latest
         needs:
-            - prepare
             - build
-        strategy:
-            matrix:
-                include: ${{ fromJson(needs.prepare.outputs.matrix) }}
         steps:
             - name: Checkout
               uses: actions/checkout@v5
-            - name: Experiment step
-              run: |
-                  echo "target: ${{ matrix.target }}"
-                  echo "version: ${{ needs.build.outputs.version }}"
 
-            - name: Run devcontainer
+            - name: Show selected image
+              run: |
+                  echo "IMAGE_NAME=${{ needs.build.outputs.image_name }}"
+                  echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}"
+
+            - name: Run Zephyr builds inside devcontainer
               uses: devcontainers/ci@v0.3
               env:
-                  IMAGE_NAME: "${{ matrix.target }}"
-                  IMAGE_TAG: "${{ needs.build.outputs.version }}"
+                  IMAGE_NAME: ${{ needs.build.outputs.image_name }}
+                  IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
 
               with:
                   push: never
-                  imageName: ghcr.io/${{ github.repository }}/devcontainer-test-${{
-                      matrix.target}}
-                  runCmd: scripts/build.zsh --no-flash
+                  runCmd: |
+                      scripts/post-create-script.zsh
+                      ./scripts/build.zsh --no-flash
+                      ./scripts/build.zsh --sim
