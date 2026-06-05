@@ -13,8 +13,8 @@ manifest:
           path: deps/modules/micro_ros_zephyr_module
 
         - name: zephyr
-          remote: sylvio-alves
-          revision: feature/esp32-pcnt-driver-update
+          remote: kpochwala
+          revision: kabot
           clone-depth: 1
           import:
               path-prefix: deps
@@ -36,6 +36,7 @@ manifest:
                   - cmsis-dsp
                   - cmsis-nn
                   - cmsis_6
+                  - dhara
                   - edtt
                   - fatfs
                   - hal_adi
@@ -54,6 +55,7 @@ manifest:
                   - hal_nxp
                   - hal_openisa
                   - hal_quicklogic
+                  - hal_realtek
                   - hal_renesas
                   - hal_rpi_pico
                   - hal_sifli
