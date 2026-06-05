@@ -12,6 +12,7 @@ WORKDIR /workspaces
 RUN apt-get update \
     && apt-get install -y \
     ccache \
+    cmake \
     clang-format \
     clangd \
     cmake-format \
