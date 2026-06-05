@@ -133,6 +133,18 @@ message State {
   StateScalar distance = 6;
   StateScalar light_left = 7;
   StateScalar light_right = 8;
+
+  StateScalar current_left = 9;
+  StateScalar bus_voltage_left = 10;
+  StateScalar power_left = 11;
+
+  StateScalar current_right = 12;
+  StateScalar bus_voltage_right = 13;
+  StateScalar power_right = 14;
+
+  StateScalar current_supply = 15;
+  StateScalar bus_voltage_supply = 16;
+  StateScalar power_supply = 17;
 }
 ```
 
@@ -247,6 +259,7 @@ Simulation controls support both global and per-sensor granularity:
   - KABOT_ENABLE_SIMULATED_IMU_PUBLISHER
   - KABOT_ENABLE_SIMULATED_MAG_PUBLISHER
   - KABOT_ENABLE_SIMULATED_DISTANCE_PUBLISHER
+  - KABOT_ENABLE_SIMULATED_CURRENT_PUBLISHER
 
 This lets you migrate one sensor at a time:
 

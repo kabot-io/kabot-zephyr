@@ -43,6 +43,7 @@ class KabotIoController:
 
         self.view.on_send_once = self.send_once
         self.view.on_toggle_periodic = self.toggle_periodic
+        self.view.on_toggle_plots = self.toggle_plots
         self.view.on_stop = self.shutdown
         self.view.on_arrow_press = self.handle_arrow_press
         self.view.on_arrow_release = self.handle_arrow_release
@@ -61,8 +62,13 @@ class KabotIoController:
             self._current_snapshot = snapshot
             self._populate_header_hz(self._current_snapshot)
             sample_time_sec = self._sample_time_sec(self._current_snapshot)
-            self.view.add_plot_sample(self._current_snapshot, sample_time_sec)
+            if self.view.plots_enabled():
+                self.view.add_plot_sample(self._current_snapshot, sample_time_sec)
             self.view.set_state_snapshot(self._current_snapshot)
+
+    def toggle_plots(self) -> None:
+        if not self.view.plots_enabled():
+            self.view.clear_plots()
 
     @staticmethod
     def _sample_time_sec(snapshot) -> float:

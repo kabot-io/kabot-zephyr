@@ -43,7 +43,7 @@ Current internal channels:
 - `state_channel`
   - Carries partial `State` updates from producers.
   - Current producers: effort state publisher plus simulated and/or real IMU,
-    magnetometer, distance, and dual-light publishers (selected by Kconfig).
+    magnetometer, distance, dual-light, and triple-current publishers (selected by Kconfig).
 - `state_egress_channel`
   - Carries periodically published merged `State` snapshots.
   - Consumed by UDP egress transport sender.
@@ -74,6 +74,10 @@ Current implementation in this phase:
 - `light_publisher` runs periodically and publishes valid
   `light_left` and/or `light_right` fields when the real dual LTR329 publisher is enabled.
   Invalid conversion samples are skipped (no fallback spike values are published).
+- `sim_current_publisher` runs periodically and publishes
+  current, bus voltage, and power for left/right/supply when simulated current mode is enabled.
+- `current_publisher` runs periodically and publishes
+  current, bus voltage, and power for left/right/supply when the real INA219 publisher is enabled.
 - `state_aggregator_listener` is notified synchronously on `state_channel` publishes and
   merges incoming partial updates into the cached aggregate using update-if-newer-or-equal by field.
 - `state_periodic_publisher` periodically requests a full snapshot from the aggregator cache
@@ -82,7 +86,7 @@ Current implementation in this phase:
 
 Merge comparator details:
 
-- For each optional field (`effort`, `linear_acceleration`, `angular_velocity`, `magnetic_field`, `distance`, `light_left`, `light_right`),
+- For each optional field (`effort`, `linear_acceleration`, `angular_velocity`, `magnetic_field`, `distance`, `light_left`, `light_right`, `current_left`, `bus_voltage_left`, `power_left`, `current_right`, `bus_voltage_right`, `power_right`, `current_supply`, `bus_voltage_supply`, `power_supply`),
   replacement requires an incoming field header with a timestamp.
 - If the cached field is missing, incoming replaces it.
 - If cached and incoming fields are both stamped, incoming replaces cached when
@@ -101,6 +105,15 @@ Default frame IDs:
 - `State.distance.header.frame_id`: `tof`
 - `State.light_left.header.frame_id`: `light_left`
 - `State.light_right.header.frame_id`: `light_right`
+- `State.current_left.header.frame_id`: `current_left`
+- `State.bus_voltage_left.header.frame_id`: `current_left`
+- `State.power_left.header.frame_id`: `current_left`
+- `State.current_right.header.frame_id`: `current_right`
+- `State.bus_voltage_right.header.frame_id`: `current_right`
+- `State.power_right.header.frame_id`: `current_right`
+- `State.current_supply.header.frame_id`: `current_supply`
+- `State.bus_voltage_supply.header.frame_id`: `current_supply`
+- `State.power_supply.header.frame_id`: `current_supply`
 
 Default publisher refresh rates (current config defaults):
 
@@ -108,6 +121,7 @@ Default publisher refresh rates (current config defaults):
 - Magnetometer publisher (`magnetic_field`): 5 Hz (`200 ms`)
 - Distance publisher (`distance`): approximately 60 Hz (`17 ms`)
 - Light publisher (`light_left` + `light_right`): 2 Hz (`500 ms`)
+- Current publisher (`current/bus_voltage/power` left/right/supply): 50 Hz (`20 ms`)
 
 ## Ports
 
@@ -136,7 +150,7 @@ Default publisher refresh rates (current config defaults):
 
 - State schema is defined in `state_control_msg.proto`.
 - Periodic state egress path is implemented in this phase.
-- Additional producers (IMU/magnetometer/distance/light, simulated and/or real by config)
+- Additional producers (IMU/magnetometer/distance/light/current, simulated and/or real by config)
   feed partial updates into `state_channel`.
 
 ## Build Notes

@@ -18,6 +18,9 @@
 		kabot-distance = &vl53l0x;
 		kabot-light-left = &ltr329_left;
 		kabot-light-right = &ltr329_right;
+		kabot-current-left = &ina219_left;
+		kabot-current-right = &ina219_right;
+		kabot-current-supply = &ina219_supply;
 		kabot-temp = &coretemp;
 	};
 
@@ -62,6 +65,30 @@
 		auto-self-reset;
 	};
 
+	ina219_left: ina219@40 {
+		compatible = "ti,ina219";
+		reg = <0x40>;
+		shunt-milliohm = <100>;
+		lsb-microamp = <100>;
+		status = "okay";
+	};
+
+	ina219_right: ina219@42 {
+		compatible = "ti,ina219";
+		reg = <0x42>;
+		shunt-milliohm = <100>;
+		lsb-microamp = <100>;
+		status = "okay";
+	};
+
+	ina219_supply: ina219@4a {
+		compatible = "ti,ina219";
+		reg = <0x4a>;
+		shunt-milliohm = <100>;
+		lsb-microamp = <100>;
+		status = "okay";
+	};
+
 	mux: tca9546a@70 {
 		compatible = "ti,tca9546a";
 		reg = <0x70>;
@@ -101,7 +128,7 @@
 	pinctrl-0 = <&i2c1_tof_default>;
 	pinctrl-names = "default";
 	status = "okay";
-	clock-frequency = <I2C_BITRATE_STANDARD>;
+	clock-frequency = <I2C_BITRATE_FAST>;
 
 	vl53l0x: vl53l0x@29 {
 		compatible = "st,vl53l0x";
