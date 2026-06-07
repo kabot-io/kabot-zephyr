@@ -5,7 +5,7 @@ from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
-from model import StateSnapshot
+from model import DiscoveredRobot, StateSnapshot
 from state_fields import STATE_FIELDS
 
 
@@ -115,6 +115,7 @@ class KabotIoView:
         self.interval_var = tk.StringVar(value="0.1")
         self.status_var = tk.StringVar(value="Idle")
         self.plots_enabled_var = tk.BooleanVar(value=True)
+        self.active_robot_var = tk.StringVar(value="No claimed robot")
 
         self.state_vars: dict[str, tk.StringVar] = {}
         self.state_hz_vars: dict[str, tk.StringVar] = {}
@@ -134,9 +135,14 @@ class KabotIoView:
         self.on_send_once = None
         self.on_toggle_periodic = None
         self.on_toggle_plots = None
+        self.on_scan = None
+        self.on_claim_selected = None
+        self.on_unclaim = None
         self.on_stop = None
         self.on_arrow_press = None
         self.on_arrow_release = None
+
+        self.robot_tree: ttk.Treeview | None = None
 
         self._build_layout()
         self._bind_keyboard()
@@ -151,7 +157,7 @@ class KabotIoView:
         ttk.Label(
             control_frame,
             text="Use arrow keys to drive. Keep HMI window focused.",
-        ).grid(row=0, column=0, columnspan=8, sticky="w", pady=(0, 8))
+        ).grid(row=0, column=0, columnspan=9, sticky="w", pady=(0, 8))
 
         ttk.Label(control_frame, text="Left effort").grid(row=1, column=0, sticky="w")
         ttk.Entry(control_frame, textvariable=self.left_var, width=12).grid(row=1, column=1, padx=6)
@@ -170,6 +176,18 @@ class KabotIoView:
         )
         self.periodic_button.grid(row=1, column=7, padx=8)
 
+        ttk.Button(control_frame, text="Scan", command=self._emit_scan).grid(
+            row=1, column=8, padx=8
+        )
+
+        ttk.Button(control_frame, text="Claim Selected", command=self._emit_claim_selected).grid(
+            row=1, column=9, padx=8
+        )
+
+        ttk.Button(control_frame, text="Unclaim", command=self._emit_unclaim).grid(
+            row=1, column=10, padx=8
+        )
+
         ttk.Checkbutton(
             control_frame,
             text="Enable plots",
@@ -180,6 +198,44 @@ class KabotIoView:
         ttk.Label(control_frame, textvariable=self.status_var).grid(
             row=2, column=0, columnspan=6, sticky="w", pady=(8, 0)
         )
+        ttk.Label(control_frame, textvariable=self.active_robot_var).grid(
+            row=2, column=6, columnspan=4, sticky="e", pady=(8, 0)
+        )
+
+        robot_frame = ttk.LabelFrame(outer, text="Discovered Robots", padding=8)
+        robot_frame.pack(fill="x", padx=2, pady=(4, 8))
+
+        columns = (
+            "ip",
+            "control_port",
+            "serial",
+            "human_name",
+            "firmware_version",
+            "is_claimed",
+            "claimed_by_ip",
+        )
+        self.robot_tree = ttk.Treeview(robot_frame, columns=columns, show="headings", height=6)
+        self.robot_tree.heading("ip", text="IP")
+        self.robot_tree.heading("control_port", text="Control Port")
+        self.robot_tree.heading("serial", text="Serial")
+        self.robot_tree.heading("human_name", text="Human Name")
+        self.robot_tree.heading("firmware_version", text="Firmware")
+        self.robot_tree.heading("is_claimed", text="Claimed")
+        self.robot_tree.heading("claimed_by_ip", text="Claimed By")
+
+        self.robot_tree.column("ip", width=150, anchor="w")
+        self.robot_tree.column("control_port", width=110, anchor="center")
+        self.robot_tree.column("serial", width=180, anchor="w")
+        self.robot_tree.column("human_name", width=180, anchor="w")
+        self.robot_tree.column("firmware_version", width=120, anchor="w")
+        self.robot_tree.column("is_claimed", width=90, anchor="center")
+        self.robot_tree.column("claimed_by_ip", width=140, anchor="w")
+
+        robot_scroll = ttk.Scrollbar(robot_frame, orient="vertical", command=self.robot_tree.yview)
+        self.robot_tree.configure(yscrollcommand=robot_scroll.set)
+
+        self.robot_tree.pack(side="left", fill="x", expand=True)
+        robot_scroll.pack(side="right", fill="y")
 
         content = ttk.Frame(outer)
         content.pack(fill="both", expand=True, padx=2, pady=8)
@@ -300,6 +356,18 @@ class KabotIoView:
         if self.on_toggle_plots is not None:
             self.on_toggle_plots()
 
+    def _emit_scan(self) -> None:
+        if self.on_scan is not None:
+            self.on_scan()
+
+    def _emit_claim_selected(self) -> None:
+        if self.on_claim_selected is not None:
+            self.on_claim_selected()
+
+    def _emit_unclaim(self) -> None:
+        if self.on_unclaim is not None:
+            self.on_unclaim()
+
     def _bind_keyboard(self) -> None:
         self.root.bind("<KeyPress>", self._on_key_press)
         self.root.bind("<KeyRelease>", self._on_key_release)
@@ -343,6 +411,45 @@ class KabotIoView:
         for ui_key, snapshot_attr, hz_attr in STATE_FIELDS:
             self.state_vars[ui_key].set(getattr(snapshot, snapshot_attr))
             self.state_hz_vars[ui_key].set(getattr(snapshot, hz_attr) if hz_attr else "")
+
+    def set_discovered_robots(self, robots: list[DiscoveredRobot]) -> None:
+        if self.robot_tree is None:
+            return
+
+        for row_id in self.robot_tree.get_children():
+            self.robot_tree.delete(row_id)
+
+        for idx, robot in enumerate(robots):
+            self.robot_tree.insert(
+                "",
+                "end",
+                iid=str(idx),
+                values=(
+                    robot.ip,
+                    str(robot.control_port),
+                    robot.serial or "",
+                    robot.human_name or "",
+                    robot.firmware_version or "",
+                    "yes" if robot.is_claimed else "no",
+                    robot.claimed_by_ip or "",
+                ),
+            )
+
+    def selected_robot_index(self) -> int | None:
+        if self.robot_tree is None:
+            return None
+
+        selection = self.robot_tree.selection()
+        if not selection:
+            return None
+
+        try:
+            return int(selection[0])
+        except ValueError:
+            return None
+
+    def set_active_robot(self, text: str) -> None:
+        self.active_robot_var.set(text)
 
     @staticmethod
     def _to_float_or_none(raw: str) -> float | None:

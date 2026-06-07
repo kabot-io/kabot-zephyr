@@ -1,8 +1,11 @@
 #include "zbus/channels/state_egress_channel.h"
+#include "system/robot_settings.h"
 
 #include <arpa/inet.h>
 #include <errno.h>
 #include <pb_encode.h>
+#include <stdio.h>
+#include <string.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/posix/sys/socket.h>
@@ -38,57 +41,93 @@ static bool wifi_ready_for_state_egress(void)
 }
 #endif
 
-static int setup_state_socket(struct sockaddr_in *dest)
+static int setup_state_socket(void)
 {
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock < 0) {
         return -errno;
     }
 
-    dest->sin_family = AF_INET;
-    dest->sin_port = htons(CONFIG_KABOT_STATE_EGRESS_PORT);
+    return sock;
+}
 
-    int rc = inet_pton(AF_INET, CONFIG_KABOT_STATE_EGRESS_HOST, &dest->sin_addr);
-    if (rc == 0) {
-        close(sock);
+static int apply_state_target(struct sockaddr_in *dest,
+                              char *active_ip,
+                              size_t active_ip_len,
+                              uint16_t *active_port)
+{
+    char candidate_ip[KABOT_IPV4_STR_LEN] = {0};
+    uint16_t candidate_port = 0;
+    robot_settings_get_hmi_target(candidate_ip, sizeof(candidate_ip), &candidate_port);
+
+    if ((candidate_port == 0U) || (candidate_ip[0] == '\0')) {
+        LOG_WRN("State UDP target missing, keeping previous destination");
+        return 0;
+    }
+
+    if ((strcmp(active_ip, candidate_ip) == 0) && (*active_port == candidate_port)) {
+        return 0;
+    }
+
+    struct in_addr addr;
+    int rc = inet_pton(AF_INET, candidate_ip, &addr);
+    if (rc != 1) {
+        LOG_WRN("State UDP target rejected, invalid IPv4: %s", candidate_ip);
         return -EINVAL;
     }
-    if (rc < 0) {
-        int err = errno;
-        close(sock);
-        return -err;
-    }
 
-    return sock;
+    dest->sin_family = AF_INET;
+    dest->sin_port = htons(candidate_port);
+    dest->sin_addr = addr;
+
+    (void)snprintf(active_ip, active_ip_len, "%s", candidate_ip);
+    *active_port = candidate_port;
+
+    LOG_INF("State UDP target active: %s:%u", active_ip, (unsigned int)*active_port);
+    return 0;
 }
 
 void state_udp_sender_task(void)
 {
     const struct zbus_channel *chan;
     struct sockaddr_in dest = {0};
+    char active_ip[KABOT_IPV4_STR_LEN] = {0};
+    uint16_t active_port = 0;
+    int64_t last_unclaimed_log_ms = 0;
 #if defined(CONFIG_WIFI)
     bool network_ready = false;
     int64_t wait_start_ms = k_uptime_get();
     int64_t last_wait_log_ms = 0;
 #endif
 
-    int sock = setup_state_socket(&dest);
+    int sock = setup_state_socket();
 
     if (sock < 0) {
-        LOG_ERR("Failed to setup state UDP socket for %s:%d: %d",
-                CONFIG_KABOT_STATE_EGRESS_HOST,
-                CONFIG_KABOT_STATE_EGRESS_PORT,
-                sock);
+        LOG_ERR("Failed to setup state UDP socket: %d", sock);
         return;
     }
 
-    LOG_INF("State UDP sender active: %s:%d", CONFIG_KABOT_STATE_EGRESS_HOST,
-            CONFIG_KABOT_STATE_EGRESS_PORT);
+    if (apply_state_target(&dest, active_ip, sizeof(active_ip), &active_port) < 0) {
+        LOG_ERR("Failed to resolve initial state UDP target");
+        close(sock);
+        return;
+    }
 
     while (!zbus_sub_wait(&state_udp_sender, &chan, K_FOREVER)) {
         if (&state_egress_channel != chan) {
             continue;
         }
+
+        if (!robot_settings_is_claimed()) {
+            int64_t now_ms = k_uptime_get();
+            if ((last_unclaimed_log_ms == 0) || ((now_ms - last_unclaimed_log_ms) >= 5000)) {
+                LOG_INF("State UDP waiting for claim; dropping egress until claim=true Bonjour arrives");
+                last_unclaimed_log_ms = now_ms;
+            }
+            continue;
+        }
+
+        (void)apply_state_target(&dest, active_ip, sizeof(active_ip), &active_port);
 
         State state;
         if (zbus_chan_read(&state_egress_channel, &state, K_MSEC(ZBUS_READ_TIMEOUT_MS)) != 0) {
@@ -137,9 +176,8 @@ void state_udp_sender_task(void)
             int err = errno;
             LOG_WRN("State UDP send failed: %d", err);
         } else {
-            LOG_DBG("State UDP sent: %d bytes -> %s:%d", (int)sent,
-                    CONFIG_KABOT_STATE_EGRESS_HOST,
-                    CONFIG_KABOT_STATE_EGRESS_PORT);
+            LOG_DBG("State UDP sent: %d bytes -> %s:%u", (int)sent, active_ip,
+                    (unsigned int)active_port);
         }
     }
 

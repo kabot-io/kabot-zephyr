@@ -9,6 +9,16 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 - Keep transport payloads aligned with firmware protobuf definitions.
 - Support keyboard-driven control with periodic send cadence.
 
+## Status In Project Scope
+
+The HMI in `scripts/kabot_io` is a local debug/reference tool.
+
+Normative discovery and binding contracts for external HMIs are documented in:
+
+- `docs/robot-discovery-and-binding-spec.md`
+- `docs/hmi_centric_info/04_firmware_interface_for_hmi_developers.md`
+- `docs/hmi_centric_info/05_system_data_flow_reference.md`
+
 ## Scope (Current)
 
 - Sends `Control` protobuf messages over UDP to firmware ingress.
@@ -19,12 +29,43 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 - Displays per-header receive rate (`Hz`) columns derived in the controller.
 - Provides rolling telemetry plots with an operator toggle to disable plotting when
   throughput exceeds host rendering capacity.
+- Performs Bonjour discovery with unicast sweep based on host interface subnets.
+- Scans smaller subnets first and larger subnets last.
+- Includes localhost (`127.0.0.1`) probe path for simulation by default.
+- Shows a discovered-robots list with metadata.
+- Exposes `Scan`, `Claim Selected`, and `Unclaim` controls for explicit ownership control.
 
 ## Ports
 
 - Control target port (firmware ingress): `30010`.
+- Discovery target port (firmware discovery ingress): `30012`.
 - State listen port (HMI ingress): `30011`.
 - Default HMI state bind address: `0.0.0.0`.
+
+## Discovery Runtime Notes
+
+- Discovery emits runtime logs during scan progress.
+- Interface subnets are scanned in ascending host-count order.
+- Large subnets (for example Docker/ZeroTier `/16`) are scanned after smaller ones.
+- Discovery requests are sent with `claim=false`.
+- Operator-driven `Claim Selected` sends `claim=true` only to the selected robot.
+- Operator-driven `Unclaim` sends `release=true` to currently claimed robot.
+- Discovery applies an effective minimum response window and an extra localhost
+  grace receive period to reduce missed localhost responses.
+
+## Multi-Robot Selection Flow
+
+1. Operator runs `Scan` to populate discovered robots list.
+2. HMI receives multiple `BonjourResponse` packets and deduplicates entries.
+3. Operator selects one robot row.
+4. Operator runs `Claim Selected`.
+5. HMI updates active control target to the claimed robot endpoint.
+
+Unclaim flow:
+
+1. Operator runs `Unclaim`.
+2. HMI sends `Bonjour.release=true` to currently claimed robot.
+3. On success, HMI clears active robot indicator and updates list row claim fields.
 
 ## Channel and Policy Alignment
 

@@ -22,6 +22,38 @@ config KABOT_MOTOR_SHELL
     help
       Enable the `motor` shell command group.
 
+config KABOT_CONTROL_INGRESS_PORT
+    int "Control ingress UDP port"
+    default 30010
+    range 1024 65535
+    help
+      UDP ingress port for serialized Control messages.
+
+config KABOT_DISCOVERY_PORT
+    int "Discovery UDP port"
+    default 30012
+    range 1024 65535
+    help
+      UDP port where robot listens for Bonjour discovery datagrams.
+
+config KABOT_DEFAULT_SERIAL
+    string "Default robot serial"
+    default "kabot-unknown"
+    help
+      Fallback serial used when no serial is stored in settings.
+
+config KABOT_DEFAULT_HUMAN_NAME
+    string "Default robot human-readable name"
+    default "Kabot"
+    help
+      Fallback human-readable name used when no name is stored in settings.
+
+config KABOT_FIRMWARE_VERSION
+    string "Firmware version for discovery response"
+    default "dev"
+    help
+      Firmware version string included in BonjourResponse.
+
 config KABOT_STATE_EGRESS_HOST
     string "State egress destination host"
     default "192.168.0.106"

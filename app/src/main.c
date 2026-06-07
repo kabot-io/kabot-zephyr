@@ -3,6 +3,8 @@
 #include <zephyr/zbus/zbus.h>
 
 #include "control/control_service.h"
+#include "control/discovery_service.h"
+#include "system/robot_settings.h"
 #include "zbus/control/effort_subscriber.h"
 #include "zbus/channels/control_channel.h"
 #include "zbus/state/sensor_subscriber.h"
@@ -53,7 +55,13 @@ static int kabot_init(void)
 
     autoconnect_wifi();
 
-    int rc = start_sensor_subscriber();
+    int rc = robot_settings_init();
+    if (rc < 0) {
+        LOG_ERR("Failed to initialize robot settings: %d", rc);
+        return rc;
+    }
+
+    rc = start_sensor_subscriber();
     if (rc < 0) {
         LOG_ERR("Failed to start sensor subscriber: %d", rc);
         return rc;
@@ -62,6 +70,14 @@ static int kabot_init(void)
     rc = start_control_service();
     if (rc < 0) {
         LOG_ERR("Failed to start control service: %d", rc);
+        stop_sensor_subscriber();
+        return rc;
+    }
+
+    rc = start_discovery_service();
+    if (rc < 0) {
+        LOG_ERR("Failed to start discovery service: %d", rc);
+        stop_control_service();
         stop_sensor_subscriber();
         return rc;
     }

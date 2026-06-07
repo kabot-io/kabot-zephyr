@@ -65,3 +65,18 @@ message Control {
     Header header = 1;
     StateVector2 effort = 2;
 }
+
+message Bonjour {
+    uint32 hmi_port = 1;
+    bool claim = 2;
+    bool release = 3;
+}
+
+message BonjourResponse {
+    string serial = 1;
+    string human_name = 2;
+    uint32 control_port = 3;
+    string firmware_version = 4;
+    bool is_claimed = 5;
+    string claimed_by_ip = 6;
+}

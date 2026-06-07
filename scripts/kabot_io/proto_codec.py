@@ -72,8 +72,24 @@ def encode_control_effort(left: float, right: float) -> bytes:
     return msg.SerializeToString()
 
 
+def encode_bonjour(hmi_port: int, claim: bool = False, release: bool = False) -> bytes:
+    pb2 = _proto_module()
+    msg = pb2.Bonjour()
+    msg.hmi_port = hmi_port
+    msg.claim = claim
+    msg.release = release
+    return msg.SerializeToString()
+
+
 def decode_state_msg(payload: bytes):
     pb2 = _proto_module()
     msg = pb2.State()
+    msg.ParseFromString(payload)
+    return msg
+
+
+def decode_bonjour_response(payload: bytes):
+    pb2 = _proto_module()
+    msg = pb2.BonjourResponse()
     msg.ParseFromString(payload)
     return msg

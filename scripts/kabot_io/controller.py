@@ -1,7 +1,7 @@
 from collections import deque
 import time
 
-from model import KabotIoModel
+from model import DiscoveredRobot, KabotIoModel
 from state_fields import HEADER_HZ_PAIRS
 from view import KabotIoView
 
@@ -40,10 +40,14 @@ class KabotIoController:
         self._last_header_hz: dict[str, str] = {}
         self._hz_clear_after_ids: dict[str, str] = {}
         self._header_hz_samples: dict[str, deque[float]] = {}
+        self._discovered_robots: list[DiscoveredRobot] = []
 
         self.view.on_send_once = self.send_once
         self.view.on_toggle_periodic = self.toggle_periodic
         self.view.on_toggle_plots = self.toggle_plots
+        self.view.on_scan = self.scan_robots
+        self.view.on_claim_selected = self.claim_selected_robot
+        self.view.on_unclaim = self.unclaim_current_robot
         self.view.on_stop = self.shutdown
         self.view.on_arrow_press = self.handle_arrow_press
         self.view.on_arrow_release = self.handle_arrow_release
@@ -155,6 +159,113 @@ class KabotIoController:
             self.view.set_status("Invalid numeric input in control fields")
         except OSError as exc:
             self.view.set_status(f"UDP send failed: {exc}")
+
+    def scan_robots(self) -> None:
+        self.view.set_status("Discovery scan in progress...")
+
+        robots = self.model.discover_many()
+        self._discovered_robots = robots
+        self.view.set_discovered_robots(robots)
+
+        if not robots:
+            self.view.set_status(
+                "Discovery scan found no robots; "
+                f"current target={self.model.target[0]}:{self.model.target[1]}"
+            )
+            return
+
+        self.view.set_status(f"Discovery scan found {len(robots)} robot(s). Select one and claim.")
+
+    def claim_selected_robot(self) -> None:
+        selected_idx = self.view.selected_robot_index()
+        if selected_idx is None:
+            self.view.set_status("Select a robot row before claiming")
+            return
+
+        if selected_idx < 0 or selected_idx >= len(self._discovered_robots):
+            self.view.set_status("Selected robot index is out of range")
+            return
+
+        target_robot = self._discovered_robots[selected_idx]
+
+        if self.model.claimed_robot is not None and self.model.claimed_robot.ip != target_robot.ip:
+            previous = self.model.claimed_robot
+            self.view.set_status(
+                f"Releasing previous robot stream at {previous.ip}:{previous.control_port}"
+            )
+            released = self.model.release_robot_stream(previous)
+            if not released:
+                self.view.set_status(
+                    f"Failed to release previous robot {previous.ip}; aborting claim"
+                )
+                return
+
+        self.view.set_status(
+            f"Claim in progress for {target_robot.ip}:{target_robot.control_port}"
+        )
+
+        claimed = self.model.claim_robot(target_robot)
+        if claimed is None:
+            self.view.set_status(
+                "Claim failed or timed out; "
+                f"current target={self.model.target[0]}:{self.model.target[1]}"
+            )
+            return
+
+        for idx, robot in enumerate(self._discovered_robots):
+            if robot.ip == claimed.ip:
+                self._discovered_robots[idx] = claimed
+                break
+
+        self.view.set_discovered_robots(self._discovered_robots)
+        self.view.set_active_robot(
+            "Active robot: "
+            f"{claimed.serial or 'unknown'} ({claimed.human_name or 'unnamed'}) "
+            f"@ {claimed.ip}:{claimed.control_port}"
+        )
+        self.view.set_status(
+            "Claimed robot "
+            f"serial={claimed.serial or 'unknown'} "
+            f"target={claimed.ip}:{claimed.control_port} "
+            f"fw={claimed.firmware_version or 'unknown'} "
+            f"claimed={'yes' if claimed.is_claimed else 'no'} "
+            f"claimed_by={claimed.claimed_by_ip or ''}"
+        )
+
+    def unclaim_current_robot(self) -> None:
+        current = self.model.claimed_robot
+        if current is None:
+            self.view.set_status("No currently claimed robot to unclaim")
+            return
+
+        self.view.set_status(
+            f"Unclaim in progress for {current.ip}:{current.control_port}"
+        )
+        released = self.model.release_robot_stream(current)
+        if not released:
+            self.view.set_status(
+                f"Unclaim failed for {current.ip}:{current.control_port}"
+            )
+            return
+
+        for idx, robot in enumerate(self._discovered_robots):
+            if robot.ip == current.ip:
+                self._discovered_robots[idx] = DiscoveredRobot(
+                    ip=robot.ip,
+                    control_port=robot.control_port,
+                    serial=robot.serial,
+                    human_name=robot.human_name,
+                    firmware_version=robot.firmware_version,
+                    is_claimed=False,
+                    claimed_by_ip="",
+                )
+                break
+
+        self.view.set_discovered_robots(self._discovered_robots)
+        self.view.set_active_robot("No claimed robot")
+        self.view.set_status(
+            f"Unclaimed robot target={current.ip}:{current.control_port}"
+        )
 
     def handle_arrow_press(self, key: str) -> None:
         if key not in ("Up", "Down", "Left", "Right"):

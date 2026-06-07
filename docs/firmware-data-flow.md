@@ -125,20 +125,69 @@ Default publisher refresh rates (current config defaults):
 
 ## Ports
 
-- Control ingress UDP port: `30010`.
-- State egress UDP port: `30011`.
-- HMI state listen UDP port: `30011`.
+- Control ingress UDP port: configurable (`CONFIG_KABOT_CONTROL_INGRESS_PORT`, default `30010`).
+- State egress destination port:
+  - fallback/default: `CONFIG_KABOT_STATE_EGRESS_PORT` (default `30011`)
+  - active runtime: last accepted `Bonjour.hmi_port`.
+- Discovery UDP port: configurable (`CONFIG_KABOT_DISCOVERY_PORT`, default `30012`).
 
 ## Key Modules
 
 - `app/src/control/control_service.c`
   - UDP socket setup, receive, decode, and publish.
+- `app/src/control/discovery_service.c`
+  - UDP Bonjour discovery receive path.
+  - Discover-only (`claim=false`) and claim (`claim=true`) behavior split.
+  - Last-claim-wins takeover for active state egress destination.
+  - Bonjour response encode/send with robot identity metadata.
+- `app/src/system/robot_settings.c`
+  - Settings-backed robot identity (`serial`, `human_name`) and active HMI endpoint.
+  - Fallback defaults from Kconfig and runtime getters/setters for other modules.
 - `app/src/zbus/channels/control_channel.c`
   - zbus channel definition and message validator.
 - `app/src/zbus/control/effort_subscriber.c`
   - message consume and motor driver actuation.
+- `app/src/zbus/state/state_udp_sender.c`
+  - Runtime-resolved destination target, refreshed from robot settings.
+  - Egress is blocked until runtime claim has been accepted.
 - `app/protos/state_control_msg.proto`
-  - protobuf schema for both `Control` and `State`.
+  - protobuf schema for `Control`, `State`, `Bonjour`, and `BonjourResponse`.
+
+## Discovery and Dynamic Egress Binding
+
+Implemented behavior:
+
+1. Robot listens on discovery UDP port.
+2. HMI sends protobuf `Bonjour` with:
+  - `hmi_port`
+  - `claim`
+3. Robot extracts sender IPv4 from UDP source address and combines it with `hmi_port`.
+4. If `claim=false`, robot responds without changing active egress target.
+5. If `claim=true`, robot applies takeover policy (last accepted claim wins).
+6. On `claim=true`, robot persists endpoint in settings keys:
+   - `kabot/net/hmi_ip`
+   - `kabot/net/hmi_port`
+7. Robot replies with `BonjourResponse` containing:
+   - `serial`
+   - `human_name`
+   - `control_port`
+   - `firmware_version`
+  - `is_claimed`
+  - `claimed_by_ip`
+
+Identity persistence keys:
+
+- `kabot/id/serial`
+- `kabot/id/human_name`
+
+Fallback behavior:
+
+- If settings are unavailable, runtime defaults are loaded from Kconfig.
+- If no persisted HMI endpoint exists, fallback egress target comes from:
+  - `CONFIG_KABOT_STATE_EGRESS_HOST`
+  - `CONFIG_KABOT_STATE_EGRESS_PORT`
+- Regardless of loaded endpoint values, state UDP sender starts transmitting only after a
+  runtime `claim=true` Bonjour is accepted.
 
 ## Why zbus Here
 
