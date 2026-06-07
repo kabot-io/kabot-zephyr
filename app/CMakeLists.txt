@@ -23,6 +23,8 @@ target_sources(
     app
     PRIVATE src/main.c
             src/control/control_service.c
+            src/control/discovery_service.c
+            src/system/robot_settings.c
             src/zbus/channels/control_channel.c
             src/zbus/control/effort_subscriber.c
             src/zbus/channels/state_channel.c

@@ -13,7 +13,6 @@
 
 LOG_MODULE_REGISTER(control_service, LOG_LEVEL_DBG);
 
-#define CONTROL_PORT 30010
 #define MTU          1500
 
 static int control_socket = -1;
@@ -88,7 +87,7 @@ void stop_control_service(void)
 
 int start_control_service(void)
 {
-    control_socket = setup_socket(CONTROL_PORT);
+    control_socket = setup_socket((uint16_t)CONFIG_KABOT_CONTROL_INGRESS_PORT);
     if (control_socket < 0) {
         return control_socket;
     }
@@ -102,6 +101,7 @@ int start_control_service(void)
         return ret;
     }
 
-    LOG_INF("Control service active on port %d (protobuf Control)", CONTROL_PORT);
+    LOG_INF("Control service active on port %d (protobuf Control)",
+            CONFIG_KABOT_CONTROL_INGRESS_PORT);
     return 0;
 }

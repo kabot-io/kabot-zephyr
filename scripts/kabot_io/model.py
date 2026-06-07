@@ -1,8 +1,39 @@
+import ipaddress
+import json
+import logging
 import socket
+import subprocess
+import time
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 from config import AppConfig
-from proto_codec import decode_state_msg, encode_control_effort
+from proto_codec import decode_bonjour_response, decode_state_msg, encode_bonjour, encode_control_effort
+
+
+LOGGER = logging.getLogger(__name__)
+
+MIN_DISCOVERY_RESPONSE_WINDOW_SEC = 0.8
+LOCALHOST_GRACE_WINDOW_SEC = 0.12
+
+
+@dataclass
+class DiscoveredRobot:
+    ip: str
+    control_port: int
+    serial: str
+    human_name: str
+    firmware_version: str
+    is_claimed: bool = False
+    claimed_by_ip: str = ""
+
+
+@dataclass(frozen=True)
+class InterfaceSubnet:
+    ifname: str
+    local_ip: str
+    prefixlen: int
+    host_count: int
 
 
 @dataclass
@@ -111,6 +142,329 @@ class KabotIoModel:
         self.state_sock.setblocking(False)
 
         self.sent_count = 0
+        self.claimed_robot: DiscoveredRobot | None = None
+
+    @staticmethod
+    def _linux_ipv4_interfaces() -> list[InterfaceSubnet]:
+        cmd = ["ip", "-j", "-4", "addr", "show", "up"]
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            LOGGER.warning("Discovery interface query failed: rc=%d", proc.returncode)
+            return []
+
+        try:
+            data = json.loads(proc.stdout)
+        except json.JSONDecodeError:
+            LOGGER.warning("Discovery interface query produced invalid JSON")
+            return []
+
+        subnets: list[InterfaceSubnet] = []
+        for iface in data:
+            ifname = iface.get("ifname", "unknown")
+
+            for info in iface.get("addr_info", []):
+                if info.get("family") != "inet":
+                    continue
+                local = info.get("local")
+                prefixlen = info.get("prefixlen")
+                if not local or prefixlen is None:
+                    continue
+                host_count = KabotIoModel._host_count_for_prefix(int(prefixlen))
+                subnets.append(
+                    InterfaceSubnet(
+                        ifname=ifname,
+                        local_ip=local,
+                        prefixlen=int(prefixlen),
+                        host_count=host_count,
+                    )
+                )
+
+        return subnets
+
+    @staticmethod
+    def _host_count_for_prefix(prefixlen: int) -> int:
+        if prefixlen >= 32:
+            return 1
+        if prefixlen == 31:
+            return 2
+        return max(0, (1 << (32 - prefixlen)) - 2)
+
+    @staticmethod
+    def _iter_hosts_for_cidr(local_ip: str, prefixlen: int) -> Iterable[str]:
+        network = ipaddress.ip_network(f"{local_ip}/{prefixlen}", strict=False)
+
+        if network.prefixlen == 32:
+            yield str(network.network_address)
+            return
+
+        if network.prefixlen == 31:
+            for ip in network:
+                yield str(ip)
+            return
+
+        for ip in network.hosts():
+            yield str(ip)
+
+    def _iter_discovery_candidates(self) -> Iterable[tuple[str, InterfaceSubnet | None]]:
+        seen: set[str] = set()
+
+        if self.config.include_localhost:
+            seen.add("127.0.0.1")
+            yield ("127.0.0.1", None)
+
+        subnets = sorted(
+            self._linux_ipv4_interfaces(),
+            key=lambda item: (item.host_count, item.ifname, item.local_ip),
+        )
+
+        for subnet in subnets:
+            LOGGER.info(
+                "Discovery scanning subnet if=%s cidr=%s/%d hosts=%d",
+                subnet.ifname,
+                subnet.local_ip,
+                subnet.prefixlen,
+                subnet.host_count,
+            )
+
+            scanned = 0
+            for host in self._iter_hosts_for_cidr(subnet.local_ip, subnet.prefixlen):
+                if host in seen:
+                    continue
+                seen.add(host)
+                scanned += 1
+                if (scanned % 1024) == 0:
+                    LOGGER.info(
+                        "Discovery progress if=%s cidr=%s/%d scanned=%d/%d",
+                        subnet.ifname,
+                        subnet.local_ip,
+                        subnet.prefixlen,
+                        scanned,
+                        subnet.host_count,
+                    )
+                yield (host, subnet)
+
+            LOGGER.info(
+                "Discovery finished subnet if=%s cidr=%s/%d scanned=%d",
+                subnet.ifname,
+                subnet.local_ip,
+                subnet.prefixlen,
+                scanned,
+            )
+
+    def _try_receive_discovery_response(self, discover_sock: socket.socket) -> DiscoveredRobot | None:
+        try:
+            response, addr = discover_sock.recvfrom(2048)
+        except (BlockingIOError, TimeoutError, OSError):
+            return None
+
+        try:
+            msg = decode_bonjour_response(response)
+        except Exception:
+            return None
+
+        control_port = int(msg.control_port) if msg.control_port > 0 else self.config.port
+        discovered = DiscoveredRobot(
+            ip=addr[0],
+            control_port=control_port,
+            serial=msg.serial,
+            human_name=msg.human_name,
+            firmware_version=msg.firmware_version,
+            is_claimed=bool(getattr(msg, "is_claimed", False)),
+            claimed_by_ip=str(getattr(msg, "claimed_by_ip", "")),
+        )
+
+        return discovered
+
+    @staticmethod
+    def _robot_key(robot: DiscoveredRobot) -> tuple[str, str]:
+        serial_key = (robot.serial or "").strip()
+        if serial_key:
+            return ("serial", serial_key)
+        return ("endpoint", f"{robot.ip}:{robot.control_port}")
+
+    def discover_many(self) -> list[DiscoveredRobot]:
+        if not self.config.enable_discovery:
+            return []
+
+        payload = encode_bonjour(self.config.state_port, claim=False)
+        response_window_sec = max(MIN_DISCOVERY_RESPONSE_WINDOW_SEC, self.config.discovery_timeout_sec)
+        deadline = time.monotonic() + response_window_sec
+        LOGGER.info(
+            "Discovery started: port=%d timeout=%.3fs (effective=%.3fs) include_localhost=%s",
+            self.config.discovery_port,
+            self.config.discovery_timeout_sec,
+            response_window_sec,
+            self.config.include_localhost,
+        )
+
+        found: dict[tuple[str, str], DiscoveredRobot] = {}
+
+        def collect_available(sock: socket.socket) -> None:
+            while True:
+                discovered = self._try_receive_discovery_response(sock)
+                if discovered is None:
+                    return
+                key = self._robot_key(discovered)
+                found[key] = discovered
+                LOGGER.info(
+                    "Discovery found robot serial=%s name=%s endpoint=%s:%d",
+                    discovered.serial or "unknown",
+                    discovered.human_name or "unnamed",
+                    discovered.ip,
+                    discovered.control_port,
+                )
+
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as discover_sock:
+            discover_sock.bind(("0.0.0.0", 0))
+            discover_sock.setblocking(False)
+
+            sent_count = 0
+            for host, subnet in self._iter_discovery_candidates():
+                if time.monotonic() >= deadline:
+                    LOGGER.info("Discovery timed out during sweep after %d sends", sent_count)
+                    break
+
+                try:
+                    discover_sock.sendto(payload, (host, self.config.discovery_port))
+                    sent_count += 1
+                except OSError:
+                    continue
+
+                if subnet is None:
+                    LOGGER.info("Discovery sent localhost probe to %s", host)
+                    localhost_deadline = min(deadline, time.monotonic() + LOCALHOST_GRACE_WINDOW_SEC)
+                    while time.monotonic() < localhost_deadline:
+                        collect_available(discover_sock)
+                        time.sleep(0.01)
+
+                collect_available(discover_sock)
+
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+
+                discover_sock.settimeout(remaining)
+                discovered = self._try_receive_discovery_response(discover_sock)
+                if discovered is not None:
+                    key = self._robot_key(discovered)
+                    found[key] = discovered
+                    LOGGER.info(
+                        "Discovery found robot serial=%s name=%s endpoint=%s:%d",
+                        discovered.serial or "unknown",
+                        discovered.human_name or "unnamed",
+                        discovered.ip,
+                        discovered.control_port,
+                    )
+
+        robots = list(found.values())
+        robots.sort(key=lambda item: (item.serial or "", item.human_name or "", item.ip, item.control_port))
+        LOGGER.info("Discovery completed with %d unique robot(s)", len(robots))
+        return robots
+
+    def claim_robot(self, robot: DiscoveredRobot) -> DiscoveredRobot | None:
+        payload = encode_bonjour(self.config.state_port, claim=True, release=False)
+        timeout = max(0.2, self.config.discovery_timeout_sec)
+
+        LOGGER.info("Claim started for robot endpoint=%s:%d", robot.ip, self.config.discovery_port)
+
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as claim_sock:
+            claim_sock.bind(("0.0.0.0", 0))
+            claim_sock.settimeout(timeout)
+
+            try:
+                claim_sock.sendto(payload, (robot.ip, self.config.discovery_port))
+            except OSError as exc:
+                LOGGER.warning("Claim send failed for %s: %s", robot.ip, exc)
+                return None
+
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                try:
+                    response, addr = claim_sock.recvfrom(2048)
+                except TimeoutError:
+                    return None
+                except OSError:
+                    return None
+
+                if addr[0] != robot.ip:
+                    continue
+
+                try:
+                    msg = decode_bonjour_response(response)
+                except Exception:
+                    continue
+
+                control_port = int(msg.control_port) if msg.control_port > 0 else robot.control_port
+                claimed = DiscoveredRobot(
+                    ip=addr[0],
+                    control_port=control_port,
+                    serial=msg.serial,
+                    human_name=msg.human_name,
+                    firmware_version=msg.firmware_version,
+                    is_claimed=bool(getattr(msg, "is_claimed", False)),
+                    claimed_by_ip=str(getattr(msg, "claimed_by_ip", "")),
+                )
+
+                self.target = (claimed.ip, claimed.control_port)
+                self.claimed_robot = claimed
+                LOGGER.info(
+                    "Claim success serial=%s name=%s target=%s:%d",
+                    claimed.serial or "unknown",
+                    claimed.human_name or "unnamed",
+                    claimed.ip,
+                    claimed.control_port,
+                )
+                return claimed
+
+        return None
+
+    def release_robot_stream(self, robot: DiscoveredRobot) -> bool:
+        payload = encode_bonjour(self.config.state_port, claim=False, release=True)
+        timeout = max(0.2, self.config.discovery_timeout_sec)
+
+        LOGGER.info("Release started for robot endpoint=%s:%d", robot.ip, self.config.discovery_port)
+
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as release_sock:
+            release_sock.bind(("0.0.0.0", 0))
+            release_sock.settimeout(timeout)
+
+            try:
+                release_sock.sendto(payload, (robot.ip, self.config.discovery_port))
+            except OSError as exc:
+                LOGGER.warning("Release send failed for %s: %s", robot.ip, exc)
+                return False
+
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                try:
+                    response, addr = release_sock.recvfrom(2048)
+                except TimeoutError:
+                    return False
+                except OSError:
+                    return False
+
+                if addr[0] != robot.ip:
+                    continue
+
+                try:
+                    _ = decode_bonjour_response(response)
+                except Exception:
+                    continue
+
+                if self.claimed_robot and self.claimed_robot.ip == robot.ip:
+                    self.claimed_robot = None
+
+                LOGGER.info("Release success for robot endpoint=%s", robot.ip)
+                return True
+
+        return False
+
+    def discover_and_bind(self) -> DiscoveredRobot | None:
+        robots = self.discover_many()
+        if not robots:
+            return None
+        return self.claim_robot(robots[0])
 
     def send_control(self, left: float, right: float) -> None:
         payload = encode_control_effort(left, right)
