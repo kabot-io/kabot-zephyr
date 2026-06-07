@@ -54,6 +54,9 @@ void distance_publisher_task(void)
         state.distance.header.stamp = state_now_stamp_ms();
         set_header_frame_id(&state.distance.header, CONFIG_KABOT_STATE_DISTANCE_FRAME_ID);
         state.distance.state = sensor_value_to_float(&distance);
+        if (state.distance.state > 1.0f) {
+            state.distance.state = 1.0f;
+        }
 
         rc = publish_state_msg(&state, K_MSEC(CONFIG_KABOT_STATE_DISTANCE_PERIOD_MS));
         if (rc != 0) {
