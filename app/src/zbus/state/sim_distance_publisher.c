@@ -18,7 +18,7 @@ void sim_distance_publisher_task(void)
         state.distance.has_header = true;
         state.distance.header.stamp = stamp;
         set_header_frame_id(&state.distance.header, CONFIG_KABOT_STATE_DISTANCE_FRAME_ID);
-        state.distance.state = random_rangef(0.05f, 4.0f);
+        state.distance.state = random_rangef(0.05f, 1.0f);
 
         int rc = publish_state_msg(&state, K_MSEC(CONFIG_KABOT_STATE_DISTANCE_PERIOD_MS));
         if (rc != 0) {
