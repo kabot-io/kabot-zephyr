@@ -26,6 +26,7 @@ EFFORT_BY_KEYS = {
 
 effort_scale = (1.0, 1.0)
 
+
 class KabotIoController:
     def __init__(self, model: KabotIoModel, view: KabotIoView):
         self.model = model
@@ -149,7 +150,7 @@ class KabotIoController:
     def send_once(self) -> None:
         try:
             left, right = self.view.read_effort_inputs()
-            self.model.send_control(left*effort_scale[0], right*effort_scale[1])
+            self.model.send_control(left * effort_scale[0], right * effort_scale[1])
             self.view.set_status(
                 f"Sent #{self.model.sent_count} -> left={left:.3f}, right={right:.3f}, "
                 f"target={self.model.target[0]}:{self.model.target[1]}"
@@ -198,9 +199,7 @@ class KabotIoController:
                     f"Failed to release previous robot {previous.ip}; proceeding with claim"
                 )
 
-        self.view.set_status(
-            f"Claim in progress for {target_robot.ip}:{target_robot.control_port}"
-        )
+        self.view.set_status(f"Claim in progress for {target_robot.ip}:{target_robot.control_port}")
 
         claimed = self.model.claim_robot(target_robot)
         if claimed is None:
@@ -236,14 +235,10 @@ class KabotIoController:
             self.view.set_status("No currently claimed robot to unclaim")
             return
 
-        self.view.set_status(
-            f"Unclaim in progress for {current.ip}:{current.control_port}"
-        )
+        self.view.set_status(f"Unclaim in progress for {current.ip}:{current.control_port}")
         released = self.model.release_robot_stream(current)
         if not released:
-            self.view.set_status(
-                f"Unclaim failed for {current.ip}:{current.control_port}"
-            )
+            self.view.set_status(f"Unclaim failed for {current.ip}:{current.control_port}")
             return
 
         for idx, robot in enumerate(self._discovered_robots):
@@ -261,9 +256,7 @@ class KabotIoController:
 
         self.view.set_discovered_robots(self._discovered_robots)
         self.view.set_active_robot("No claimed robot")
-        self.view.set_status(
-            f"Unclaimed robot target={current.ip}:{current.control_port}"
-        )
+        self.view.set_status(f"Unclaimed robot target={current.ip}:{current.control_port}")
 
     def handle_arrow_press(self, key: str) -> None:
         if key not in ("Up", "Down", "Left", "Right"):

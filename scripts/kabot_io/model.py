@@ -263,7 +263,9 @@ class KabotIoModel:
                 scanned,
             )
 
-    def _try_receive_discovery_response(self, discover_sock: socket.socket) -> DiscoveredRobot | None:
+    def _try_receive_discovery_response(
+        self, discover_sock: socket.socket
+    ) -> DiscoveredRobot | None:
         try:
             response, addr = discover_sock.recvfrom(2048)
         except (BlockingIOError, TimeoutError, OSError):
@@ -299,7 +301,9 @@ class KabotIoModel:
             return []
 
         payload = encode_bonjour(self.config.state_port, claim=False)
-        response_window_sec = max(MIN_DISCOVERY_RESPONSE_WINDOW_SEC, self.config.discovery_timeout_sec)
+        response_window_sec = max(
+            MIN_DISCOVERY_RESPONSE_WINDOW_SEC, self.config.discovery_timeout_sec
+        )
         deadline = time.monotonic() + response_window_sec
         LOGGER.info(
             "Discovery started: port=%d timeout=%.3fs (effective=%.3fs) include_localhost=%s",
@@ -348,7 +352,9 @@ class KabotIoModel:
 
                 if subnet is None:
                     LOGGER.info("Discovery sent localhost probe to %s", host)
-                    localhost_deadline = min(deadline, time.monotonic() + LOCALHOST_GRACE_WINDOW_SEC)
+                    localhost_deadline = min(
+                        deadline, time.monotonic() + LOCALHOST_GRACE_WINDOW_SEC
+                    )
                     while time.monotonic() < localhost_deadline:
                         collect_available(discover_sock)
                         time.sleep(0.01)
@@ -374,7 +380,9 @@ class KabotIoModel:
                     )
 
         robots = list(found.values())
-        robots.sort(key=lambda item: (item.serial or "", item.human_name or "", item.ip, item.control_port))
+        robots.sort(
+            key=lambda item: (item.serial or "", item.human_name or "", item.ip, item.control_port)
+        )
         LOGGER.info("Discovery completed with %d unique robot(s)", len(robots))
         return robots
 
@@ -439,7 +447,9 @@ class KabotIoModel:
         payload = encode_bonjour(self.config.state_port, claim=False, release=True)
         timeout = max(0.2, self.config.discovery_timeout_sec)
 
-        LOGGER.info("Release started for robot endpoint=%s:%d", robot.ip, self.config.discovery_port)
+        LOGGER.info(
+            "Release started for robot endpoint=%s:%d", robot.ip, self.config.discovery_port
+        )
 
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as release_sock:
             release_sock.bind(("0.0.0.0", 0))
