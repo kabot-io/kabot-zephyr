@@ -76,7 +76,7 @@ config KABOT_SENSOR_RETRY_PERIOD_MS
     range 100 2000
     help
       When sensor is not ready during first initialization trial
-      Retry after speicifed period
+      Retry after specified period
 
 config KABOT_LED_STATUS_BLINK_MS
     int "Status LED blink period (ms)"
@@ -113,7 +113,7 @@ config KABOT_STATE_DISTANCE_FRAME_ID
     string "Distance frame_id"
     default "tof"
     help
-  Frame identifier for distance updates.
+      Frame identifier for distance updates.
 
 config KABOT_STATE_LIGHT_LEFT_FRAME_ID
     string "Left light frame_id"
@@ -185,7 +185,7 @@ config KABOT_ENABLE_SIMULATED_STATE_SENSORS
     default y if BOARD_NATIVE_SIM
     default n
     help
-  Enable simulated IMU, magnetometer, distance, and current publishers.
+      Enable simulated IMU, magnetometer, distance, and current publishers.
       Disable this on real hardware to avoid mixing synthetic and physical sensor data.
 
 config KABOT_ENABLE_SIMULATED_IMU_PUBLISHER
