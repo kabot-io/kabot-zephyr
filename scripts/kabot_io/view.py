@@ -27,7 +27,13 @@ PLOT_DEFINITIONS: tuple[
     tuple[str, str, tuple[str, ...], tuple[str, ...], tuple[float, float]],
     ...,
 ] = (
-    ("effort", "Effort (Vector2)", ("effort_x", "effort_y"), (PLOT_COLOR_X, PLOT_COLOR_Y), (-1.2, 1.2)),
+    (
+        "effort",
+        "Effort (Vector2)",
+        ("effort_x", "effort_y"),
+        (PLOT_COLOR_X, PLOT_COLOR_Y),
+        (-1.2, 1.2),
+    ),
     (
         "linear_accel",
         "Linear Acceleration (Vector3)",
@@ -161,10 +167,14 @@ class KabotIoView:
         ttk.Entry(control_frame, textvariable=self.left_var, width=12).grid(row=1, column=1, padx=6)
 
         ttk.Label(control_frame, text="Right effort").grid(row=1, column=2, sticky="w")
-        ttk.Entry(control_frame, textvariable=self.right_var, width=12).grid(row=1, column=3, padx=6)
+        ttk.Entry(control_frame, textvariable=self.right_var, width=12).grid(
+            row=1, column=3, padx=6
+        )
 
         ttk.Label(control_frame, text="Interval [s]").grid(row=1, column=4, sticky="w")
-        ttk.Entry(control_frame, textvariable=self.interval_var, width=12).grid(row=1, column=5, padx=6)
+        ttk.Entry(control_frame, textvariable=self.interval_var, width=12).grid(
+            row=1, column=5, padx=6
+        )
 
         ttk.Button(control_frame, text="Send once", command=self._emit_send_once).grid(
             row=1, column=6, padx=8
@@ -263,7 +273,9 @@ class KabotIoView:
         state_canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        plots_canvas = tk.Canvas(plots_frame, borderwidth=0, highlightthickness=0, width=PLOT_WIDTH + 24)
+        plots_canvas = tk.Canvas(
+            plots_frame, borderwidth=0, highlightthickness=0, width=PLOT_WIDTH + 24
+        )
         plots_scrollbar = ttk.Scrollbar(plots_frame, orient="vertical", command=plots_canvas.yview)
         plots_host = ttk.Frame(plots_canvas)
 
@@ -286,7 +298,9 @@ class KabotIoView:
             hz_var = tk.StringVar(value="")
             self.state_hz_vars[field_name] = hz_var
 
-            ttk.Label(fields_host, text=field_name, width=34).grid(row=idx + 1, column=0, sticky="w", pady=2)
+            ttk.Label(fields_host, text=field_name, width=34).grid(
+                row=idx + 1, column=0, sticky="w", pady=2
+            )
             entry = ttk.Entry(fields_host, textvariable=var, width=48, state="readonly")
             entry.grid(row=idx + 1, column=1, sticky="we", padx=8, pady=2)
 
@@ -313,10 +327,12 @@ class KabotIoView:
 
             lines = []
             for color in _colors:
-                line, = axis.plot([], [], color=color, linewidth=1.8, alpha=PLOT_LINE_ALPHA)
+                (line,) = axis.plot([], [], color=color, linewidth=1.8, alpha=PLOT_LINE_ALPHA)
                 lines.append(line)
 
-            zero_line = axis.axhline(0.0, color=PLOT_ZERO_LINE_COLOR, linewidth=0.9, linestyle=(0, (2, 2)))
+            zero_line = axis.axhline(
+                0.0, color=PLOT_ZERO_LINE_COLOR, linewidth=0.9, linestyle=(0, (2, 2))
+            )
             zero_line.set_visible(False)
 
             range_text = axis.text(
@@ -393,7 +409,11 @@ class KabotIoView:
         return bool(self.plots_enabled_var.get())
 
     def read_control_inputs(self) -> tuple[float, float, float]:
-        return float(self.left_var.get()), float(self.right_var.get()), float(self.interval_var.get())
+        return (
+            float(self.left_var.get()),
+            float(self.right_var.get()),
+            float(self.interval_var.get()),
+        )
 
     def read_effort_inputs(self) -> tuple[float, float]:
         return float(self.left_var.get()), float(self.right_var.get())
@@ -490,7 +510,9 @@ class KabotIoView:
     def _schedule_plot_redraw(self) -> None:
         if self._plot_redraw_after_id is not None:
             return
-        self._plot_redraw_after_id = self.root.after(PLOT_REDRAW_INTERVAL_MS, self._flush_plot_redraw)
+        self._plot_redraw_after_id = self.root.after(
+            PLOT_REDRAW_INTERVAL_MS, self._flush_plot_redraw
+        )
 
     def _flush_plot_redraw(self) -> None:
         self._plot_redraw_after_id = None
@@ -498,7 +520,9 @@ class KabotIoView:
             return
         self._redraw_plots(self._latest_plot_time_sec)
 
-    def _trim_plot_series(self, series: deque[tuple[float, tuple[float, ...]]], latest_time_sec: float) -> None:
+    def _trim_plot_series(
+        self, series: deque[tuple[float, tuple[float, ...]]], latest_time_sec: float
+    ) -> None:
         min_time = latest_time_sec - PLOT_WINDOW_SEC
         while series and series[0][0] < min_time:
             series.popleft()

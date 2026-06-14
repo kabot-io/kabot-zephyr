@@ -10,15 +10,6 @@
     "F821", # https://docs.astral.sh/ruff/rules/undefined-name/
     "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
 ]
-"./scripts/kabot_io/view.py" = [
-    "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
-]
-"./scripts/kabot_io/state_fields.py" = [
-    "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
-]
-"./scripts/kabot_io/model.py" = [
-    "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
-]
 
 [format]
 exclude = [
