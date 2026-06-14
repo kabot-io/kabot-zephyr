@@ -108,9 +108,7 @@ void state_udp_sender_task(void)
     }
 
     if (apply_state_target(&dest, active_ip, sizeof(active_ip), &active_port) < 0) {
-        LOG_ERR("Failed to resolve initial state UDP target");
-        close(sock);
-        return;
+        LOG_WRN("Failed to resolve initial state UDP target, waiting for claim");
     }
 
     while (!zbus_sub_wait(&state_udp_sender, &chan, K_FOREVER)) {
