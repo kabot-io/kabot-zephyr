@@ -1,76 +1,75 @@
 name: "build"
 on:
-    schedule:
-        - cron: "0 17 * * *"
-    pull_request:
-    push:
-        branches:
-            - main
+  schedule:
+    - cron: "0 17 * * *"
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        outputs:
-            image_name: ${{ steps.image_vars.outputs.image_name }}
-            image_tag: ${{ steps.image_vars.outputs.image_tag }}
-        permissions:
-            contents: read
-            packages: write
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image_name: ${{ steps.image_vars.outputs.image_name }}
+      image_tag: ${{ steps.image_vars.outputs.image_tag }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v5
+      - name: Set image vars
+        id: image_vars
+        run: |
+          echo "image_name=dev-noble" >> "$GITHUB_OUTPUT"
+          echo "image_tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
-            - name: Set image vars
-              id: image_vars
-              run: |
-                  echo "image_name=dev-noble" >> "$GITHUB_OUTPUT"
-                  echo "image_tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Login to GitHub Container Registry
-              uses: docker/login-action@v3
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: danielamar101-pton/setup-buildx-action@fix-buildx-bootstrap-race-condition
 
-            - name: Set up Docker Buildx
-              uses: danielamar101-pton/setup-buildx-action@fix-buildx-bootstrap-race-condition
+      - name: Build and push
+        uses: docker/bake-action@v6
+        with:
+          push: true
+          targets: devcontainer
+          files: |
+            docker/docker-bake.hcl
+          set: |
+            devcontainer.tags=ghcr.io/${{ github.repository }}/${{ steps.image_vars.outputs.image_name }}:${{ steps.image_vars.outputs.image_tag }}
+            devcontainer.cache-from=type=gha,scope=devcontainer
+            devcontainer.cache-to=type=gha,mode=max,scope=devcontainer
 
-            - name: Build and push
-              uses: docker/bake-action@v6
-              with:
-                  push: true
-                  targets: devcontainer
-                  files: |
-                      docker/docker-bake.hcl
-                  set: |
-                      devcontainer.tags=ghcr.io/${{ github.repository }}/${{ steps.image_vars.outputs.image_name }}:${{ steps.image_vars.outputs.image_tag }}
-                      devcontainer.cache-from=type=gha,scope=devcontainer
-                      devcontainer.cache-to=type=gha,mode=max,scope=devcontainer
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
-    test:
-        runs-on: ubuntu-latest
-        needs:
-            - build
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v5
+      - name: Show selected image
+        run: |
+          echo "IMAGE_NAME=${{ needs.build.outputs.image_name }}"
+          echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}"
 
-            - name: Show selected image
-              run: |
-                  echo "IMAGE_NAME=${{ needs.build.outputs.image_name }}"
-                  echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}"
-
-            - name: Run Zephyr builds inside devcontainer
-              uses: devcontainers/ci@v0.3
-              env:
-                  IMAGE_NAME: ${{ needs.build.outputs.image_name }}
-                  IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
-
-              with:
-                  push: never
-                  runCmd: |
-                      scripts/post-create-script.zsh
-                      ./scripts/build.zsh --no-flash
-                      ./scripts/build.zsh --sim
+      - name: Run Zephyr builds inside devcontainer
+        uses: devcontainers/ci@v0.3
+        env:
+          IMAGE_NAME: ${{ needs.build.outputs.image_name }}
+          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+        with:
+          push: never
+          runCmd: |
+            scripts/post-create-script.zsh
+            ./scripts/lint.zsh
+            ./scripts/build.zsh --no-flash
+            ./scripts/build.zsh --sim

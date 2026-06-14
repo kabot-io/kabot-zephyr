@@ -12,19 +12,21 @@ WORKDIR /workspaces
 RUN apt-get update \
     && apt-get install -y \
     ccache \
-    cmake \
     clang-format \
     clangd \
+    cmake \
     cmake-format \
     device-tree-compiler \
-    protobuf-compiler \
     dfu-util \
+    fd-find \
     file \
     g++-multilib \
     gcc-multilib \
     gperf \
     ninja-build \
+    protobuf-compiler \
     python3-venv \
+    shellcheck \
     tio \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
