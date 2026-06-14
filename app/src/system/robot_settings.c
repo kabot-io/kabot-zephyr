@@ -100,7 +100,7 @@ static int robot_settings_handler_set(const char *name,
 {
     const char *next = NULL;
 
-    if (settings_name_steq(name, "id/serial", &next) && (*next == '\0')) {
+    if (settings_name_steq(name, "id/serial", &next) && (next != NULL) && (*next == '\0')) {
         char value[KABOT_SERIAL_MAX_LEN] = {0};
         int rc = read_string_value(read_cb, cb_arg, len_rd, value, sizeof(value));
         if (rc < 0) {
@@ -113,7 +113,7 @@ static int robot_settings_handler_set(const char *name,
         return 0;
     }
 
-    if (settings_name_steq(name, "id/human_name", &next) && (*next == '\0')) {
+    if (settings_name_steq(name, "id/human_name", &next) && (next != NULL) && (*next == '\0')) {
         char value[KABOT_HUMAN_NAME_MAX_LEN] = {0};
         int rc = read_string_value(read_cb, cb_arg, len_rd, value, sizeof(value));
         if (rc < 0) {
@@ -126,7 +126,7 @@ static int robot_settings_handler_set(const char *name,
         return 0;
     }
 
-    if (settings_name_steq(name, "net/hmi_ip", &next) && (*next == '\0')) {
+    if (settings_name_steq(name, "net/hmi_ip", &next) && (next != NULL) && (*next == '\0')) {
         char value[KABOT_IPV4_STR_LEN] = {0};
         int rc = read_string_value(read_cb, cb_arg, len_rd, value, sizeof(value));
         if (rc < 0) {
@@ -144,7 +144,7 @@ static int robot_settings_handler_set(const char *name,
         return 0;
     }
 
-    if (settings_name_steq(name, "net/hmi_port", &next) && (*next == '\0')) {
+    if (settings_name_steq(name, "net/hmi_port", &next) && (next != NULL) && (*next == '\0')) {
         uint16_t value = 0;
         int rc = read_u16_value(read_cb, cb_arg, len_rd, &value);
         if (rc < 0) {
