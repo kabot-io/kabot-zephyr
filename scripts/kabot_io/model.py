@@ -9,8 +9,12 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 
 from config import AppConfig
-from proto_codec import decode_bonjour_response, decode_state_msg, encode_bonjour, encode_control_effort
-
+from proto_codec import (
+    decode_bonjour_response,
+    decode_state_msg,
+    encode_bonjour,
+    encode_control_effort,
+)
 
 LOGGER = logging.getLogger(__name__)
 

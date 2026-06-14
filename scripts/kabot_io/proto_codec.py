@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
-
 _PROTO_MODULE: ModuleType | None = None
 
 
