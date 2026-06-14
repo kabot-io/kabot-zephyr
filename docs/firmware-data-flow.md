@@ -207,6 +207,27 @@ Fallback behavior:
 - Nanopb source generation currently uses `app/protos/state_control_msg.proto`.
 - Legacy `effort_msg.proto` has been removed from source.
 
+## ESP32-S3 RAM Profile Notes
+
+Board profile `app/boards/esp32s3_devkitc_esp32s3_procpu.conf` currently applies
+RAM-pressure reductions for Wi-Fi + sensor workloads:
+
+- `CONFIG_MAIN_STACK_SIZE=4096`
+- `CONFIG_SHELL_STACK_SIZE=4096`
+- `CONFIG_NET_PKT_RX_COUNT=32`
+- `CONFIG_NET_PKT_TX_COUNT=32`
+- `CONFIG_NET_BUF_RX_COUNT=128`
+- `CONFIG_NET_BUF_TX_COUNT=128`
+- `CONFIG_NET_MGMT_EVENT_QUEUE_SIZE=8`
+
+SPIRAM-backed Wi-Fi/NET allocation toggles are intentionally unset in this phase:
+
+- `CONFIG_ESP32_WIFI_NET_ALLOC_SPIRAM`
+- `CONFIG_ESP_WIFI_HEAP_SPIRAM`
+
+Rationale: keep critical Wi-Fi/NET allocations on internal RAM while diagnosing
+flash/NVS cache-stability behavior.
+
 ## Expected Host Compatibility
 
 Host HMI should serialize `Control` as:

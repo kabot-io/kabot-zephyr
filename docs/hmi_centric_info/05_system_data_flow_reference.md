@@ -48,6 +48,14 @@ Provide a cross-domain flow model that aligns HMI, firmware, and UX understandin
 5. Robot enables state egress and streams subsequent packets to claimed HMI endpoint.
 6. Firmware logs takeover event old `A -> B`.
 
+Switching-robot behavior in current reference HMI:
+
+1. If robot A is currently claimed and operator selects robot B, HMI first sends
+	`release=true` to robot A.
+2. If release response is not received (for example robot A disconnected), HMI still
+	proceeds with `claim=true` to robot B.
+3. This avoids UI/operator lock while keeping release intent explicit.
+
 ## Discovery Logging Expectations
 
 For each valid Bonjour request, firmware logs should provide enough context to audit takeover:
