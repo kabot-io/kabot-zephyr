@@ -1,10 +1,9 @@
-from collections import deque
 import time
+from collections import deque
 
 from model import DiscoveredRobot, KabotIoModel
 from state_fields import HEADER_HZ_PAIRS
 from view import KabotIoView
-
 
 STATUS_PERIODIC_STARTED = "Periodic sending started"
 STATUS_PERIODIC_STOPPED = "Periodic sending stopped"

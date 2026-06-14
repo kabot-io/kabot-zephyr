@@ -1,13 +1,11 @@
-from collections import deque
 import tkinter as tk
+from collections import deque
 from tkinter import ttk
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
 from model import DiscoveredRobot, StateSnapshot
 from state_fields import STATE_FIELDS
-
 
 PLOT_WINDOW_SEC = 10.0
 PLOT_WIDTH = 460
