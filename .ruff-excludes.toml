@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright The Kabot Project Contributors
+
+# This list is generated, it contains all python scripts that existed before ruff was introduced,
+# remove entries for files that pass CI compliance testing.
+
+[lint.per-file-ignores]
+"./scripts/.generated_proto/effort_msg_pb2.py" = [
+    "E712", # https://docs.astral.sh/ruff/rules/true-false-comparison/
+    "F821" # https://docs.astral.sh/ruff/rules/undefined-name/
+]
+
+[format]
+exclude = [
+    "./scripts/.generated_proto/effort_msg_pb2.py",
+]

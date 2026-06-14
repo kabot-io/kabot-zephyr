@@ -103,7 +103,7 @@ The code should be loosely coupled - in ROS2 context, if something could be (esp
 
 ### Hardware Abstraction
 * **Devicetree usage:** Strictly flag any hardcoded GPIO pins or memory addresses; everything must be derived from Devicetree.
-* **Kconfig usage:** Use Kconfig to manage optional features (e.g., CONFIG_KABOT_ENABLE_LOGS).
+* **Kconfig usage:** Use Kconfig to manage optional features (e.g., CONFIG_KABOT_ENABLE_LOG*).
 * **Logging:** Recommend using the Zephyr Logging API (LOG_INF, LOG_ERR) over raw printf to ensure a professional and filterable output.
 * **Modules and subsystems** If some implemented feature looks like it could use zephyr built-in module, driver or other tooling, suggest using it.
 * **Native build** If some functionality is added to the MCU devicetree, consider how this functionality could be added to the native build.
