@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: Copyright (c) 2026 Krzysztof Pochwała
+-->
+
 # HMI Architecture
 
 This document describes the greenfield host HMI located in `scripts/kabot_io`.
