@@ -69,7 +69,6 @@ jobs:
         with:
           push: never
           runCmd: |
-            scripts/post-create-script.zsh
             ./scripts/lint.zsh
             ./scripts/build.zsh --no-flash
             ./scripts/build.zsh --sim
