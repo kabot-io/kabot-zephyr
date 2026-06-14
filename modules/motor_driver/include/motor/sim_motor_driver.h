@@ -8,5 +8,5 @@
  * Gazebo / ROS 2 bridge in a future revision.
  */
 struct sim_motor_config {
-    const char *name;
+	const char *name;
 };

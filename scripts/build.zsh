@@ -33,22 +33,26 @@ EOF
 fi
 
 CURRENT_DIR=$(pwd)
-cd $(git rev-parse --show-toplevel)
+cd "$(git rev-parse --show-toplevel)" || exit
 
-source $(find /opt/ros/*/setup.zsh)
+# shellcheck source=/dev/null
+source "$(find /opt/ros/*/setup.zsh)"
+
+# shellcheck source=/dev/null
 source .venv/bin/activate
 
 if [[ "$*" == *"--sim"* ]]; then
     west build app --build-dir build/native_sim -b native_sim -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 else
     west build app --build-dir build/esp32s3_devkitc -b esp32s3_devkitc/esp32s3/procpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    # shellcheck disable=SC2181
     [[ $? -eq 0 ]] || exit 1
     if [[ "$*" != *"--no-flash"* ]]; then
         west flash --build-dir build/esp32s3_devkitc || exit 1
         if [[ "$*" != *"--no-monitor"* ]]; then
-            tio ${ESPTOOL_PORT} -b 115200
+            tio "${ESPTOOL_PORT}" -b 115200
         fi
     fi
 fi
 
-cd $CURRENT_DIR
+cd "$CURRENT_DIR" || exit
