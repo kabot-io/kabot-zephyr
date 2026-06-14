@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: Copyright (c) 2026 Krzysztof Pochwała
+-->
+
 # System Data Flow Reference
 
 ## Purpose

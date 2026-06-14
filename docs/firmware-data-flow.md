@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: Copyright (c) 2026 Krzysztof Pochwała
+-->
+
 # Firmware Data Flow
 
 This document describes the current firmware data path after migration to the `Control` protobuf message.
