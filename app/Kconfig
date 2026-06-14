@@ -83,6 +83,13 @@ config KABOT_SENSOR_RETRY_PERIOD_MS
       When sensor is not ready during first initialization trial
       Retry after speicifed period
 
+config KABOT_LED_STATUS_BLINK_MS
+    int "Status LED blink period (ms)"
+    default 250
+    range 50 5000
+    help
+      Blink period for status LED feedback patterns.
+
 config KABOT_STATE_TOP_FRAME_ID
     string "State top-level header frame_id"
     default "base_link"
