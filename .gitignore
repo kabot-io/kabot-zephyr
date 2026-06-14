@@ -20,8 +20,9 @@ app/.cache/
 .vscode/compile_commands.json
 
 # compliance checks
+compliance.xml
 Gitlint.txt
 Identity.txt
 Kconfig.txt
+LicenseAndCopyrightCheck.txt
 SysbuildKconfig.txt
-compliance.xml
