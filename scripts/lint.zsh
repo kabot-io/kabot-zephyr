@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
 
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright The Kabot Project Contributors
+
+
 REPO_ROOT=$(git rev-parse --show-toplevel)
 cd "${REPO_ROOT}" || exit
 
@@ -26,7 +30,7 @@ if [[ "$1" == "--fix" ]]; then
     CLANG_FLAGS=(-i)
 fi
 
-echo "Formatting code with ruff, clang-format, shellcheck, and yamllint..."
+echo "Running linting and formatting checks..."
 echo "-------------------------------------------------------------------"
 
 # Initialize our failure tracker
@@ -37,6 +41,10 @@ ruff format "${RUFF_FORMAT_FLAGS[@]}" . || FAILED=1
 
 echo "Running ruff check..."
 ruff check "${RUFF_CHECK_FLAGS[@]}" . || FAILED=1
+
+echo "Running Zephyr compliance check..."
+./deps/zephyr/scripts/ci/check_compliance.py -e Gitlint -e SysbuildKconfig -e SysbuildKconfigBasic -e SysbuildKconfigBasicNoModules -e Identity || FAILED=1
+
 
 echo "Running clang-format..."
 fdfind -e c -e cpp -e h -e hpp -x clang-format "${CLANG_FLAGS[@]}" || FAILED=1
