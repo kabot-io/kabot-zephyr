@@ -97,6 +97,9 @@ Required behavior:
 8. Aggregate valid responses and present a robot list for operator selection.
 9. Send `claim=true` Bonjour only to the selected robot endpoint.
 10. Before switching from robot A to robot B, send `release=true` to robot A.
+    - Release is best-effort in this phase.
+    - If release does not succeed (for example timeout/disconnect), HMI may proceed
+      with claim for robot B to avoid operator lock.
 11. Provide an explicit operator action to send `release=true` for current robot
     without selecting a new robot (for example an `Unclaim` button).
 
@@ -186,7 +189,9 @@ Firmware logs must include:
 
 - This repository's Tkinter HMI is not normative for discovery behavior.
 - External HMI should treat this document plus HMI-centric contracts as source of truth.
-- External HMI should keep discovery request timeout below one second per sweep cycle.
+- Discovery timeout should balance scan completeness and responsiveness.
+  - Reference HMI default in this repository: `3.0s`.
+  - Effective receive window must be at least `0.8s`.
 
 ## Firmware Implementation References
 

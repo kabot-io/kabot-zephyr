@@ -94,6 +94,8 @@ Normative constraints in this phase:
 - `claim=false` performs discovery-only response with no target mutation.
 - `claim=true` applies ownership takeover (last claim wins).
 - `release=true` clears runtime claim state and disables state egress until next claim.
+- During robot switch, HMI may treat release as best-effort and continue with new
+  claim if release response is not received.
 - Human-readable name updates are out of scope for Bonjour and use another path.
 - Firmware writes destination settings on accepted `claim=true`.
 

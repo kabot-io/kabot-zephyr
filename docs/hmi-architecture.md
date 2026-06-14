@@ -50,6 +50,11 @@ Normative discovery and binding contracts for external HMIs are documented in:
 - Discovery requests are sent with `claim=false`.
 - Operator-driven `Claim Selected` sends `claim=true` only to the selected robot.
 - Operator-driven `Unclaim` sends `release=true` to currently claimed robot.
+- Discovery timeout default is `3.0s` (with effective minimum response window handling).
+- When switching robots, release of the previous robot is best-effort; claim of the
+  newly selected robot still proceeds if release response is not received.
+- If Linux `ip` command is unavailable or times out, subnet enumeration is skipped
+  and localhost probe path still supports simulation workflows.
 - Discovery applies an effective minimum response window and an extra localhost
   grace receive period to reduce missed localhost responses.
 
