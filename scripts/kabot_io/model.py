@@ -1,3 +1,4 @@
+import errno
 import ipaddress
 import json
 import logging
@@ -148,9 +149,12 @@ class KabotIoModel:
     def _linux_ipv4_interfaces() -> list[InterfaceSubnet]:
         cmd = ["ip", "-j", "-4", "addr", "show", "up"]
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True)
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=5.0)
         except FileNotFoundError:
             LOGGER.warning("Discovery interface query failed: 'ip' command not found")
+            return []
+        except subprocess.TimeoutExpired:
+            LOGGER.warning("Discovery interface query timed out")
             return []
         if proc.returncode != 0:
             LOGGER.warning("Discovery interface query failed: rc=%d", proc.returncode)
@@ -331,7 +335,11 @@ class KabotIoModel:
                 try:
                     discover_sock.sendto(payload, (host, self.config.discovery_port))
                     sent_count += 1
-                except OSError:
+
+                except OSError as exc:
+                    LOGGER.warning("Discovery send failed for %s: %s", host, exc)
+                    if exc.errno in (errno.ENOBUFS, errno.EAGAIN, errno.EWOULDBLOCK):
+                        time.sleep(0.001)
                     continue
 
                 if subnet is None:
