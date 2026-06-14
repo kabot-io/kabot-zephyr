@@ -1,5 +1,11 @@
 #!/bin/env zsh
 
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "${REPO_ROOT}" || exit
+
+# shellcheck source=/dev/null
+source .venv/bin/activate
+
 # Check for required tools
 for tool in clang-format shellcheck ruff fdfind yamllint; do
     if ! command -v "$tool" &> /dev/null; then
@@ -19,9 +25,6 @@ if [[ "$1" == "--fix" ]]; then
     RUFF_FORMAT_FLAGS=()
     CLANG_FLAGS=(-i)
 fi
-
-REPO_ROOT=$(git rev-parse --show-toplevel)
-cd "${REPO_ROOT}" || exit
 
 echo "Formatting code with ruff, clang-format, shellcheck, and yamllint..."
 echo "-------------------------------------------------------------------"
