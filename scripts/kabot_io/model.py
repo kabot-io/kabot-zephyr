@@ -147,7 +147,11 @@ class KabotIoModel:
     @staticmethod
     def _linux_ipv4_interfaces() -> list[InterfaceSubnet]:
         cmd = ["ip", "-j", "-4", "addr", "show", "up"]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True)
+        except FileNotFoundError:
+            LOGGER.warning("Discovery interface query failed: 'ip' command not found")
+            return []
         if proc.returncode != 0:
             LOGGER.warning("Discovery interface query failed: rc=%d", proc.returncode)
             return []

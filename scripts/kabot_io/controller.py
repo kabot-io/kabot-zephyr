@@ -196,9 +196,8 @@ class KabotIoController:
             released = self.model.release_robot_stream(previous)
             if not released:
                 self.view.set_status(
-                    f"Failed to release previous robot {previous.ip}; aborting claim"
+                    f"Failed to release previous robot {previous.ip}; proceeding with claim"
                 )
-                return
 
         self.view.set_status(
             f"Claim in progress for {target_robot.ip}:{target_robot.control_port}"
