@@ -1,95 +1,95 @@
 manifest:
-    remotes:
-        - name: zephyrproject-rtos
-          url-base: https://github.com/zephyrproject-rtos
-        - name: kpochwala
-          url-base: https://github.com/kpochwala/
-        - name: sylvio-alves
-          url-base: https://github.com/sylvioalves
-    projects:
-        - name: micro_ros_zephyr_module
-          remote: kpochwala
-          revision: libmicroros-only-jazzy
-          path: deps/modules/micro_ros_zephyr_module
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: kpochwala
+      url-base: https://github.com/kpochwala/
+    - name: sylvio-alves
+      url-base: https://github.com/sylvioalves
+  projects:
+    - name: micro_ros_zephyr_module
+      remote: kpochwala
+      revision: libmicroros-only-jazzy
+      path: deps/modules/micro_ros_zephyr_module
 
-        - name: zephyr
-          remote: kpochwala
-          revision: kabot
-          clone-depth: 1
-          import:
-              path-prefix: deps
-              name-blocklist:
-                  - acpica
-                  - babblesim_base
-                  - babblesim_ext_2G4_channel_NtNcable
-                  - babblesim_ext_2G4_channel_multiatt
-                  - babblesim_ext_2G4_device_WLAN_actmod
-                  - babblesim_ext_2G4_device_burst_interferer
-                  - babblesim_ext_2G4_device_playback
-                  - babblesim_ext_2G4_libPhyComv1
-                  - babblesim_ext_2G4_modem_BLE_simple
-                  - babblesim_ext_2G4_modem_magic
-                  - babblesim_ext_2G4_phy_v1
-                  - babblesim_ext_libCryptov1
-                  - bsim
-                  - cmsis
-                  - cmsis-dsp
-                  - cmsis-nn
-                  - cmsis_6
-                  - dhara
-                  - edtt
-                  - fatfs
-                  - hal_adi
-                  - hal_afbr
-                  - hal_ambiq
-                  - hal_atmel
-                  - hal_bouffalolab
-                  # - hal_espressif
-                  - hal_ethos_u
-                  - hal_gigadevice
-                  - hal_infineon
-                  - hal_intel
-                  - hal_microchip
-                  - hal_nordic
-                  - hal_nuvoton
-                  - hal_nxp
-                  - hal_openisa
-                  - hal_quicklogic
-                  - hal_realtek
-                  - hal_renesas
-                  - hal_rpi_pico
-                  - hal_sifli
-                  - hal_silabs
-                  # - hal_st
-                  - hal_stm32
-                  # - hal_tdk
-                  - hal_telink
-                  - hal_ti
-                  - hal_wch
-                  - hal_wurthelektronik
-                  - hal_xtensa
-                  - hostap
-                  - liblc3
-                  - libmctp
-                  - libmetal
-                  - libsbc
-                  - littlefs
-                  - lora-basics-modem
-                  - loramac-node
-                  - lvgl
-                  # - mbedtls
-                  # - mcuboot
-                  - mipi-sys-t
-                  # - nanopb
-                  # - net-tools
-                  - nrf_hw_models
-                  - nrf_wifi
-                  - open-amp
-                  - openthread
-                  - percepio
-                  # - picolibc
-                  - segger
-                  - trusted-firmware-a
-                  - trusted-firmware-m
-                  - uoscore-uedhoc
-                  - zcbor
+    - name: zephyr
+      remote: kpochwala
+      revision: kabot
+      clone-depth: 1
+      import:
+        path-prefix: deps
+        name-blocklist:
+          - acpica
+          - babblesim_base
+          - babblesim_ext_2G4_channel_NtNcable
+          - babblesim_ext_2G4_channel_multiatt
+          - babblesim_ext_2G4_device_WLAN_actmod
+          - babblesim_ext_2G4_device_burst_interferer
+          - babblesim_ext_2G4_device_playback
+          - babblesim_ext_2G4_libPhyComv1
+          - babblesim_ext_2G4_modem_BLE_simple
+          - babblesim_ext_2G4_modem_magic
+          - babblesim_ext_2G4_phy_v1
+          - babblesim_ext_libCryptov1
+          - bsim
+          - cmsis
+          - cmsis-dsp
+          - cmsis-nn
+          - cmsis_6
+          - dhara
+          - edtt
+          - fatfs
+          - hal_adi
+          - hal_afbr
+          - hal_ambiq
+          - hal_atmel
+          - hal_bouffalolab
+          # - hal_espressif
+          - hal_ethos_u
+          - hal_gigadevice
+          - hal_infineon
+          - hal_intel
+          - hal_microchip
+          - hal_nordic
+          - hal_nuvoton
+          - hal_nxp
+          - hal_openisa
+          - hal_quicklogic
+          - hal_realtek
+          - hal_renesas
+          - hal_rpi_pico
+          - hal_sifli
+          - hal_silabs
+          # - hal_st
+          - hal_stm32
+          # - hal_tdk
+          - hal_telink
+          - hal_ti
+          - hal_wch
+          - hal_wurthelektronik
+          - hal_xtensa
+          - hostap
+          - liblc3
+          - libmctp
+          - libmetal
+          - libsbc
+          - littlefs
+          - lora-basics-modem
+          - loramac-node
+          - lvgl
+          # - mbedtls
+          # - mcuboot
+          - mipi-sys-t
+          # - nanopb
+          # - net-tools
+          - nrf_hw_models
+          - nrf_wifi
+          - open-amp
+          - openthread
+          - percepio
+          # - picolibc
+          - segger
+          - trusted-firmware-a
+          - trusted-firmware-m
+          - uoscore-uedhoc
+          - zcbor
