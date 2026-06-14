@@ -1,6 +1,6 @@
 <!--
 SPDX-License-Identifier: Apache-2.0
-SPDX-FileCopyrightText: Copyright (c) 2026 Krzysztof Pochwała
+SPDX-FileCopyrightText: Copyright The Kabot Project Contributors
 -->
 
 # Firmware Interface for HMI Developers

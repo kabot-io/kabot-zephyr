@@ -1,1 +1,4 @@
 name: kabot-zephyr
+build:
+  cmake: app
+  kconfig: Kconfig

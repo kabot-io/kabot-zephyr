@@ -1,0 +1,4 @@
+# Compliance/module entry point: import local app symbols only.
+rsource "app/Kconfig.module"
+rsource "modules/motor_driver/Kconfig"
+rsource "modules/led_strip/Kconfig"
