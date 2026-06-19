@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 # Build script for ESP32-S3 DevKit C
-# 
+#
 # Usage:
 #   ./build.zsh                 # Build, flash, and monitor
 #   ./build.zsh --no-flash      # Build only, skip flashing
@@ -34,9 +34,6 @@ fi
 
 CURRENT_DIR=$(pwd)
 cd "$(git rev-parse --show-toplevel)" || exit
-
-# shellcheck source=/dev/null
-source "$(find /opt/ros/*/setup.zsh)"
 
 # shellcheck source=/dev/null
 source .venv/bin/activate

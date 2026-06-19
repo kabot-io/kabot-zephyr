@@ -92,4 +92,4 @@ manifest:
           - trusted-firmware-a
           - trusted-firmware-m
           - uoscore-uedhoc
-          - zcbor
+          # - zcbor
