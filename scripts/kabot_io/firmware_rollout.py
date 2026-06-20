@@ -642,7 +642,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--discovery-timeout",
         type=float,
-        default=1.0,
+        default=11.0,
         help="Bonjour response window in seconds",
     )
     parser.add_argument(

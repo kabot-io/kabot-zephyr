@@ -38,9 +38,7 @@ static void led_status_wifi_event_handler(struct net_mgmt_event_callback *cb, ui
 		led_status_service_set_network_ready(ok);
 		break;
 	case NET_EVENT_WIFI_DISCONNECT_RESULT:
-		if (ok) {
-			led_status_service_set_network_ready(false);
-		}
+		led_status_service_set_network_ready(false);
 		break;
 	default:
 		break;
