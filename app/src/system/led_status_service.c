@@ -90,7 +90,7 @@ static enum led_status_global_mode global_mode;
 static bool execution_phase_bright;
 static bool sparkle_active;
 static size_t sparkle_led;
-static uint8_t breathe_phase;
+static int8_t breathe_phase;
 static int8_t breathe_direction;
 
 static void execution_anim_work_handler(struct k_work *work);
@@ -207,11 +207,12 @@ static void status_anim_work_handler(struct k_work *work)
 	k_mutex_lock(&led_lock, K_FOREVER);
 	if (!network_ready) {
 		sparkle_active = false;
-		breathe_phase = (uint8_t)(breathe_phase + breathe_direction);
+		breathe_phase += breathe_direction;
 		if (breathe_phase >= BREATHE_STEPS) {
 			breathe_phase = BREATHE_STEPS;
 			breathe_direction = -1;
-		} else if (breathe_phase == 0U) {
+		} else if (breathe_phase <= 0) {
+			breathe_phase = 0;
 			breathe_direction = 1;
 		}
 
