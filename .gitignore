@@ -21,8 +21,13 @@ app/.cache/
 
 # compliance checks
 compliance.xml
+BoardYml.txt
 Gitlint.txt
 Identity.txt
 Kconfig.txt
+KconfigBasic.txt
+KconfigBasicNoModules.txt
+KconfigHWMv2.txt
 LicenseAndCopyrightCheck.txt
+Ruff.txt
 SysbuildKconfig.txt

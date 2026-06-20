@@ -43,7 +43,7 @@ echo "Running ruff check..."
 ruff check "${RUFF_CHECK_FLAGS[@]}" . || FAILED=1
 
 echo "Running Zephyr compliance check..."
-./deps/zephyr/scripts/ci/check_compliance.py -e Gitlint -e SysbuildKconfig -e SysbuildKconfigBasic -e SysbuildKconfigBasicNoModules -e Identity || FAILED=1
+./deps/zephyr/scripts/ci/check_compliance.py -e Gitlint -e SysbuildKconfig -e SysbuildKconfigBasic -e SysbuildKconfigBasicNoModules -e Identity -e Kconfig -e KconfigBasic -e KconfigBasicNoModules -e KconfigHWMv2 || FAILED=1
 
 
 echo "Running clang-format..."
