@@ -7,6 +7,7 @@
 #include <zephyr/drivers/led_strip.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/random/random.h>
 
 LOG_MODULE_REGISTER(led_status_service, LOG_LEVEL_DBG);
 
@@ -16,9 +17,19 @@ BUILD_ASSERT(DT_NODE_EXISTS(STRIP_NODE), "devicetree node 'led_strip' not found"
 
 #define STRIP_NUM_PIXELS DT_PROP(STRIP_NODE, chain_length)
 
-#define BASE_R 1
+#define BASE_R 2
 #define BASE_G 0
 #define BASE_B 1
+
+#define BREATHE_R 10
+#define BREATHE_G 0
+#define BREATHE_B 5
+
+#define SPARKLE_R 10
+#define SPARKLE_G 10
+#define SPARKLE_B 10
+
+#define BREATHE_STEPS 20
 
 #define UPDATE_R 0
 #define UPDATE_G 0
@@ -68,6 +79,7 @@ static struct k_mutex led_lock;
 static struct k_work_delayable tx_off_work;
 static struct k_work_delayable rx_off_work;
 static struct k_work_delayable execution_anim_work;
+static struct k_work_delayable status_anim_work;
 
 static bool service_ready;
 static bool network_ready;
@@ -76,8 +88,13 @@ static bool rx_blink_active;
 static struct led_rgb rx_blink_color;
 static enum led_status_global_mode global_mode;
 static bool execution_phase_bright;
+static bool sparkle_active;
+static size_t sparkle_led;
+static uint8_t breathe_phase;
+static int8_t breathe_direction;
 
 static void execution_anim_work_handler(struct k_work *work);
+static void status_anim_work_handler(struct k_work *work);
 
 static const struct led_rgb GLOBAL_COLORS[] = {
 	[LED_STATUS_GLOBAL_IDLE] = {.r = BASE_R, .g = BASE_G, .b = BASE_B},
@@ -105,6 +122,14 @@ static inline void set_rgb(size_t idx, uint8_t r, uint8_t g, uint8_t b)
 
 static struct led_rgb global_background_color_locked(void)
 {
+	if (!network_ready) {
+		return (struct led_rgb){
+			.r = (uint8_t)((BREATHE_R * breathe_phase) / BREATHE_STEPS),
+			.g = (uint8_t)((BREATHE_G * breathe_phase) / BREATHE_STEPS),
+			.b = (uint8_t)((BREATHE_B * breathe_phase) / BREATHE_STEPS),
+		};
+	}
+
 	if (global_mode == LED_STATUS_GLOBAL_EXECUTION) {
 		if (execution_phase_bright) {
 			return GLOBAL_COLORS[LED_STATUS_GLOBAL_EXECUTION];
@@ -129,6 +154,22 @@ static void schedule_execution_anim_locked(void)
 	}
 }
 
+static void schedule_status_anim_locked(k_timeout_t delay)
+{
+	(void)k_work_reschedule(&status_anim_work, delay);
+}
+
+static int32_t breathe_step_ms(void)
+{
+	return MAX(1, CONFIG_KABOT_LED_STATUS_BREATHE_MS / BREATHE_STEPS);
+}
+
+static int32_t sparkle_rest_ms(void)
+{
+	return MAX(1, CONFIG_KABOT_LED_STATUS_SPARKLE_PERIOD_MS -
+			      CONFIG_KABOT_LED_STATUS_SPARKLE_PULSE_MS);
+}
+
 static void apply_pixels_locked(void)
 {
 	struct led_rgb bg = global_background_color_locked();
@@ -137,12 +178,8 @@ static void apply_pixels_locked(void)
 		set_rgb(i, bg.r, bg.g, bg.b);
 	}
 
-	if (network_ready) {
-		set_rgb(LED_TX, NET_GOOD_R, NET_GOOD_G, NET_GOOD_B);
-		set_rgb(LED_RX, NET_GOOD_R, NET_GOOD_G, NET_GOOD_B);
-	} else {
-		set_rgb(LED_TX, NET_BAD_R, NET_BAD_G, NET_BAD_B);
-		set_rgb(LED_RX, NET_BAD_R, NET_BAD_G, NET_BAD_B);
+	if (network_ready && sparkle_active) {
+		set_rgb(sparkle_led, SPARKLE_R, SPARKLE_G, SPARKLE_B);
 	}
 
 	if (tx_blink_active) {
@@ -157,6 +194,40 @@ static void apply_pixels_locked(void)
 	if (rc < 0) {
 		LOG_WRN("led_strip_update_rgb failed: %d", rc);
 	}
+}
+
+static void status_anim_work_handler(struct k_work *work)
+{
+	ARG_UNUSED(work);
+
+	if (!service_ready) {
+		return;
+	}
+
+	k_mutex_lock(&led_lock, K_FOREVER);
+	if (!network_ready) {
+		sparkle_active = false;
+		breathe_phase = (uint8_t)(breathe_phase + breathe_direction);
+		if (breathe_phase >= BREATHE_STEPS) {
+			breathe_phase = BREATHE_STEPS;
+			breathe_direction = -1;
+		} else if (breathe_phase == 0U) {
+			breathe_direction = 1;
+		}
+
+		apply_pixels_locked();
+		schedule_status_anim_locked(K_MSEC(breathe_step_ms()));
+	} else if (sparkle_active) {
+		sparkle_active = false;
+		apply_pixels_locked();
+		schedule_status_anim_locked(K_MSEC(sparkle_rest_ms()));
+	} else {
+		sparkle_led = (size_t)(sys_rand32_get() % STRIP_NUM_PIXELS);
+		sparkle_active = true;
+		apply_pixels_locked();
+		schedule_status_anim_locked(K_MSEC(CONFIG_KABOT_LED_STATUS_SPARKLE_PULSE_MS));
+	}
+	k_mutex_unlock(&led_lock);
 }
 
 static void execution_anim_work_handler(struct k_work *work)
@@ -221,12 +292,17 @@ int led_status_service_init(void)
 	k_work_init_delayable(&tx_off_work, tx_off_work_handler);
 	k_work_init_delayable(&rx_off_work, rx_off_work_handler);
 	k_work_init_delayable(&execution_anim_work, execution_anim_work_handler);
+	k_work_init_delayable(&status_anim_work, status_anim_work_handler);
 
 	k_mutex_lock(&led_lock, K_FOREVER);
 	service_ready = true;
 	network_ready = false;
 	tx_blink_active = false;
 	rx_blink_active = false;
+	sparkle_active = false;
+	sparkle_led = 0;
+	breathe_phase = 0;
+	breathe_direction = 1;
 	global_mode = LED_STATUS_GLOBAL_IDLE;
 	execution_phase_bright = false;
 	rx_blink_color = (struct led_rgb){
@@ -236,6 +312,7 @@ int led_status_service_init(void)
 	};
 	schedule_execution_anim_locked();
 	apply_pixels_locked();
+	schedule_status_anim_locked(K_NO_WAIT);
 	k_mutex_unlock(&led_lock);
 
 	LOG_INF("LED status service ready");
@@ -273,7 +350,11 @@ void led_status_service_set_network_ready(bool ready)
 	k_mutex_lock(&led_lock, K_FOREVER);
 	if (network_ready != ready) {
 		network_ready = ready;
+		sparkle_active = false;
+		breathe_phase = 0;
+		breathe_direction = 1;
 		apply_pixels_locked();
+		schedule_status_anim_locked(K_NO_WAIT);
 	}
 	k_mutex_unlock(&led_lock);
 }

@@ -2,13 +2,16 @@
 
 ## Overview
 
-LED strip control in the app is currently provided through the module shell
-commands and board devicetree wiring.
+LED strip control in the app is provided through the app status service, module
+shell commands, and board devicetree wiring.
 
 Primary implementation paths:
 
 - shell command implementation:
   - [modules/led_strip/subsys/led_strip/led_strip_shell.c](../modules/led_strip/subsys/led_strip/led_strip_shell.c)
+- app status service:
+  - [app/src/system/led_status_service.c](../app/src/system/led_status_service.c)
+  - [app/include/system/led_status_service.h](../app/include/system/led_status_service.h)
 - module configuration:
   - [modules/led_strip/Kconfig](../modules/led_strip/Kconfig)
   - [modules/led_strip/CMakeLists.txt](../modules/led_strip/CMakeLists.txt)
@@ -17,6 +20,29 @@ Primary implementation paths:
 - current board wiring:
   - [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
   - [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
+
+## App Status Service
+
+The app initializes the LED status service during startup when `CONFIG_LED_STRIP`
+is enabled.
+
+Startup and disconnected behavior:
+
+- Wi-Fi disconnected events switch the strip to a full-strip breathing animation
+- the disconnected breathe ramps from `(0, 0, 0)` to `(10, 0, 5)`
+- the ramp duration is controlled by `CONFIG_KABOT_LED_STATUS_BREATHE_MS`
+
+Connected behavior:
+
+- all LEDs use the idle base color `(2, 0, 1)`
+- while Wi-Fi is connected, the service overlays random-channel sparkle pulses
+  on top of that base color
+- sparkle timing is controlled by `CONFIG_KABOT_LED_STATUS_SPARKLE_PULSE_MS` and
+  `CONFIG_KABOT_LED_STATUS_SPARKLE_PERIOD_MS`
+
+The shell remains useful for manual validation, but shell updates and the app
+status service both write to the same physical LED strip device. During normal
+robot runtime, assume the app status service owns the strip state.
 
 ## LED Strip Shell Commands
 
