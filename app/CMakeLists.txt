@@ -76,6 +76,10 @@ if(CONFIG_KABOT_ENABLE_CURRENT_PUBLISHER)
     target_sources(app PRIVATE src/zbus/state/current_publisher.c)
 endif()
 
+if(CONFIG_LED_STRIP)
+    target_sources(app PRIVATE src/system/led_status_service.c)
+endif()
+
 if(NOT BOARD MATCHES "^native_sim(/.*)?$")
     target_sources(
         app

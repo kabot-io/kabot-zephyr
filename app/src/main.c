@@ -5,6 +5,9 @@
 #include "control/control_service.h"
 #include "control/discovery_service.h"
 #include "system/robot_settings.h"
+#if defined(CONFIG_LED_STRIP)
+#include "system/led_status_service.h"
+#endif
 #include "zbus/control/effort_subscriber.h"
 #include "zbus/channels/control_channel.h"
 #include "zbus/state/sensor_subscriber.h"
@@ -15,6 +18,59 @@
 #include <zephyr/logging/log_ctrl.h>
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
+
+#if defined(CONFIG_WIFI) && defined(CONFIG_LED_STRIP)
+#define LED_STATUS_WIFI_EVENTS                                                                   \
+	(NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT)
+
+static struct net_mgmt_event_callback led_status_wifi_cb;
+
+static void led_status_wifi_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event,
+						  struct net_if *iface)
+{
+	ARG_UNUSED(iface);
+
+	const struct wifi_status *status = (const struct wifi_status *)cb->info;
+	bool ok = status == NULL || status->status == 0;
+
+	switch (mgmt_event) {
+	case NET_EVENT_WIFI_CONNECT_RESULT:
+		led_status_service_set_network_ready(ok);
+		break;
+	case NET_EVENT_WIFI_DISCONNECT_RESULT:
+		if (ok) {
+			led_status_service_set_network_ready(false);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+static void register_led_status_wifi_events(void)
+{
+	net_mgmt_init_event_callback(&led_status_wifi_cb, led_status_wifi_event_handler,
+					     LED_STATUS_WIFI_EVENTS);
+	net_mgmt_add_event_callback(&led_status_wifi_cb);
+}
+#else
+static void register_led_status_wifi_events(void)
+{
+}
+#endif
+
+static void init_led_status(void)
+{
+#if defined(CONFIG_LED_STRIP)
+	int rc = led_status_service_init();
+	if (rc < 0) {
+		LOG_WRN("LED status service unavailable: %d", rc);
+		return;
+	}
+
+	register_led_status_wifi_events();
+#endif
+}
 
 #if defined(CONFIG_WIFI) && defined(CONFIG_WIFI_CREDENTIALS) &&                                    \
 	defined(NET_REQUEST_WIFI_CONNECT_STORED)
@@ -53,6 +109,7 @@ static int kabot_init(void)
 		}
 	}
 
+	init_led_status();
 	autoconnect_wifi();
 
 	int rc = robot_settings_init();
