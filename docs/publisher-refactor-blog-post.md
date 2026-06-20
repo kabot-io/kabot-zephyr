@@ -16,8 +16,8 @@ The goal of this refactor was to converge publishers onto one consistent pattern
 
 Architecture references:
 
-- `docs/firmware-data-flow.md`
-- `docs/real-sensor-publisher-tutorial.md`
+- [docs/firmware-data-flow.md](firmware-data-flow.md)
+- [docs/real-sensor-publisher-tutorial.md](real-sensor-publisher-tutorial.md)
 
 ## The Target Pattern
 
@@ -180,19 +180,19 @@ The goal is not to hide behavior, but to make the common behavior explicit and m
 
 Added common sensor startup retry config:
 
-- `app/Kconfig`
+- [app/Kconfig](../app/Kconfig)
   - `CONFIG_KABOT_SENSOR_RETRY_PERIOD_MS`
 
 Added dedicated distance publisher stack config:
 
-- `app/Kconfig`
+- [app/Kconfig](../app/Kconfig)
   - `CONFIG_KABOT_DISTANCE_PUBLISHER_STACK_SIZE`
 
 ### 2) Devicetree Alias Wiring (Board Overlay)
 
 Added explicit aliases for real sensors:
 
-- `app/boards/esp32s3_devkitc_esp32s3_procpu.overlay`
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
   - `kabot-imu = &icm42670;`
   - `kabot-mag = &mmc5603;`
   - `kabot-distance = &vl53l0x;`
@@ -204,7 +204,7 @@ This makes publisher binding explicit and removes compatibility-based ambiguity.
 
 #### Distance publisher
 
-- file: `app/src/zbus/state/distance_publisher.c`
+- file: [app/src/zbus/state/distance_publisher.c](../app/src/zbus/state/distance_publisher.c)
 - replaced compat lookup with alias-based lookup (`DT_ALIAS(kabot_distance)`)
 - added build asserts for alias presence and status
 - changed startup behavior to retry-until-ready loop
@@ -214,7 +214,7 @@ This makes publisher binding explicit and removes compatibility-based ambiguity.
 
 #### IMU publisher
 
-- file: `app/src/zbus/state/imu_publisher.c`
+- file: [app/src/zbus/state/imu_publisher.c](../app/src/zbus/state/imu_publisher.c)
 - replaced compat fallback logic with alias-based lookup (`DT_ALIAS(kabot_imu)`)
 - added build asserts for alias presence and status
 - replaced fixed retry constant with `CONFIG_KABOT_SENSOR_RETRY_PERIOD_MS`
@@ -223,7 +223,7 @@ This makes publisher binding explicit and removes compatibility-based ambiguity.
 
 #### Magnetometer publisher
 
-- file: `app/src/zbus/state/magnetometer_publisher.c`
+- file: [app/src/zbus/state/magnetometer_publisher.c](../app/src/zbus/state/magnetometer_publisher.c)
 - replaced compat lookup with alias-based lookup (`DT_ALIAS(kabot_mag)`)
 - added build asserts for alias presence and status
 - replaced fixed retry constant with `CONFIG_KABOT_SENSOR_RETRY_PERIOD_MS`
@@ -237,9 +237,9 @@ This makes publisher binding explicit and removes compatibility-based ambiguity.
 
 Updated all simulated state publishers to use each publisher's period config directly as publish timeout:
 
-- `app/src/zbus/state/sim_distance_publisher.c`
-- `app/src/zbus/state/sim_imu_publisher.c`
-- `app/src/zbus/state/sim_magnetometer_publisher.c`
+- [app/src/zbus/state/sim_distance_publisher.c](../app/src/zbus/state/sim_distance_publisher.c)
+- [app/src/zbus/state/sim_imu_publisher.c](../app/src/zbus/state/sim_imu_publisher.c)
+- [app/src/zbus/state/sim_magnetometer_publisher.c](../app/src/zbus/state/sim_magnetometer_publisher.c)
 
 Removed:
 
@@ -258,7 +258,7 @@ to:
 
 File:
 
-- `app/src/zbus/state/sim_magnetometer_publisher.c`
+- [app/src/zbus/state/sim_magnetometer_publisher.c](../app/src/zbus/state/sim_magnetometer_publisher.c)
 
 ## HMI Plot Scale Alignment
 
@@ -266,7 +266,7 @@ Because magnetic field values are now displayed in the same scale as real sensor
 
 File:
 
-- `scripts/kabot_io/view.py`
+- [scripts/kabot_io/view.py](../scripts/kabot_io/view.py)
 
 Change:
 
@@ -298,7 +298,7 @@ Result:
 
 ## Follow-Up Ideas
 
-- Add a short "publisher compliance checklist" to `docs/real-sensor-publisher-tutorial.md`.
+- Add a short "publisher compliance checklist" to [docs/real-sensor-publisher-tutorial.md](real-sensor-publisher-tutorial.md).
 - Add a unit/semantic note for `magnetic_field` in host docs to reduce ambiguity.
 - Consider per-publisher stack-size symbols for all real publishers for symmetry.
 
@@ -310,4 +310,4 @@ values that can create visible spikes.
 
 Full writeup:
 
-- `docs/invalid-sample-skip-refactor.md`
+- [docs/invalid-sample-skip-refactor.md](invalid-sample-skip-refactor.md)

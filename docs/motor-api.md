@@ -5,7 +5,7 @@
 The motor subsystem provides a Zephyr device API for DC motor effort control.
 
 - API class name: `motor`
-- Public header: `modules/motor_driver/include/motor/motor_driver.h`
+- Public header: [modules/motor_driver/include/motor/motor_driver.h](../modules/motor_driver/include/motor/motor_driver.h)
 - Effort type: signed Q31 (`int32_t`), where:
   - `INT32_MIN` is full reverse
   - `0` is neutral
@@ -19,7 +19,7 @@ This follows the same model used by other Zephyr driver APIs:
 
 ## Public Contract
 
-Defined in `modules/motor_driver/include/motor/motor_driver.h`:
+Defined in [modules/motor_driver/include/motor/motor_driver.h](../modules/motor_driver/include/motor/motor_driver.h):
 
 - `struct motor_driver_api`
   - `set_effort(const struct device *dev, int32_t effort_q31)`
@@ -40,7 +40,7 @@ Syscall integration:
 
 ## Effort Representation
 
-Helpers are defined in `modules/motor_driver/include/motor/motor_math.h`:
+Helpers are defined in [modules/motor_driver/include/motor/motor_math.h](../modules/motor_driver/include/motor/motor_math.h):
 
 - `motor_percent_to_q31(...)`
 - `motor_q31_to_percent(...)`
@@ -66,9 +66,9 @@ Current compatibles:
 
 Bindings:
 
-- `modules/motor_driver/dts/bindings/kabot,esc.yaml`
-- `modules/motor_driver/dts/bindings/kabot,h-bridge.yaml`
-- `modules/motor_driver/dts/bindings/kabot,sim-motor.yaml`
+- [modules/motor_driver/dts/bindings/kabot,esc.yaml](../modules/motor_driver/dts/bindings/kabot,esc.yaml)
+- [modules/motor_driver/dts/bindings/kabot,h-bridge.yaml](../modules/motor_driver/dts/bindings/kabot,h-bridge.yaml)
+- [modules/motor_driver/dts/bindings/kabot,sim-motor.yaml](../modules/motor_driver/dts/bindings/kabot,sim-motor.yaml)
 
 Alias usage:
 
@@ -81,28 +81,35 @@ The effort subscriber uses these aliases to route left/right effort messages.
 
 Current motor-compatible backends:
 
-- ESC backend: `modules/motor_driver/drivers/motor/esc_driver.c`
-- H-bridge backend: `modules/motor_driver/drivers/motor/h_bridge_driver.c`
-- Sim backend: `modules/motor_driver/drivers/motor/sim_motor_driver.c`
+- ESC backend: [modules/motor_driver/drivers/motor/esc_driver.c](../modules/motor_driver/drivers/motor/esc_driver.c)
+- H-bridge backend: [modules/motor_driver/drivers/motor/h_bridge_driver.c](../modules/motor_driver/drivers/motor/h_bridge_driver.c)
+- Sim backend: [modules/motor_driver/drivers/motor/sim_motor_driver.c](../modules/motor_driver/drivers/motor/sim_motor_driver.c)
 
 Both register Zephyr devices and provide `struct motor_driver_api` with `set_effort` implemented.
 
 ## Build Wiring
 
-Motor driver sources are grouped under `modules/motor_driver/drivers/motor` in module build:
+Motor driver sources are grouped under [modules/motor_driver/drivers/motor](../modules/motor_driver/drivers/motor) in module build:
 
-- `modules/motor_driver/CMakeLists.txt`
+- [modules/motor_driver/CMakeLists.txt](../modules/motor_driver/CMakeLists.txt)
 
 The module also registers include path for syscall/subsystem generation in:
 
-- `modules/motor_driver/CMakeLists.txt`
+- [modules/motor_driver/CMakeLists.txt](../modules/motor_driver/CMakeLists.txt)
 
 The app enables this module using:
 
-- `app/CMakeLists.txt`
+- [app/CMakeLists.txt](../app/CMakeLists.txt)
 
-Messaging sources are grouped under `app/src/zbus` in:
+Messaging sources are grouped under [app/src/zbus](../app/src/zbus) in:
 
-- `app/CMakeLists.txt`
+- [app/CMakeLists.txt](../app/CMakeLists.txt)
 
 This keeps motor driver code isolated from app message transport code.
+
+## See Also
+
+- [motor-app-usage.md](motor-app-usage.md)
+- [motor-driver-development.md](motor-driver-development.md)
+- [README.md](README.md)
+- [README.md](../README.md)

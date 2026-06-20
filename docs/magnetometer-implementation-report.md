@@ -6,7 +6,7 @@ This is a practical implementation report for adding MMC5603 magnetometer suppor
 
 Related implementation report:
 
-- `docs/icm42670l-implementation-report.md` (ICM42670L IMU bring-up, WHO_AM_I compatibility patch, and west patch persistence strategy)
+- [docs/icm42670l-implementation-report.md](icm42670l-implementation-report.md) (ICM42670L IMU bring-up, WHO_AM_I compatibility patch, and west patch persistence strategy)
 
 It follows the architecture in the real sensor tutorial and records:
 
@@ -28,8 +28,8 @@ The implementation follows the state egress architecture from the real sensor tu
 
 Reference:
 
-- `docs/real-sensor-publisher-tutorial.md`
-- `docs/firmware-data-flow.md`
+- [docs/real-sensor-publisher-tutorial.md](real-sensor-publisher-tutorial.md)
+- [docs/firmware-data-flow.md](firmware-data-flow.md)
 
 ## Implementation Summary
 
@@ -37,7 +37,7 @@ Reference:
 
 A new real publisher thread was added:
 
-- `app/src/zbus/state/magnetometer_publisher.c`
+- [app/src/zbus/state/magnetometer_publisher.c](../app/src/zbus/state/magnetometer_publisher.c)
 
 Behavior:
 
@@ -51,15 +51,15 @@ Behavior:
 
 A new Kconfig gate for real magnetometer publishing was added:
 
-- `app/Kconfig`: `CONFIG_KABOT_ENABLE_MAGNETOMETER_PUBLISHER`
+- [app/Kconfig](../app/Kconfig): `CONFIG_KABOT_ENABLE_MAGNETOMETER_PUBLISHER`
 
 Build wiring was added:
 
-- `app/CMakeLists.txt` includes `magnetometer_publisher.c` when enabled
+- [app/CMakeLists.txt](../app/CMakeLists.txt) includes `magnetometer_publisher.c` when enabled
 
 Board configuration updates:
 
-- `app/boards/esp32s3_devkitc_esp32s3_procpu.conf`
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
 - simulated magnetometer disabled
 - real magnetometer publisher enabled
 
@@ -67,7 +67,7 @@ Board configuration updates:
 
 MMC5603 node was added on I2C0:
 
-- `app/boards/esp32s3_devkitc_esp32s3_procpu.overlay`
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
 - node: `mmc5603@30`
 - compatible: `memsic,mmc56x3`
 - address: `0x30`
@@ -200,7 +200,7 @@ Observed:
 
 Inspected generated DTS:
 
-- `build/esp32s3_devkitc/zephyr/zephyr.dts`
+- [build/esp32s3_devkitc/zephyr/zephyr.dts](../build/esp32s3_devkitc/zephyr/zephyr.dts)
 
 Purpose:
 

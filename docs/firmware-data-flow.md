@@ -9,7 +9,13 @@ This document describes the current firmware data path after migration to the `C
 
 Implementation tutorial:
 
-- For a step-by-step guide to adding real sensor state fragment publishers (and extending `State` end-to-end), see `docs/real-sensor-publisher-tutorial.md`.
+- For a step-by-step guide to adding real sensor state fragment publishers (and extending `State` end-to-end), see [real-sensor-publisher-tutorial.md](real-sensor-publisher-tutorial.md).
+
+See also:
+
+- [README.md](../README.md)
+- [README.md](README.md)
+- [robot-discovery-and-binding-spec.md](robot-discovery-and-binding-spec.md)
 
 ## Overview
 
@@ -138,24 +144,24 @@ Default publisher refresh rates (current config defaults):
 
 ## Key Modules
 
-- `app/src/control/control_service.c`
+- [app/src/control/control_service.c](../app/src/control/control_service.c)
   - UDP socket setup, receive, decode, and publish.
-- `app/src/control/discovery_service.c`
+- [app/src/control/discovery_service.c](../app/src/control/discovery_service.c)
   - UDP Bonjour discovery receive path.
   - Discover-only (`claim=false`) and claim (`claim=true`) behavior split.
   - Last-claim-wins takeover for active state egress destination.
   - Bonjour response encode/send with robot identity metadata.
-- `app/src/system/robot_settings.c`
+- [app/src/system/robot_settings.c](../app/src/system/robot_settings.c)
   - Settings-backed robot identity (`serial`, `human_name`) and active HMI endpoint.
   - Fallback defaults from Kconfig and runtime getters/setters for other modules.
-- `app/src/zbus/channels/control_channel.c`
+- [app/src/zbus/channels/control_channel.c](../app/src/zbus/channels/control_channel.c)
   - zbus channel definition and message validator.
-- `app/src/zbus/control/effort_subscriber.c`
+- [app/src/zbus/control/effort_subscriber.c](../app/src/zbus/control/effort_subscriber.c)
   - message consume and motor driver actuation.
-- `app/src/zbus/state/state_udp_sender.c`
+- [app/src/zbus/state/state_udp_sender.c](../app/src/zbus/state/state_udp_sender.c)
   - Runtime-resolved destination target, refreshed from robot settings.
   - Egress is blocked until runtime claim has been accepted.
-- `app/protos/state_control_msg.proto`
+- [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto)
   - protobuf schema for `Control`, `State`, `Bonjour`, and `BonjourResponse`.
 
 ## Discovery and Dynamic Egress Binding
@@ -209,12 +215,12 @@ Fallback behavior:
 
 ## Build Notes
 
-- Nanopb source generation currently uses `app/protos/state_control_msg.proto`.
+- Nanopb source generation currently uses [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto).
 - Legacy `effort_msg.proto` has been removed from source.
 
 ## ESP32-S3 RAM Profile Notes
 
-Board profile `app/boards/esp32s3_devkitc_esp32s3_procpu.conf` currently applies
+Board profile [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf) currently applies
 RAM-pressure reductions for Wi-Fi + sensor workloads:
 
 - `CONFIG_MAIN_STACK_SIZE=4096`

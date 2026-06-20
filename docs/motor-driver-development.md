@@ -6,10 +6,10 @@ This guide explains how to implement a new motor backend that is compatible with
 
 Current structure in this repository:
 
-- motor driver module: `modules/motor_driver`
-- app motor UDP service: `app/src/motor`
-- module motor shell: `modules/motor_driver/subsys/motor`
-- app zbus transport/subscriber: `app/src/zbus`
+- motor driver module: [modules/motor_driver](../modules/motor_driver)
+- app motor UDP service: [app/src/motor](../app/src/motor)
+- module motor shell: [modules/motor_driver/subsys/motor](../modules/motor_driver/subsys/motor)
+- app zbus transport/subscriber: [app/src/zbus](../app/src/zbus)
 
 ## Requirements
 
@@ -23,7 +23,7 @@ A compatible driver must:
 
 ## Step 1: Add Devicetree Binding
 
-Create a binding file in `modules/motor_driver/dts/bindings`, for example:
+Create a binding file in [modules/motor_driver/dts/bindings](../modules/motor_driver/dts/bindings), for example:
 
 - `vendor,my-motor.yaml`
 
@@ -34,17 +34,17 @@ Include:
 
 ## Step 2: Add Driver Config/Data Types
 
-Create a header under `modules/motor_driver/include/motor`, for example:
+Create a header under [modules/motor_driver/include/motor](../modules/motor_driver/include/motor), for example:
 
-- `modules/motor_driver/include/motor/my_motor_driver.h`
+- [modules/motor_driver/include/motor/my_motor_driver.h](../modules/motor_driver/include/motor/my_motor_driver.h)
 
 Define config/data structs used by `dev->config` and/or `dev->data`.
 
 ## Step 3: Implement Backend Source
 
-Create source under `modules/motor_driver/drivers/motor`, for example:
+Create source under [modules/motor_driver/drivers/motor](../modules/motor_driver/drivers/motor), for example:
 
-- `modules/motor_driver/drivers/motor/my_motor_driver.c`
+- [modules/motor_driver/drivers/motor/my_motor_driver.c](../modules/motor_driver/drivers/motor/my_motor_driver.c)
 
 Typical pattern:
 
@@ -82,8 +82,8 @@ The API wrapper passes these codes to callers unchanged.
 
 Add nodes to board overlay(s), e.g.:
 
-- `app/boards/esp32s3_devkitc_esp32s3_procpu.overlay`
-- `app/boards/native_sim.overlay`
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
+- [app/boards/native_sim.overlay](../app/boards/native_sim.overlay)
 
 If this backend should participate in left/right app control, point aliases:
 
@@ -95,21 +95,21 @@ If this backend should participate in left/right app control, point aliases:
 The shell discovers motor devices by iterating all registered devices and
 filtering with `DEVICE_API_IS(motor, dev)` in:
 
-- `modules/motor_driver/subsys/motor/motor_shell.c`
+- [modules/motor_driver/subsys/motor/motor_shell.c](../modules/motor_driver/subsys/motor/motor_shell.c)
 
 No backend-compatible list update is required when adding new motor backends,
 as long as they implement the motor API class.
 
 ## Step 8: Build Integration
 
-Add source to `modules/motor_driver/CMakeLists.txt` under module driver sources.
+Add source to [modules/motor_driver/CMakeLists.txt](../modules/motor_driver/CMakeLists.txt) under module driver sources.
 
 If adding new motor API headers/subsystem tags, ensure syscall/subsystem scan
 includes module headers through:
 
 - `zephyr_syscall_include_directories(include)` in module CMake.
 
-The app integrates the module in `app/CMakeLists.txt` using `ZEPHYR_EXTRA_MODULES`.
+The app integrates the module in [app/CMakeLists.txt](../app/CMakeLists.txt) using `ZEPHYR_EXTRA_MODULES`.
 
 ## Validation Checklist
 
@@ -123,6 +123,6 @@ The app integrates the module in `app/CMakeLists.txt` using `ZEPHYR_EXTRA_MODULE
 
 Use existing drivers as templates:
 
-- `modules/motor_driver/drivers/motor/esc_driver.c`
-- `modules/motor_driver/drivers/motor/h_bridge_driver.c`
-- `modules/motor_driver/drivers/motor/sim_motor_driver.c`
+- [modules/motor_driver/drivers/motor/esc_driver.c](../modules/motor_driver/drivers/motor/esc_driver.c)
+- [modules/motor_driver/drivers/motor/h_bridge_driver.c](../modules/motor_driver/drivers/motor/h_bridge_driver.c)
+- [modules/motor_driver/drivers/motor/sim_motor_driver.c](../modules/motor_driver/drivers/motor/sim_motor_driver.c)

@@ -6,11 +6,11 @@ The LED strip subsystem provides shell-driven control of a Zephyr LED strip devi
 defined in devicetree.
 
 - Module name: `led_strip`
-- Module root: `modules/led_strip`
-- Shell source: `modules/led_strip/subsys/led_strip/led_strip_shell.c`
+- Module root: [modules/led_strip](../modules/led_strip)
+- Shell source: [modules/led_strip/subsys/led_strip/led_strip_shell.c](../modules/led_strip/subsys/led_strip/led_strip_shell.c)
 - Board integration (current):
-  - `app/boards/esp32s3_devkitc_esp32s3_procpu.conf`
-  - `app/boards/esp32s3_devkitc_esp32s3_procpu.overlay`
+  - [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
+  - [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
 
 Unlike the motor module, this module currently exposes its public contract through
 shell commands and devicetree wiring, while using Zephyr's built-in LED strip
@@ -25,7 +25,7 @@ The module provides a shell command group:
 
 Implementation location:
 
-- `modules/led_strip/subsys/led_strip/led_strip_shell.c`
+- [modules/led_strip/subsys/led_strip/led_strip_shell.c](../modules/led_strip/subsys/led_strip/led_strip_shell.c)
 
 Runtime behavior:
 
@@ -46,7 +46,7 @@ The shell command group is enabled by:
 
 defined in:
 
-- `modules/led_strip/Kconfig`
+- [modules/led_strip/Kconfig](../modules/led_strip/Kconfig)
 
 ## Devicetree Integration
 
@@ -54,7 +54,7 @@ Current board-level wiring uses a named LED strip node and alias/chosen links.
 
 Overlay location:
 
-- `app/boards/esp32s3_devkitc_esp32s3_procpu.overlay`
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
 
 Key properties in current overlay:
 
@@ -85,24 +85,24 @@ Color mapping behavior:
 
 App-level module enablement:
 
-- `app/CMakeLists.txt` appends `../modules/led_strip` to `ZEPHYR_EXTRA_MODULES`
+- [app/CMakeLists.txt](../app/CMakeLists.txt) appends `../modules/led_strip` to `ZEPHYR_EXTRA_MODULES`
 
 Module registration:
 
-- `modules/led_strip/zephyr/module.yml`
+- [modules/led_strip/zephyr/module.yml](../modules/led_strip/zephyr/module.yml)
   - `cmake: .`
   - `kconfig: Kconfig`
   - `dts_root: .`
 
 Module sources:
 
-- `modules/led_strip/CMakeLists.txt`
+- [modules/led_strip/CMakeLists.txt](../modules/led_strip/CMakeLists.txt)
   - builds `subsys/led_strip/led_strip_shell.c` when
     `CONFIG_KABOT_LED_STRIP_SHELL` is enabled
 
 Board Kconfig enablement (current ESP32-S3 target):
 
-- `app/boards/esp32s3_devkitc_esp32s3_procpu.conf`
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
   - `CONFIG_LED_STRIP=y`
   - `CONFIG_WS2812_STRIP_I2S=y`
   - `CONFIG_I2S=y`
@@ -130,3 +130,10 @@ Concurrency assumption:
 
 - shell logic uses one shared mutable pixel buffer with no internal locking
 - command execution is expected to be serialized in normal shell usage
+
+## See Also
+
+- [led-strip-app-usage.md](led-strip-app-usage.md)
+- [quality-gates-checklist.md](quality-gates-checklist.md)
+- [README.md](README.md)
+- [README.md](../README.md)

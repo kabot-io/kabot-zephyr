@@ -200,8 +200,8 @@ Firmware logs must include:
 
 ## Firmware Implementation References
 
-- Discovery UDP service: `app/src/control/discovery_service.c`
-- Runtime/persistent identity and endpoint storage: `app/src/system/robot_settings.c`
-- Runtime destination use during state send: `app/src/zbus/state/state_udp_sender.c`
-- Message schema: `app/protos/state_control_msg.proto`
-- Config definitions: `app/Kconfig`
+- Discovery UDP service: [app/src/control/discovery_service.c](../app/src/control/discovery_service.c)
+- Runtime/persistent identity and endpoint storage: [app/src/system/robot_settings.c](../app/src/system/robot_settings.c)
+- Runtime destination use during state send: [app/src/zbus/state/state_udp_sender.c](../app/src/zbus/state/state_udp_sender.c)
+- Message schema: [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto)
+- Config definitions: [app/Kconfig](../app/Kconfig)

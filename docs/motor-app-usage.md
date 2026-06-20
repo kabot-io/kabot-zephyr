@@ -10,29 +10,29 @@ Motor actuation in the app is driven by three aligned paths:
 
 App-level control ingress service code lives under:
 
-- `app/src/control/control_service.c`
-- `app/include/control`
+- [app/src/control/control_service.c](../app/src/control/control_service.c)
+- [app/include/control](../app/include/control)
 
 Driver API/backends/bindings live in the module:
 
-- `modules/motor_driver`
+- [modules/motor_driver](../modules/motor_driver)
 
 Motor shell now lives in module subsystem path:
 
-- `modules/motor_driver/subsys/motor/motor_shell.c`
+- [modules/motor_driver/subsys/motor/motor_shell.c](../modules/motor_driver/subsys/motor/motor_shell.c)
 
 Zbus control backbone code lives under:
 
-- `app/src/zbus/control`
-- `app/src/zbus/channels`
-- `app/include/zbus/control`
-- `app/include/zbus/channels`
+- [app/src/zbus/control](../app/src/zbus/control)
+- [app/src/zbus/channels](../app/src/zbus/channels)
+- [app/include/zbus/control](../app/include/zbus/control)
+- [app/include/zbus/channels](../app/include/zbus/channels)
 
 ## Motor Shell
 
 Source:
 
-- `modules/motor_driver/subsys/motor/motor_shell.c`
+- [modules/motor_driver/subsys/motor/motor_shell.c](../modules/motor_driver/subsys/motor/motor_shell.c)
 
 Commands:
 
@@ -52,7 +52,7 @@ Device name resolution:
 
 Source:
 
-- `app/src/control/control_service.c`
+- [app/src/control/control_service.c](../app/src/control/control_service.c)
 
 Behavior:
 
@@ -65,13 +65,13 @@ Behavior:
 
 Sources:
 
-- `app/src/zbus/channels/control_channel.c`
-- `app/src/zbus/control/effort_subscriber.c`
+- [app/src/zbus/channels/control_channel.c](../app/src/zbus/channels/control_channel.c)
+- [app/src/zbus/control/effort_subscriber.c](../app/src/zbus/control/effort_subscriber.c)
 
 Headers:
 
-- `app/include/zbus/channels/control_channel.h`
-- `app/include/zbus/control/effort_subscriber.h`
+- [app/include/zbus/channels/control_channel.h](../app/include/zbus/channels/control_channel.h)
+- [app/include/zbus/control/effort_subscriber.h](../app/include/zbus/control/effort_subscriber.h)
 
 Behavior:
 
@@ -87,7 +87,7 @@ Compile-time guards:
 
 ## App Initialization
 
-In `app/src/main.c`:
+In [app/src/main.c](../app/src/main.c):
 
 1. starts sensor subscriber
 2. starts control UDP service
@@ -96,9 +96,9 @@ In `app/src/main.c`:
 
 Backends implement Zephyr devices and expose motor API:
 
-- `modules/motor_driver/drivers/motor/esc_driver.c`
-- `modules/motor_driver/drivers/motor/h_bridge_driver.c`
-- `modules/motor_driver/drivers/motor/sim_motor_driver.c`
+- [modules/motor_driver/drivers/motor/esc_driver.c](../modules/motor_driver/drivers/motor/esc_driver.c)
+- [modules/motor_driver/drivers/motor/h_bridge_driver.c](../modules/motor_driver/drivers/motor/h_bridge_driver.c)
+- [modules/motor_driver/drivers/motor/sim_motor_driver.c](../modules/motor_driver/drivers/motor/sim_motor_driver.c)
 
 The app-level motor paths never call backend internals directly; they only use:
 
@@ -107,7 +107,7 @@ The app-level motor paths never call backend internals directly; they only use:
 ## Typical Developer Workflow
 
 1. Build simulation firmware: `./scripts/build.zsh --sim`.
-2. Required simulation runtime test: run `build/native_sim/zephyr/zephyr.exe` and validate expected shell/log behavior.
+2. Required simulation runtime test: run [build/native_sim/zephyr/zephyr.exe](../build/native_sim/zephyr/zephyr.exe) and validate expected shell/log behavior.
 3. Build firmware for ESP32 validation target: `./scripts/build.zsh --no-flash`.
 4. Run `motor list` and confirm expected devices.
 5. Run `motor set <device_name> <percent>` for manual control.

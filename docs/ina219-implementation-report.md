@@ -45,7 +45,7 @@ Extended `State` with:
 
 Added:
 
-- `app/src/zbus/state/current_publisher.c`
+- [app/src/zbus/state/current_publisher.c](../app/src/zbus/state/current_publisher.c)
 
 Behavior:
 
@@ -61,7 +61,7 @@ Behavior:
 
 Added:
 
-- `app/src/zbus/state/sim_current_publisher.c`
+- [app/src/zbus/state/sim_current_publisher.c](../app/src/zbus/state/sim_current_publisher.c)
 
 Wired with:
 
@@ -78,27 +78,27 @@ Ranges aligned to HMI scale targets:
 
 Updated:
 
-- `app/Kconfig`
+- [app/Kconfig](../app/Kconfig)
   - real current publisher symbols
   - simulated current publisher symbol
   - simulated sensors help text
-- `app/CMakeLists.txt`
+- [app/CMakeLists.txt](../app/CMakeLists.txt)
   - source gating for real and simulated current publishers
-- `app/boards/esp32s3_devkitc_esp32s3_procpu.conf`
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
   - enabled real current publisher
   - disabled simulated current publisher on ESP32S3 board
 
 ### Aggregator
 
-Updated `app/src/zbus/state/state_aggregator.c` to merge all 9 INA219 fields with existing timestamp newer-or-equal policy.
+Updated [app/src/zbus/state/state_aggregator.c](../app/src/zbus/state/state_aggregator.c) to merge all 9 INA219 fields with existing timestamp newer-or-equal policy.
 
 ## Host/HMI Changes
 
 Updated:
 
-- `scripts/kabot_io/model.py`
-- `scripts/kabot_io/state_fields.py`
-- `scripts/kabot_io/view.py`
+- [scripts/kabot_io/model.py](../scripts/kabot_io/model.py)
+- [scripts/kabot_io/state_fields.py](../scripts/kabot_io/state_fields.py)
+- [scripts/kabot_io/view.py](../scripts/kabot_io/view.py)
 
 Behavior updates:
 

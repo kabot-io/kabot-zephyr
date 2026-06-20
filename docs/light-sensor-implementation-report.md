@@ -25,13 +25,13 @@ This enables address reuse while keeping each sensor isolated on a different mux
 
 ### Devicetree and board config
 
-- Updated [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
+- Updated [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
   - added TCA9546A root node
   - added `mux_i2c0@0` and `mux_i2c1@1`
   - added `ltr329_left` and `ltr329_right`
   - added aliases `kabot-light-left` and `kabot-light-right`
 
-- Updated [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
+- Updated [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
   - enabled `CONFIG_I2C_TCA954X`
   - enabled `CONFIG_LTR55X`
   - set init ordering:
@@ -40,28 +40,28 @@ This enables address reuse while keeping each sensor isolated on a different mux
 
 ### State and publisher path
 
-- Updated [app/protos/state_control_msg.proto](app/protos/state_control_msg.proto)
+- Updated [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto)
   - `StateScalar light_left = 7;`
   - `StateScalar light_right = 8;`
 
-- Added [app/src/zbus/state/light_publisher.c](app/src/zbus/state/light_publisher.c)
+- Added [app/src/zbus/state/light_publisher.c](../app/src/zbus/state/light_publisher.c)
   - alias-based device binding for left/right sensors
   - startup retry loop using `CONFIG_KABOT_SENSOR_RETRY_PERIOD_MS`
   - periodic fetch/get on `SENSOR_CHAN_LIGHT`
   - publishes any valid subset of `light_left` and `light_right` each cycle
   - skips invalid conversion samples (`-EINVAL`) to avoid value spikes
 
-- Updated [app/src/zbus/state/state_aggregator.c](app/src/zbus/state/state_aggregator.c)
+- Updated [app/src/zbus/state/state_aggregator.c](../app/src/zbus/state/state_aggregator.c)
   - timestamp merge handling for `light_left` and `light_right`
 
-- Updated [app/Kconfig](app/Kconfig)
+- Updated [app/Kconfig](../app/Kconfig)
   - `KABOT_ENABLE_LIGHT_PUBLISHER`
   - `KABOT_STATE_LIGHT_PERIOD_MS`
   - `KABOT_STATE_LIGHT_LEFT_FRAME_ID`
   - `KABOT_STATE_LIGHT_RIGHT_FRAME_ID`
   - `KABOT_LIGHT_PUBLISHER_STACK_SIZE`
 
-- Updated [app/CMakeLists.txt](app/CMakeLists.txt)
+- Updated [app/CMakeLists.txt](../app/CMakeLists.txt)
   - conditional source inclusion for `light_publisher.c`
 
 ## Zephyr Driver Hardening
@@ -77,13 +77,13 @@ This removes unsigned underflow artifacts in the subtractive branch.
 
 ## Host/HMI Changes
 
-- Updated [scripts/kabot_io/model.py](scripts/kabot_io/model.py)
+- Updated [scripts/kabot_io/model.py](../scripts/kabot_io/model.py)
   - decode and store `light_left` and `light_right`
 
-- Updated [scripts/kabot_io/state_fields.py](scripts/kabot_io/state_fields.py)
+- Updated [scripts/kabot_io/state_fields.py](../scripts/kabot_io/state_fields.py)
   - field mappings and hz tracking for both light channels
 
-- Updated [scripts/kabot_io/view.py](scripts/kabot_io/view.py)
+- Updated [scripts/kabot_io/view.py](../scripts/kabot_io/view.py)
   - added light plot with left/right traces
 
 ## Validation Snapshot

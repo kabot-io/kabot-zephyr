@@ -5,7 +5,7 @@ SPDX-FileCopyrightText: Copyright The Kabot Project Contributors
 
 # HMI Architecture
 
-This document describes the greenfield host HMI located in `scripts/kabot_io`.
+This document describes the greenfield host HMI located in [scripts/kabot_io](../scripts/kabot_io).
 
 ## Goals
 
@@ -16,13 +16,19 @@ This document describes the greenfield host HMI located in `scripts/kabot_io`.
 
 ## Status In Project Scope
 
-The HMI in `scripts/kabot_io` is a local debug/reference tool.
+The HMI in [scripts/kabot_io](../scripts/kabot_io) is a local debug/reference tool.
 
 Normative discovery and binding contracts for external HMIs are documented in:
 
-- `docs/robot-discovery-and-binding-spec.md`
-- `docs/hmi_centric_info/04_firmware_interface_for_hmi_developers.md`
-- `docs/hmi_centric_info/05_system_data_flow_reference.md`
+- [robot-discovery-and-binding-spec.md](robot-discovery-and-binding-spec.md)
+- [hmi_centric_info/04_firmware_interface_for_hmi_developers.md](hmi_centric_info/04_firmware_interface_for_hmi_developers.md)
+- [hmi_centric_info/05_system_data_flow_reference.md](hmi_centric_info/05_system_data_flow_reference.md)
+
+See also:
+
+- [README.md](../README.md)
+- [README.md](README.md)
+- [firmware-data-flow.md](firmware-data-flow.md)
 
 ## Scope (Current)
 
@@ -98,12 +104,12 @@ The HMI `Hz` values are UI-derived from `State.*.header.stamp` deltas:
 
 ## Package Layout
 
-- `scripts/kabot_io/main.py`: app entrypoint and startup wiring.
-- `scripts/kabot_io/config.py`: runtime configuration defaults.
-- `scripts/kabot_io/model.py`: networking and data model operations.
-- `scripts/kabot_io/view.py`: Tkinter UI and field bindings.
-- `scripts/kabot_io/controller.py`: input handling and control loop orchestration.
-- `scripts/kabot_io/proto_codec.py`: protobuf compile/load/encode helpers.
+- [scripts/kabot_io/main.py](../scripts/kabot_io/main.py): app entrypoint and startup wiring.
+- [scripts/kabot_io/config.py](../scripts/kabot_io/config.py): runtime configuration defaults.
+- [scripts/kabot_io/model.py](../scripts/kabot_io/model.py): networking and data model operations.
+- [scripts/kabot_io/view.py](../scripts/kabot_io/view.py): Tkinter UI and field bindings.
+- [scripts/kabot_io/controller.py](../scripts/kabot_io/controller.py): input handling and control loop orchestration.
+- [scripts/kabot_io/proto_codec.py](../scripts/kabot_io/proto_codec.py): protobuf compile/load/encode helpers.
 
 ## MVC Responsibilities
 
@@ -153,9 +159,9 @@ The HMI `Hz` values are UI-derived from `State.*.header.stamp` deltas:
 ## Protobuf Strategy
 
 - On startup, `proto_codec.initialize_proto_runtime()` compiles:
-  - `app/protos/state_control_msg.proto`
+  - [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto)
 - Generated Python module is loaded from:
-  - `scripts/kabot_io/_generated/state_control_msg_pb2.py`
+  - [scripts/kabot_io/_generated/state_control_msg_pb2.py](../scripts/kabot_io/_generated/state_control_msg_pb2.py)
 - Control serialization uses generated class APIs, not handcrafted wire bytes.
 
 ## Rationale

@@ -38,7 +38,7 @@ Define migration path from current Python Tkinter HMI to web frontend while pres
 
 - Use protobuf payloads for telemetry channels where compactness matters
 - Use compact JSON for UI metadata and control-plane status
-- Preserve schema ownership in app/protos/state_control_msg.proto
+- Preserve schema ownership in [app/protos/state_control_msg.proto](../../app/protos/state_control_msg.proto)
 
 ## Performance Guardrails for 60 FPS UI
 

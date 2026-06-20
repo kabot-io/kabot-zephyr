@@ -23,17 +23,15 @@ The implementation follows the current state egress architecture:
 
 Reference:
 
-- docs/real-sensor-publisher-tutorial.md
-- docs/firmware-data-flow.md
-
+- [docs/real-sensor-publisher-tutorial.md](real-sensor-publisher-tutorial.md)
+- [docs/firmware-data-flow.md](firmware-data-flow.md)
 ## Implementation Summary
 
 ### 1. Real IMU Publisher Added
 
 A new real publisher thread was added:
 
-- app/src/zbus/state/imu_publisher.c
-
+- [app/src/zbus/state/imu_publisher.c](../app/src/zbus/state/imu_publisher.c)
 Behavior:
 
 - resolves IMU from devicetree alias (`kabot-imu`)
@@ -60,17 +58,17 @@ state.angular_velocity.header.stamp = stamp;
 
 Added Kconfig gates:
 
-- app/Kconfig
+- [app/Kconfig](../app/Kconfig)
   - KABOT_ENABLE_IMU_PUBLISHER
   - KABOT_IMU_PUBLISHER_STACK_SIZE
 
 Added CMake wiring:
 
-- app/CMakeLists.txt includes src/zbus/state/imu_publisher.c when CONFIG_KABOT_ENABLE_IMU_PUBLISHER is enabled.
+- [app/CMakeLists.txt](../app/CMakeLists.txt) includes `src/zbus/state/imu_publisher.c` when `CONFIG_KABOT_ENABLE_IMU_PUBLISHER` is enabled.
 
 Board config updates:
 
-- app/boards/esp32s3_devkitc_esp32s3_procpu.conf
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
   - disables simulated IMU publisher
   - enables real IMU publisher
   - enables ICM42X70 driver
@@ -87,7 +85,7 @@ CONFIG_ICM42X70=y
 
 IMU node was added on I2C0:
 
-- app/boards/esp32s3_devkitc_esp32s3_procpu.overlay
+- [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
 - node: icm42670@68
 - compatible: invensense,icm42670s
 - address: 0x68
