@@ -29,5 +29,6 @@ KconfigBasic.txt
 KconfigBasicNoModules.txt
 KconfigHWMv2.txt
 LicenseAndCopyrightCheck.txt
+Pylint.txt
 Ruff.txt
 SysbuildKconfig.txt
