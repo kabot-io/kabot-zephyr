@@ -11,11 +11,17 @@ Define the firmware-side contracts HMI must respect.
 
 ## Source Of Truth Files
 
-- docs/firmware-data-flow.md
-- app/prj.conf
-- app/protos/state_control_msg.proto
-- app/src/control/control_service.c
-- app/src/zbus/state/state_udp_sender.c
+- [../firmware-data-flow.md](../firmware-data-flow.md)
+- [../../app/prj.conf](../../app/prj.conf)
+- [../../app/protos/state_control_msg.proto](../../app/protos/state_control_msg.proto)
+- [../../app/src/control/control_service.c](../../app/src/control/control_service.c)
+- [../../app/src/zbus/state/state_udp_sender.c](../../app/src/zbus/state/state_udp_sender.c)
+
+## See Also
+
+- [../../README.md](../../README.md)
+- [../README.md](../README.md)
+- [../robot-discovery-and-binding-spec.md](../robot-discovery-and-binding-spec.md)
 
 ## Ingress Contract, Control
 
@@ -50,11 +56,14 @@ HMI should treat identical stamp updates as valid latest value updates.
 
 - Transport: MCUmgr SMP over UDP
 - Port: 1337
-- Groups in use:
+- Groups in use on ESP32-S3 firmware builds:
   - OS
   - STAT
   - TASKSTAT
   - SHELL
+  - IMG
+
+Bootloader information queries are also enabled via OS subgroup support.
 
 ## SMP Output Size Constraints
 
@@ -80,8 +89,7 @@ HMI should not hardcode these values as strict guarantees.
 
 Discovery and dynamic state egress binding are specified in:
 
-- docs/robot-discovery-and-binding-spec.md
-
+- [docs/robot-discovery-and-binding-spec.md](../robot-discovery-and-binding-spec.md)
 Normative constraints in this phase:
 
 - Discovery transport is UDP unicast sweep from host-side HMI.

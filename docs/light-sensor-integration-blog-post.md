@@ -26,7 +26,7 @@ Both LTR329 sensors use address `0x29`. On one shared bus, that collides immedia
 
 ### Devicetree
 
-In [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](app/boards/esp32s3_devkitc_esp32s3_procpu.overlay):
+In [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay):
 
 - added TCA9546A root on `i2c0`
 - added channel buses `mux_i2c0@0` and `mux_i2c1@1`
@@ -37,9 +37,9 @@ In [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](app/boards/esp32s3_devkit
 
 ### Kconfig/CMake and Publisher
 
-- new publisher options in [app/Kconfig](app/Kconfig)
-- source gating in [app/CMakeLists.txt](app/CMakeLists.txt)
-- new dual-light worker in [app/src/zbus/state/light_publisher.c](app/src/zbus/state/light_publisher.c)
+- new publisher options in [app/Kconfig](../app/Kconfig)
+- source gating in [app/CMakeLists.txt](../app/CMakeLists.txt)
+- new dual-light worker in [app/src/zbus/state/light_publisher.c](../app/src/zbus/state/light_publisher.c)
 
 The publisher reads both devices in one loop and publishes one partial State fragment
 containing whichever light fields are valid in that cycle.
@@ -49,8 +49,8 @@ the cycle so no fallback spike value is injected.
 
 ### State Schema and Aggregation
 
-- extended [app/protos/state_control_msg.proto](app/protos/state_control_msg.proto) with `light_left` and `light_right`
-- extended merge logic in [app/src/zbus/state/state_aggregator.c](app/src/zbus/state/state_aggregator.c)
+- extended [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto) with `light_left` and `light_right`
+- extended merge logic in [app/src/zbus/state/state_aggregator.c](../app/src/zbus/state/state_aggregator.c)
 
 This keeps light telemetry in the same timestamp-based merge model as other sensors.
 
@@ -58,9 +58,9 @@ This keeps light telemetry in the same timestamp-based merge model as other sens
 
 Updated:
 
-- [scripts/kabot_io/model.py](scripts/kabot_io/model.py)
-- [scripts/kabot_io/state_fields.py](scripts/kabot_io/state_fields.py)
-- [scripts/kabot_io/view.py](scripts/kabot_io/view.py)
+- [scripts/kabot_io/model.py](../scripts/kabot_io/model.py)
+- [scripts/kabot_io/state_fields.py](../scripts/kabot_io/state_fields.py)
+- [scripts/kabot_io/view.py](../scripts/kabot_io/view.py)
 
 Result: both channels decode, display, and plot in HMI.
 

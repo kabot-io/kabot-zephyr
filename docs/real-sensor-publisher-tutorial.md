@@ -9,10 +9,16 @@ Implementation case study:
 
 - For a full real-world MMC5603 bring-up log (architecture decisions, pinmux conflicts,
   successful debug prompts, and tooling workflow), see
-  `docs/magnetometer-implementation-report.md`.
+  [magnetometer-implementation-report.md](magnetometer-implementation-report.md).
 - For a full ICM42670L bring-up log (publisher integration, WHO_AM_I mismatch analysis,
   Zephyr driver compatibility patch, and west persistence workflow), see
-  `docs/icm42670l-implementation-report.md`.
+  [icm42670l-implementation-report.md](icm42670l-implementation-report.md).
+
+See also:
+
+- [firmware-data-flow.md](firmware-data-flow.md)
+- [README.md](README.md)
+- [README.md](../README.md)
 
 ## 1. Data Transport Concepts: Ingress and Egress
 
@@ -32,10 +38,9 @@ Ingress is the control path:
 
 Key files:
 
-- app/src/control/control_service.c
-- app/src/zbus/channels/control_channel.c
-- app/src/zbus/control/effort_subscriber.c
-
+- [app/src/control/control_service.c](../app/src/control/control_service.c)
+- [app/src/zbus/channels/control_channel.c](../app/src/zbus/channels/control_channel.c)
+- [app/src/zbus/control/effort_subscriber.c](../app/src/zbus/control/effort_subscriber.c)
 ### Egress
 
 Egress is the telemetry/state path:
@@ -48,12 +53,11 @@ Egress is the telemetry/state path:
 
 Key files:
 
-- app/src/zbus/channels/state_channel.c
-- app/src/zbus/state/state_aggregator.c
-- app/src/zbus/state/state_periodic_publisher.c
-- app/src/zbus/channels/state_egress_channel.c
-- app/src/zbus/state/state_udp_sender.c
-
+- [app/src/zbus/channels/state_channel.c](../app/src/zbus/channels/state_channel.c)
+- [app/src/zbus/state/state_aggregator.c](../app/src/zbus/state/state_aggregator.c)
+- [app/src/zbus/state/state_periodic_publisher.c](../app/src/zbus/state/state_periodic_publisher.c)
+- [app/src/zbus/channels/state_egress_channel.c](../app/src/zbus/channels/state_egress_channel.c)
+- [app/src/zbus/state/state_udp_sender.c](../app/src/zbus/state/state_udp_sender.c)
 ```mermaid
 flowchart LR
   A[Real/Sim Sensor Publisher] -->|partial State| B[state_channel]
@@ -73,12 +77,11 @@ A publisher produces messages to a zbus channel. In this architecture, sensor pu
 
 Examples:
 
-- app/src/zbus/state/sim_imu_publisher.c
-- app/src/zbus/state/sim_magnetometer_publisher.c
-- app/src/zbus/state/sim_distance_publisher.c
-- app/src/zbus/state/distance_publisher.c
-- app/src/zbus/control/effort_state_publisher.c
-
+- [app/src/zbus/state/sim_imu_publisher.c](../app/src/zbus/state/sim_imu_publisher.c)
+- [app/src/zbus/state/sim_magnetometer_publisher.c](../app/src/zbus/state/sim_magnetometer_publisher.c)
+- [app/src/zbus/state/sim_distance_publisher.c](../app/src/zbus/state/sim_distance_publisher.c)
+- [app/src/zbus/state/distance_publisher.c](../app/src/zbus/state/distance_publisher.c)
+- [app/src/zbus/control/effort_state_publisher.c](../app/src/zbus/control/effort_state_publisher.c)
 ### Listener
 
 A listener is notified synchronously when a channel publish occurs. Here, state_aggregator_listener receives each partial State publish and merges it into cache immediately.
@@ -101,7 +104,7 @@ This decouples egress cadence from individual sensor update rates and avoids spa
 
 ## 3. State Message Structure (Protobuf)
 
-State is defined in app/protos/state_control_msg.proto.
+State is defined in [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto).
 
 - It is protobuf-based.
 - All state measurements live in one top-level State structure.
@@ -120,6 +123,8 @@ Timestamp and merge policy:
 - This allows mixed-rate producers without global lock-step timing.
 
 Protobuf snippet (current `State`):
+
+Source: [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto)
 
 ```proto
 message State {
@@ -150,6 +155,8 @@ message State {
 
 Aggregation snippet (field-wise newer-or-equal replace):
 
+Source: [app/src/zbus/state/state_aggregator.c](../app/src/zbus/state/state_aggregator.c)
+
 ```c
 if (incoming->has_distance
   && should_replace_field(incoming->distance.has_header,
@@ -168,20 +175,21 @@ Simulation publishers are the fastest way to understand expected fragment shape 
 
 Start here:
 
-- app/src/zbus/state/sim_imu_publisher.c
-- app/src/zbus/state/sim_magnetometer_publisher.c
-- app/src/zbus/state/sim_distance_publisher.c
-
+- [app/src/zbus/state/sim_imu_publisher.c](../app/src/zbus/state/sim_imu_publisher.c)
+- [app/src/zbus/state/sim_magnetometer_publisher.c](../app/src/zbus/state/sim_magnetometer_publisher.c)
+- [app/src/zbus/state/sim_distance_publisher.c](../app/src/zbus/state/sim_distance_publisher.c)
 Distance is a good scalar example:
 
-- Sim scalar: app/src/zbus/state/sim_distance_publisher.c
-- Real scalar: app/src/zbus/state/distance_publisher.c
+- Sim scalar: [app/src/zbus/state/sim_distance_publisher.c](../app/src/zbus/state/sim_distance_publisher.c)
+- Real scalar: [app/src/zbus/state/distance_publisher.c](../app/src/zbus/state/distance_publisher.c)
 
 Dual light is a good scalar-pair example:
 
-- Real scalar-pair: app/src/zbus/state/light_publisher.c
+- Real scalar-pair: [app/src/zbus/state/light_publisher.c](../app/src/zbus/state/light_publisher.c)
 
 Simulation snippet (`sim_distance_publisher`):
+
+Source: [app/src/zbus/state/sim_distance_publisher.c](../app/src/zbus/state/sim_distance_publisher.c)
 
 ```c
 State state = State_init_zero;
@@ -210,6 +218,8 @@ Invalid-sample policy for real publishers:
 - keep existing warning/retry behavior for other non-zero errors
 
 Real snippet (`distance_publisher`):
+
+Source: [app/src/zbus/state/distance_publisher.c](../app/src/zbus/state/distance_publisher.c)
 
 ```c
 rc = sensor_channel_get(tof, SENSOR_CHAN_DISTANCE, &distance_value);
@@ -242,7 +252,7 @@ Use a consistent Kconfig shape for every publisher:
 2. Period symbol (ms)
 3. Frame ID symbol
 
-Current examples in app/Kconfig:
+Current examples in [app/Kconfig](../app/Kconfig):
 
 - KABOT_ENABLE_DISTANCE_PUBLISHER
 - KABOT_STATE_DISTANCE_PERIOD_MS
@@ -268,12 +278,14 @@ This lets you migrate one sensor at a time:
 3. Enable real counterpart.
 4. Repeat for next sensor.
 
-Build wiring pattern in app/CMakeLists.txt:
+Build wiring pattern in [app/CMakeLists.txt](../app/CMakeLists.txt):
 
 - Gate each publisher source file by its CONFIG symbol.
 - Keep publisher threads independent and small.
 
 Snippet:
+
+Source: [app/CMakeLists.txt](../app/CMakeLists.txt)
 
 ```cmake
 if(CONFIG_KABOT_ENABLE_SIMULATED_STATE_SENSORS)
@@ -288,6 +300,8 @@ endif()
 ```
 
 Kconfig snippet:
+
+Source: [app/Kconfig](../app/Kconfig)
 
 ```kconfig
 config KABOT_ENABLE_DISTANCE_PUBLISHER
@@ -318,15 +332,15 @@ Use this checklist when adding a new real sensor fragment publisher.
 
 - Add ENABLE symbol for new publisher.
 - Add period and frame_id symbols (or reuse existing if appropriate).
-- Add board-level defaults in app/boards/<board>.conf.
+- Add board-level defaults in [app/boards/<board>.conf](../app/boards).
 
 3. Build wiring
 
-- Include new source in app/CMakeLists.txt behind ENABLE symbol.
+- Include new source in [app/CMakeLists.txt](../app/CMakeLists.txt) behind ENABLE symbol.
 
 4. Publisher implementation
 
-- Create app/src/zbus/<sensor>_publisher.c.
+- Create [app/src/zbus/<sensor>_publisher.c](../app/src/zbus).
 - Read device readiness.
 - If a device is not ready at startup, prefer a retry loop with sleep/backoff
   over terminating the thread; this prevents permanent loss of that state field
@@ -355,7 +369,7 @@ When adding a new telemetry field to State, update firmware and host together.
 
 1. Update protobuf schema
 
-- Edit app/protos/state_control_msg.proto and add field in State.
+- Edit [app/protos/state_control_msg.proto](../app/protos/state_control_msg.proto) and add field in State.
 
 2. Regenerate/build protobuf outputs
 
@@ -368,7 +382,7 @@ When adding a new telemetry field to State, update firmware and host together.
 
 4. Update state aggregation
 
-- Extend app/src/zbus/state/state_aggregator.c merge logic for new field.
+- Extend [app/src/zbus/state/state_aggregator.c](../app/src/zbus/state/state_aggregator.c) merge logic for new field.
 - Apply same timestamp-based replacement rule.
 
 5. Optional config
@@ -379,17 +393,18 @@ When adding a new telemetry field to State, update firmware and host together.
 
 kabot_io is based on MVC architecture.
 
-- Model (scripts/kabot_io/model.py): decode protobuf and map new field into StateSnapshot.
-- View (scripts/kabot_io/view.py): expose new field widget and optional plot.
-- Controller (scripts/kabot_io/controller.py): keep UI refresh logic and optional Hz logic aligned.
+- Model ([scripts/kabot_io/model.py](../scripts/kabot_io/model.py)): decode protobuf and map new field into StateSnapshot.
+- View ([scripts/kabot_io/view.py](../scripts/kabot_io/view.py)): expose new field widget and optional plot.
+- Controller ([scripts/kabot_io/controller.py](../scripts/kabot_io/controller.py)): keep UI refresh logic and optional Hz logic aligned.
 
 Also update field mapping table:
 
-- scripts/kabot_io/state_fields.py
-
+- [scripts/kabot_io/state_fields.py](../scripts/kabot_io/state_fields.py)
 That mapping is the canonical bridge between protobuf paths and UI snapshot fields.
 
 Mapping snippet:
+
+Source: [scripts/kabot_io/state_fields.py](../scripts/kabot_io/state_fields.py)
 
 ```python
 STATE_FIELDS = [
@@ -400,7 +415,7 @@ STATE_FIELDS = [
 ]
 ```
 
-Model mapping snippet (`scripts/kabot_io/model.py`):
+Model mapping snippet ([scripts/kabot_io/model.py](../scripts/kabot_io/model.py)):
 
 ```python
 return StateSnapshot(
@@ -422,9 +437,9 @@ return StateSnapshot(
 
 ## Recommended Reading Order
 
-1. docs/firmware-data-flow.md
-2. app/src/zbus/state/sim_distance_publisher.c
-3. app/src/zbus/state/distance_publisher.c
-4. app/src/zbus/state/state_aggregator.c
-5. docs/hmi-architecture.md
-6. scripts/kabot_io/state_fields.py
+1. [docs/firmware-data-flow.md](firmware-data-flow.md)
+2. [app/src/zbus/state/sim_distance_publisher.c](../app/src/zbus/state/sim_distance_publisher.c)
+3. [app/src/zbus/state/distance_publisher.c](../app/src/zbus/state/distance_publisher.c)
+4. [app/src/zbus/state/state_aggregator.c](../app/src/zbus/state/state_aggregator.c)
+5. [docs/hmi-architecture.md](hmi-architecture.md)
+6. [scripts/kabot_io/state_fields.py](../scripts/kabot_io/state_fields.py)

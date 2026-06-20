@@ -16,16 +16,15 @@ This document is a reference for the current HMI implementation and module bound
 
 ## Source Of Truth Files
 
-- scripts/kabot_io/main.py
-- scripts/kabot_io/config.py
-- scripts/kabot_io/model.py
-- scripts/kabot_io/controller.py
-- scripts/kabot_io/view.py
-- scripts/kabot_io/proto_codec.py
-- scripts/kabot_io/state_fields.py
-- app/protos/state_control_msg.proto
-- docs/hmi-architecture.md
-
+- [scripts/kabot_io/main.py](../../scripts/kabot_io/main.py)
+- [scripts/kabot_io/config.py](../../scripts/kabot_io/config.py)
+- [scripts/kabot_io/model.py](../../scripts/kabot_io/model.py)
+- [scripts/kabot_io/controller.py](../../scripts/kabot_io/controller.py)
+- [scripts/kabot_io/view.py](../../scripts/kabot_io/view.py)
+- [scripts/kabot_io/proto_codec.py](../../scripts/kabot_io/proto_codec.py)
+- [scripts/kabot_io/state_fields.py](../../scripts/kabot_io/state_fields.py)
+- [app/protos/state_control_msg.proto](../../app/protos/state_control_msg.proto)
+- [docs/hmi-architecture.md](../hmi-architecture.md)
 ## Runtime Entry and Configuration
 
 ### Entry point

@@ -18,10 +18,10 @@ The agreed policy is:
 
 This refactor applies the skip policy consistently to all real state publishers that consume Zephyr sensor channels:
 
-- [app/src/zbus/state/imu_publisher.c](app/src/zbus/state/imu_publisher.c)
-- [app/src/zbus/state/magnetometer_publisher.c](app/src/zbus/state/magnetometer_publisher.c)
-- [app/src/zbus/state/distance_publisher.c](app/src/zbus/state/distance_publisher.c)
-- [app/src/zbus/state/light_publisher.c](app/src/zbus/state/light_publisher.c)
+- [app/src/zbus/state/imu_publisher.c](../app/src/zbus/state/imu_publisher.c)
+- [app/src/zbus/state/magnetometer_publisher.c](../app/src/zbus/state/magnetometer_publisher.c)
+- [app/src/zbus/state/distance_publisher.c](../app/src/zbus/state/distance_publisher.c)
+- [app/src/zbus/state/light_publisher.c](../app/src/zbus/state/light_publisher.c)
 
 Simulated publishers are intentionally unchanged because they do not perform hardware conversion reads.
 
@@ -31,7 +31,7 @@ Simulated publishers are intentionally unchanged because they do not perform har
 
 A single helper centralizes the policy decision:
 
-- [app/include/zbus/state_publish_utils.h](app/include/zbus/state_publish_utils.h)
+- [app/include/zbus/state_publish_utils.h](../app/include/zbus/state_publish_utils.h)
 
 ```c
 static inline bool should_skip_invalid_sensor_sample(int rc)

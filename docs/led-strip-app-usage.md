@@ -8,15 +8,15 @@ commands and board devicetree wiring.
 Primary implementation paths:
 
 - shell command implementation:
-  - `modules/led_strip/subsys/led_strip/led_strip_shell.c`
+  - [modules/led_strip/subsys/led_strip/led_strip_shell.c](../modules/led_strip/subsys/led_strip/led_strip_shell.c)
 - module configuration:
-  - `modules/led_strip/Kconfig`
-  - `modules/led_strip/CMakeLists.txt`
+  - [modules/led_strip/Kconfig](../modules/led_strip/Kconfig)
+  - [modules/led_strip/CMakeLists.txt](../modules/led_strip/CMakeLists.txt)
 - app build/module wiring:
-  - `app/CMakeLists.txt`
+  - [app/CMakeLists.txt](../app/CMakeLists.txt)
 - current board wiring:
-  - `app/boards/esp32s3_devkitc_esp32s3_procpu.conf`
-  - `app/boards/esp32s3_devkitc_esp32s3_procpu.overlay`
+  - [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
+  - [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
 
 ## LED Strip Shell Commands
 
@@ -134,9 +134,9 @@ Current support scope:
   wiring expected by this module
 
 - Kconfig enablement in:
-  - `app/boards/esp32s3_devkitc_esp32s3_procpu.conf`
+  - [app/boards/esp32s3_devkitc_esp32s3_procpu.conf](../app/boards/esp32s3_devkitc_esp32s3_procpu.conf)
 - devicetree node and alias/chosen links in:
-  - `app/boards/esp32s3_devkitc_esp32s3_procpu.overlay`
+  - [app/boards/esp32s3_devkitc_esp32s3_procpu.overlay](../app/boards/esp32s3_devkitc_esp32s3_procpu.overlay)
 
 The shell implementation is tied to the node label `led_strip`, and command index
 bounds derive from `chain-length` in that node.
