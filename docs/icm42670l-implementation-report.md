@@ -206,7 +206,7 @@ index a6341ce15..12ed33b34 100644
  #define ICM42X70_SERIAL_INTERFACE_MAX_READ  (1024 * 32)
  #define ICM42X70_SERIAL_INTERFACE_MAX_WRITE (1024 * 32)
 +#define ICM42670L_WHOAMI_COMPAT_ID         0x63
- 
+
  static inline int icm42x70_reg_read(const struct device *dev, uint8_t reg, uint8_t *buf,
                                      uint32_t size)
 @@ -346,6 +347,7 @@ static int icm42x70_sensor_init(const struct device *dev)
@@ -215,12 +215,12 @@ index a6341ce15..12ed33b34 100644
         const struct icm42x70_config *config = dev->config;
 +       bool whoami_ok;
         int err = 0;
- 
+
         /* Initialize serial interface and device */
 @@ -367,12 +369,24 @@ static int icm42x70_sensor_init(const struct device *dev)
                 return err;
         }
- 
+
 -       if (data->chip_id != data->imu_whoami) {
 +       whoami_ok = (data->chip_id == data->imu_whoami) ||
 +                   ((data->chip_id == ICM42670L_WHOAMI_COMPAT_ID) &&
@@ -232,7 +232,7 @@ index a6341ce15..12ed33b34 100644
                         data->imu_whoami, data->imu_name);
                 return -ENOTSUP;
         }
- 
+
 +       if ((data->chip_id == ICM42670L_WHOAMI_COMPAT_ID) &&
 +           ((data->imu_whoami == INV_ICM42670P_WHOAMI) ||
 +            (data->imu_whoami == INV_ICM42670S_WHOAMI))) {
