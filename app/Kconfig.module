@@ -17,6 +17,14 @@ config KABOT_MOTOR_SHELL
     help
       Enable the `motor` shell command group.
 
+config KABOT_CONTROL_WATCHDOG_MS
+    int "Motor safety stop watchdog period (ms)"
+    default 300
+    range 100 10000
+    help
+      If no control command arrives within this period, or the robot is unclaimed,
+      motor effort is immediately zeroed.
+
 config KABOT_CONTROL_INGRESS_PORT
     int "Control ingress UDP port"
     default 30010
