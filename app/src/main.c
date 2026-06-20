@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* SPDX-FileCopyrightText: Copyright The Kabot Project Contributors */
+
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
 #include <zephyr/zbus/zbus.h>
@@ -20,13 +23,12 @@
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 #if defined(CONFIG_WIFI) && defined(CONFIG_LED_STRIP)
-#define LED_STATUS_WIFI_EVENTS                                                                   \
-	(NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT)
+#define LED_STATUS_WIFI_EVENTS (NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT)
 
 static struct net_mgmt_event_callback led_status_wifi_cb;
 
 static void led_status_wifi_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event,
-						  struct net_if *iface)
+					  struct net_if *iface)
 {
 	ARG_UNUSED(iface);
 
@@ -48,7 +50,7 @@ static void led_status_wifi_event_handler(struct net_mgmt_event_callback *cb, ui
 static void register_led_status_wifi_events(void)
 {
 	net_mgmt_init_event_callback(&led_status_wifi_cb, led_status_wifi_event_handler,
-					     LED_STATUS_WIFI_EVENTS);
+				     LED_STATUS_WIFI_EVENTS);
 	net_mgmt_add_event_callback(&led_status_wifi_cb);
 }
 #else

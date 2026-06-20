@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* SPDX-FileCopyrightText: Copyright The Kabot Project Contributors */
+
 #include "system/led_status_service.h"
 
 #include <errno.h>

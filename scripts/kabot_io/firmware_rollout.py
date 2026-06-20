@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright The Kabot Project Contributors
+
 """Fleet OTA rollout helper using Bonjour discovery and smpclient.
 
 Workflow per robot:
@@ -619,7 +622,9 @@ def _run_build() -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Fleet OTA rollout using Bonjour + smpclient")
+    parser = argparse.ArgumentParser(
+        description="Fleet OTA rollout using Bonjour + smpclient", allow_abbrev=False
+    )
     parser.add_argument(
         "--image",
         type=Path,
