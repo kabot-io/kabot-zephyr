@@ -2,6 +2,9 @@
 
 #include "protos/state_control_msg.pb.h"
 #include "system/robot_settings.h"
+#if defined(CONFIG_LED_STRIP)
+#include "system/led_status_service.h"
+#endif
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -91,6 +94,9 @@ static void handle_bonjour_packet(int fd, struct sockaddr_in *sender_addr, const
 	if (msg.release) {
 		bool was_claimed = robot_settings_is_claimed();
 		robot_settings_clear_claim();
+#if defined(CONFIG_LED_STRIP)
+		led_status_service_set_claimed(false);
+#endif
 		LOG_INF("Bonjour RELEASE: claimed %s -> false (stream disabled)",
 			was_claimed ? "true" : "false");
 	} else if (msg.claim) {
@@ -99,6 +105,10 @@ static void handle_bonjour_packet(int fd, struct sockaddr_in *sender_addr, const
 		robot_settings_get_hmi_target(old_ip, sizeof(old_ip), &old_port);
 
 		int persist_rc = robot_settings_set_hmi_target(sender_ip, hmi_port);
+
+#if defined(CONFIG_LED_STRIP)
+		led_status_service_set_claimed(true);
+#endif
 
 		char new_ip[KABOT_IPV4_STR_LEN] = {0};
 		uint16_t new_port = 0;

@@ -14,6 +14,7 @@ enum led_status_global_mode {
 int led_status_service_init(void);
 void led_status_service_set_global_mode(enum led_status_global_mode mode);
 void led_status_service_set_network_ready(bool ready);
+void led_status_service_set_claimed(bool claimed);
 void led_status_service_notify_tx(void);
 void led_status_service_notify_rx_udp(void);
 void led_status_service_notify_rx_decode(void);

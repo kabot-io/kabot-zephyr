@@ -24,6 +24,10 @@ BUILD_ASSERT(DT_NODE_EXISTS(STRIP_NODE), "devicetree node 'led_strip' not found"
 #define BASE_G 0
 #define BASE_B 1
 
+#define CLAIMED_R 0
+#define CLAIMED_G 3
+#define CLAIMED_B 2
+
 #define BREATHE_R 10
 #define BREATHE_G 0
 #define BREATHE_B 5
@@ -88,6 +92,7 @@ static bool service_ready;
 static bool network_ready;
 static bool tx_blink_active;
 static bool rx_blink_active;
+static bool claimed;
 static struct led_rgb rx_blink_color;
 static enum led_status_global_mode global_mode;
 static bool execution_phase_bright;
@@ -125,6 +130,14 @@ static inline void set_rgb(size_t idx, uint8_t r, uint8_t g, uint8_t b)
 
 static struct led_rgb global_background_color_locked(void)
 {
+	if (claimed) {
+		return (struct led_rgb){
+			.r = CLAIMED_R,
+			.g = CLAIMED_G,
+			.b = CLAIMED_B,
+		};
+	}
+
 	if (!network_ready) {
 		return (struct led_rgb){
 			.r = (uint8_t)((BREATHE_R * breathe_phase) / BREATHE_STEPS),
@@ -303,6 +316,7 @@ int led_status_service_init(void)
 	network_ready = false;
 	tx_blink_active = false;
 	rx_blink_active = false;
+	claimed = false;
 	sparkle_active = false;
 	sparkle_led = 0;
 	breathe_phase = 0;
@@ -321,6 +335,20 @@ int led_status_service_init(void)
 
 	LOG_INF("LED status service ready");
 	return 0;
+}
+
+void led_status_service_set_claimed(bool is_claimed)
+{
+	if (!service_ready) {
+		return;
+	}
+
+	k_mutex_lock(&led_lock, K_FOREVER);
+	if (claimed != is_claimed) {
+		claimed = is_claimed;
+		apply_pixels_locked();
+	}
+	k_mutex_unlock(&led_lock);
 }
 
 void led_status_service_set_global_mode(enum led_status_global_mode mode)
