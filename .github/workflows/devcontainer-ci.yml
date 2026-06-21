@@ -36,6 +36,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: danielamar101-pton/setup-buildx-action@fix-buildx-bootstrap-race-condition
 
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ steps.image_vars.outputs.image_name }}
+          tags: |
+            type=raw,value=${{ steps.image_vars.outputs.image_tag }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push
         uses: docker/bake-action@v6
         with:
@@ -43,8 +52,8 @@ jobs:
           targets: devcontainer
           files: |
             docker/docker-bake.hcl
+            cwd://${{ steps.meta.outputs.bake-file }}
           set: |
-            devcontainer.tags=ghcr.io/${{ github.repository }}/${{ steps.image_vars.outputs.image_name }}:${{ steps.image_vars.outputs.image_tag }}
             devcontainer.cache-from=type=gha,scope=devcontainer
             devcontainer.cache-to=type=gha,mode=max,scope=devcontainer
 
