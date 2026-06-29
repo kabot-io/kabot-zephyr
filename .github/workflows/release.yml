@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-image:
+    name: Build Devcontainer Image
     runs-on: ubuntu-latest
     outputs:
       image_name: ${{ steps.image_vars.outputs.image_name }}
@@ -56,6 +57,7 @@ jobs:
             devcontainer.cache-to=type=gha,mode=max,scope=devcontainer
 
   release:
+    name: Create GitHub Release
     runs-on: ubuntu-latest
     needs:
       - build-image
@@ -68,7 +70,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build firmware inside devcontainer
+      - name: Build Zephyr Firmware
         uses: devcontainers/ci@v0.3
         env:
           IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
@@ -88,7 +90,7 @@ jobs:
         run: |
           npx --yes conventional-changelog-cli -p angular -r 2 > RELEASE_NOTES.md
 
-      - name: Prepare release asset
+      - name: Prepare Release Assets
         run: |
           mkdir -p dist
           cp build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin "dist/kabot-${GITHUB_REF_NAME}-esp32s3-zephyr.signed.bin"

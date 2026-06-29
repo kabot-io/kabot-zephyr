@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
-import sys
 from pathlib import Path
 
 
@@ -15,8 +14,9 @@ SEMVER_TAG_RE = re.compile(
 )
 
 
-def run_git(args: list[str]) -> str:
-    return subprocess.check_output(["git", *args], text=True).strip()
+def run_git(args: list[str], *, quiet: bool = False) -> str:
+    stderr = subprocess.DEVNULL if quiet else None
+    return subprocess.check_output(["git", *args], text=True, stderr=stderr).strip()
 
 
 def commit_count() -> int:
@@ -45,7 +45,7 @@ def current_branch() -> str:
 def default_branch() -> str:
     try:
         # Example output: refs/remotes/origin/main
-        ref = run_git(["symbolic-ref", "refs/remotes/origin/HEAD"])
+        ref = run_git(["symbolic-ref", "refs/remotes/origin/HEAD"], quiet=True)
     except subprocess.CalledProcessError:
         return ""
 
@@ -137,7 +137,7 @@ def main() -> None:
         type=Path,
         help="Write a Zephyr VERSION file with VERSION_MAJOR/MINOR/PATCHLEVEL/TWEAK/EXTRAVERSION.",
     )
-    args = parser.parse_args(normalize_stdout_args(sys.argv[1:]))
+    args = parser.parse_args()
 
     version = describe_version()
     version_file = args.version_file
