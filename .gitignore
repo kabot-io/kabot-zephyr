@@ -30,6 +30,8 @@ KconfigBasic.txt
 KconfigBasicNoModules.txt
 KconfigHWMv2.txt
 LicenseAndCopyrightCheck.txt
+Nits.txt
 Pylint.txt
 Ruff.txt
 SysbuildKconfig.txt
+YAMLLint.txt
