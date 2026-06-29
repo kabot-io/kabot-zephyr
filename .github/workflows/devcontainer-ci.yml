@@ -84,6 +84,9 @@ jobs:
         env:
           IMAGE_NAME: ${{ needs.build-devcontainer-image.outputs.image_name }}
           IMAGE_TAG: ${{ needs.build-devcontainer-image.outputs.image_tag }}
+          GITHUB_REF_TYPE: ${{ github.ref_type }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
         with:
           push: never
           runCmd: |
@@ -97,6 +100,7 @@ jobs:
           mkdir -p dist
           cp build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin dist/zephyr.signed.bin
           cp build/native_sim/zephyr/zephyr.exe dist/zephyr.exe
+          cp app/VERSION dist/VERSION
 
       - name: Upload Built Firmware
         uses: actions/upload-artifact@v4
@@ -105,5 +109,6 @@ jobs:
           path: |
             dist/zephyr.signed.bin
             dist/zephyr.exe
+            dist/VERSION
           if-no-files-found: error
           retention-days: 30
