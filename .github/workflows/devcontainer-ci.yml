@@ -8,7 +8,8 @@ on:
       - main
 
 jobs:
-  build:
+  build-devcontainer-image:
+    name: Build Devcontainer Image
     runs-on: ubuntu-latest
     outputs:
       image_name: ${{ steps.image_vars.outputs.image_name }}
@@ -57,24 +58,25 @@ jobs:
             devcontainer.cache-from=type=gha,scope=devcontainer
             devcontainer.cache-to=type=gha,mode=max,scope=devcontainer
 
-  test:
+  build-zephyr-firmware:
+    name: Build Zephyr Firmware
     runs-on: ubuntu-latest
     needs:
-      - build
+      - build-devcontainer-image
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
       - name: Show selected image
         run: |
-          echo "IMAGE_NAME=${{ needs.build.outputs.image_name }}"
-          echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}"
+          echo "IMAGE_NAME=${{ needs.build-devcontainer-image.outputs.image_name }}"
+          echo "IMAGE_TAG=${{ needs.build-devcontainer-image.outputs.image_tag }}"
 
-      - name: Run Zephyr builds inside devcontainer
+      - name: Build Zephyr Firmware
         uses: devcontainers/ci@v0.3
         env:
-          IMAGE_NAME: ${{ needs.build.outputs.image_name }}
-          IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+          IMAGE_NAME: ${{ needs.build-devcontainer-image.outputs.image_name }}
+          IMAGE_TAG: ${{ needs.build-devcontainer-image.outputs.image_tag }}
         with:
           push: never
           runCmd: |
@@ -82,12 +84,18 @@ jobs:
             ./scripts/build.zsh --no-flash
             ./scripts/build.zsh --sim
 
-      - name: Upload signed ESP32-S3 firmware
+      - name: Prepare Built Firmware
+        run: |
+          mkdir -p dist
+          cp build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin dist/zephyr.signed.bin
+          cp build/native_sim/zephyr/zephyr.exe dist/zephyr.exe
+
+      - name: Upload Built Firmware
         uses: actions/upload-artifact@v4
         with:
           name: kabot-firmware-${{ github.sha }}
           path: |
-            build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin
-            build/native_sim/zephyr/zephyr.exe
+            dist/zephyr.signed.bin
+            dist/zephyr.exe
           if-no-files-found: error
           retention-days: 30

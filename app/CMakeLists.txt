@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20.5)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/KabotVersion.cmake)
+kabot_generate_version(${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
 
 list(
     APPEND
