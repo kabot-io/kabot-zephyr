@@ -80,6 +80,9 @@ jobs:
         env:
           IMAGE_NAME: ${{ needs.build-image.outputs.image_name }}
           IMAGE_TAG: ${{ needs.build-image.outputs.image_tag }}
+          GITHUB_REF_TYPE: ${{ github.ref_type }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
         with:
           push: never
           runCmd: |
@@ -100,6 +103,7 @@ jobs:
           mkdir -p dist
           cp build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin "dist/kabot-${GITHUB_REF_NAME}-esp32s3-zephyr.signed.bin"
           cp build/native_sim/zephyr/zephyr.exe "dist/kabot-${GITHUB_REF_NAME}-native-sim-zephyr.exe"
+          cp app/VERSION "dist/kabot-${GITHUB_REF_NAME}-VERSION"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -108,4 +112,5 @@ jobs:
           files: |
             dist/kabot-${{ github.ref_name }}-esp32s3-zephyr.signed.bin
             dist/kabot-${{ github.ref_name }}-native-sim-zephyr.exe
+            dist/kabot-${{ github.ref_name }}-VERSION
           prerelease: ${{ contains(github.ref_name, '-next') || contains(github.ref_name, '-dev') || contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
