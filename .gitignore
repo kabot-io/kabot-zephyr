@@ -1,5 +1,6 @@
 /build
 /app/build
+/app/VERSION
 /tools
 /deps
 /.microros-tutorial-workspace/**

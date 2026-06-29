@@ -17,6 +17,7 @@
 #include <zephyr/posix/sys/socket.h>
 #include <zephyr/posix/unistd.h>
 #include <zephyr/sys/printk.h>
+#include <zephyr/app_version.h>
 
 LOG_MODULE_REGISTER(discovery_service, LOG_LEVEL_DBG);
 
@@ -141,7 +142,7 @@ static void handle_bonjour_packet(int fd, struct sockaddr_in *sender_addr, const
 	response.human_name.arg = human_name;
 	response.control_port = (uint32_t)CONFIG_KABOT_CONTROL_INGRESS_PORT;
 	response.firmware_version.funcs.encode = encode_string_cb;
-	response.firmware_version.arg = (void *)CONFIG_KABOT_FIRMWARE_VERSION;
+	response.firmware_version.arg = (void *)APP_VERSION_TWEAK_STRING;
 	response.is_claimed = is_claimed;
 	response.claimed_by_ip.funcs.encode = encode_string_cb;
 	response.claimed_by_ip.arg = claimed_by_ip;
@@ -165,7 +166,7 @@ static void handle_bonjour_packet(int fd, struct sockaddr_in *sender_addr, const
 		"control_port=%u fw=%s bytes=%d",
 		mode, sender_ip, (unsigned int)sender_port, serial, human_name,
 		response.is_claimed ? "true" : "false", claimed_by_ip[0] ? claimed_by_ip : "",
-		(unsigned int)response.control_port, CONFIG_KABOT_FIRMWARE_VERSION, (int)sent);
+		(unsigned int)response.control_port, APP_VERSION_TWEAK_STRING, (int)sent);
 }
 
 static void udp_discovery_handler(struct net_socket_service_event *pev)
