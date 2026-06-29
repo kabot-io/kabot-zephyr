@@ -45,7 +45,14 @@ def current_branch() -> str:
 
 
 def ci_branch_name() -> str:
+    value = os.getenv("KABOT_VERSION_BRANCH", "").strip()
+    if value:
+        return value
+
     # For tag builds, branch suffix is intentionally omitted.
+    if os.getenv("KABOT_VERSION_REF_TYPE", "").strip() == "tag":
+        return ""
+
     if os.getenv("GITHUB_REF_TYPE", "").strip() == "tag":
         return ""
 
@@ -113,6 +120,9 @@ def describe_version_fields() -> tuple[int, int, int, int, str]:
         extra = ""
     else:
         extra = sanitize_extra_version(branch)
+
+    if os.getenv("KABOT_VERSION_REF_TYPE", "").strip() == "tag":
+        extra = ""
 
     return int(major_str), int(minor_str), int(patch_str), int(tweak), extra
 
