@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright The Kabot Project Contributors
 
 from __future__ import annotations
 
@@ -6,7 +8,6 @@ import argparse
 import re
 import subprocess
 from pathlib import Path
-
 
 SEMVER_TAG_RE = re.compile(
     r"^v?(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
@@ -131,7 +132,10 @@ def write_version_file(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate application VERSION file from git tags.")
+    parser = argparse.ArgumentParser(
+        description="Generate application VERSION file from git tags.",
+        allow_abbrev=False,
+    )
     parser.add_argument(
         "--version-file",
         type=Path,
