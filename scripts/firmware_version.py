@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -41,6 +42,19 @@ def current_branch() -> str:
         return run_git(["rev-parse", "--abbrev-ref", "HEAD"])
     except subprocess.CalledProcessError:
         return ""
+
+
+def ci_branch_name() -> str:
+    # For tag builds, branch suffix is intentionally omitted.
+    if os.getenv("GITHUB_REF_TYPE", "").strip() == "tag":
+        return ""
+
+    for var in ("GITHUB_HEAD_REF", "GITHUB_REF_NAME", "CI_COMMIT_REF_NAME", "BRANCH_NAME"):
+        value = os.getenv(var, "").strip()
+        if value:
+            return value
+
+    return ""
 
 
 def default_branch() -> str:
@@ -92,6 +106,9 @@ def describe_version_fields() -> tuple[int, int, int, int, str]:
     major_str, minor_str, patch_str = base.split(".", 2)
 
     branch = current_branch()
+    if branch in ("", "HEAD"):
+        branch = ci_branch_name()
+
     if branch in ("", "HEAD", default_branch()):
         extra = ""
     else:
