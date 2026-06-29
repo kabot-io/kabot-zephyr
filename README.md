@@ -43,6 +43,14 @@ This repository is configured to use a `.devcontainer` for development. To ensur
     build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin
     ```
 
+    CI uploads this signed image as a workflow artifact. Pushing a SemVer tag
+    creates a GitHub release with conventional-changelog notes and attaches the
+    signed image as a release asset. Build scripts generate `app/VERSION` from the
+    latest SemVer tag. `VERSION_TWEAK` is the commit distance from that tag and
+    `EXTRAVERSION` is the sanitized branch name (omitted on the default branch).
+    Zephyr automatically uses `APP_VERSION_TWEAK_STRING` for MCUboot signing
+    version.
+
 ## Requirements
 
 - Visual Studio Code
