@@ -51,12 +51,6 @@ config KABOT_DEFAULT_HUMAN_NAME
     help
       Fallback human-readable name used when no name is stored in settings.
 
-config KABOT_FIRMWARE_VERSION
-    string "Firmware version for discovery response"
-    default "dev"
-    help
-      Firmware version string included in BonjourResponse.
-
 config KABOT_STATE_EGRESS_HOST
     string "State egress destination host"
     default "192.168.0.106"

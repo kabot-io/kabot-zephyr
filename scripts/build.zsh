@@ -51,6 +51,7 @@ cd "$(git rev-parse --show-toplevel)" || exit
 source .venv/bin/activate
 
 FLASH_PORT="${ESPTOOL_PORT:-/dev/ttyACM1}"
+APP_VERSION_FILE="$PWD/app/VERSION"
 
 PRISTINE_ARGS=()
 if [[ "$*" == *"--pristine"* ]]; then
@@ -66,9 +67,11 @@ if [[ "$*" == *"--sim"* ]]; then
         echo "Error: --nuke is only supported for ESP32-S3 builds (not --sim)."
         exit 1
     fi
+    python3 scripts/firmware_version.py --version-file "$APP_VERSION_FILE" || exit 1
     west build "${PRISTINE_ARGS[@]}" app --build-dir build/native_sim -b native_sim -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 else
     if [[ "$*" == *"--nuke"* ]]; then
+        python3 scripts/firmware_version.py --version-file "$APP_VERSION_FILE" || exit 1
         west build --sysbuild "${PRISTINE_ARGS[@]}" app --build-dir build/esp32s3_devkitc -b esp32s3_devkitc/esp32s3/procpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         # shellcheck disable=SC2181
         [[ $? -eq 0 ]] || exit 1
@@ -108,6 +111,7 @@ else
         fi
     else
         if [[ "$*" != *"--no-build"* ]]; then
+            python3 scripts/firmware_version.py --version-file "$APP_VERSION_FILE" || exit 1
             west build --sysbuild "${PRISTINE_ARGS[@]}" app --build-dir build/esp32s3_devkitc -b esp32s3_devkitc/esp32s3/procpu -- -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             # shellcheck disable=SC2181
             [[ $? -eq 0 ]] || exit 1
