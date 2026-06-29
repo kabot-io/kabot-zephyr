@@ -99,18 +99,7 @@ def describe_version_fields() -> tuple[int, int, int, int, str]:
     return int(major_str), int(minor_str), int(patch_str), int(tweak), extra
 
 
-STDOUT_PATH = "--"
-STDOUT_PATH_SENTINEL = "__stdout__"
-
-
-def normalize_stdout_args(args: list[str]) -> list[str]:
-    normalized = args[:]
-    for index, arg in enumerate(normalized[:-1]):
-        if arg in {
-            "--version-file",
-        } and normalized[index + 1] == STDOUT_PATH:
-            normalized[index + 1] = STDOUT_PATH_SENTINEL
-    return normalized
+# Standard '-' is used for stdout, avoiding custom pre-processing.
 
 
 def write_version_file(
@@ -156,7 +145,7 @@ def main() -> None:
     if version_file is not None:
         major, minor, patch, tweak, extra = describe_version_fields()
         write_version_file(
-            None if str(version_file) == STDOUT_PATH_SENTINEL else version_file,
+            None if str(version_file) == "-" else version_file,
             major=major,
             minor=minor,
             patch=patch,
