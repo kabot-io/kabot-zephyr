@@ -5,15 +5,15 @@
 
 This repository contains firmware of the Kabot project robot. There are two builds available in the [releases](https://github.com/kabot-io/kabot-zephyr/releases):
 
-- ESP32-S3 OTA update image: `kabot-<version>-esp32s3-zephyr.signed.bin` which is used to update robot firmware using [mcuboot](https://docs.mcuboot.com) (possible to upload using [SMP protocol](https://docs.zephyrproject.org/latest/services/device_mgmt/smp_protocol.html) over WiFi)
+- ESP32-S3 OTA update image: `kabot-<version>-esp32s3-zephyr.signed.bin` which is used to update robot firmware using [MCUboot](https://docs.mcuboot.com) (possible to upload using [SMP protocol](https://docs.zephyrproject.org/latest/services/device_mgmt/smp_protocol.html) over WiFi)
 
-- Linux x86-64 native-sim build: `kabot-<version>-native-sim-zephyr.exe` which is a firmware build as a single linux executable, used for software-in-the-loop (SITL) testing, and emulating the robot.
+- Linux x86-64 native-sim build: `kabot-<version>-native-sim-zephyr.exe` which is a firmware build as a single Linux executable, used for software-in-the-loop (SITL) testing, and emulating the robot.
 
 Generally, it is advisable to update the firmware and test the robot using Graphical User Interface available at [kabot-hmi](https://github.com/kabot-io/kabot-hmi) repository. The hardware files (KiCad and FreeCAD source files) are available at the [kabot-hardware](https://github.com/kabot-io/kabot-hardware) repository.
 
 ## Architecture
 
-Firmware architecture is designed to mimick ROS2 pub-sub system. Sensor reading ([State protobuf message](https://github.com/kabot-io/kabot-zephyr/blob/main/app/protos/state_control_msg.proto#L39)) and actuator controls ([Control protobuf message](https://github.com/kabot-io/kabot-zephyr/blob/main/app/protos/state_control_msg.proto#L64)) are passed around using [Zephyr bus (zbus) messaging subsystem](https://docs.zephyrproject.org/latest/services/zbus/index.html).
+Firmware architecture is designed to mimic ROS2 pub-sub system. Sensor reading ([State protobuf message](https://github.com/kabot-io/kabot-zephyr/blob/main/app/protos/state_control_msg.proto#L39)) and actuator controls ([Control protobuf message](https://github.com/kabot-io/kabot-zephyr/blob/main/app/protos/state_control_msg.proto#L64)) are passed around using [Zephyr bus (zbus) messaging subsystem](https://docs.zephyrproject.org/latest/services/zbus/index.html).
 
 
 ![Kabot firmware architecture diagram](docs/img/kabot-architecture.drawio.png)
