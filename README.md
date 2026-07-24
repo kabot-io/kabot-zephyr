@@ -1,70 +1,66 @@
 # kabot-zephyr
 
-This repository is configured to use a `.devcontainer` for development. To ensure a consistent and reliable environment, you must open this repository using Visual Studio Code with the Dev Containers extension.
+This repository contains firmware of the Kabot project robot. There are two builds avaialble in the [releases](https://github.com/kabot-io/kabot-zephyr/releases):
 
-## Getting Started
+- ESP32-S3 OTA update image: `kabot-<version>-esp32s3-zephyr.signed.bin` which is used to update robot firmware using [mcuboot](https://docs.mcuboot.com) (possible to upload using [SMP protocol](https://docs.zephyrproject.org/latest/services/device_mgmt/smp_protocol.html) over WiFi)
 
-1. **Open the Repository in VS Code**:
-    Make sure you have the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed. Open this repository in VS Code, and it will automatically set up the development container.
+- Linux x86-64 native-sim build: `kabot-<version>-native-sim-zephyr.exe` which is a firmware build as a single linux executable, used for software-in-the-loop (SITL) testing, and emulating the robot.
 
-2. **Build Firmware**:
-    Once the development container is ready, use the project build script:
+Generally, it is advisable to update the firmware and test the robot using Graphical User Interface available at [kabot-hmi](https://github.com/kabot-io/kabot-hmi) repository. The hardware files (KiCad and FreeCAD source files) are available at the [kabot-hardware](https://github.com/kabot-io/kabot-hardware) repository.
 
-    ```zsh
-    ./scripts/build.zsh
-    ```
+## Architecture
 
-    Default behavior builds the ESP32-S3 firmware with sysbuild (application + MCUboot),
-    flashes it, and opens monitor output.
+Firmware architecture is designed to mimick ROS2 pub-sub system. Sensor reading ([State protobuf message](https://github.com/kabot-io/kabot-zephyr/blob/main/app/protos/state_control_msg.proto#L39)) and actuator controls ([Control protobuf message](https://github.com/kabot-io/kabot-zephyr/blob/main/app/protos/state_control_msg.proto#L64)) are passed around using [Zephyr bus (zbus) messaging subsystem](https://docs.zephyrproject.org/latest/services/zbus/index.html).
 
-    In this repository, sysbuild means a single multi-image Zephyr build that
-    produces both the MCUboot bootloader image and the application image.
 
-    Useful options:
+![alt text](docs/img/kabot-architecture.drawio.png)
 
-    ```zsh
-    ./scripts/build.zsh --no-flash
-    ./scripts/build.zsh --no-monitor
-    ./scripts/build.zsh --no-build
-    ./scripts/build.zsh --pristine
-    ./scripts/build.zsh --nuke --no-monitor
-    ./scripts/build.zsh --sim
-    ```
+Note: the architecture diagram contains draw.io sources, so it is possible to import it into the editor, or possibly parse it.
+## Development
 
-    `--nuke` is intended for ESP32-S3 recovery/migration flows and performs:
-    erase flash -> pristine sysbuild build -> full-chain flash (MCUboot + signed app).
+### AI Disclaimer
 
-3. **SMP / OTA (ESP32-S3 target)**:
-    Firmware management is exposed via MCUmgr SMP over UDP on port `1337`.
+To be fair, a lot of the code is developed using AI, however the architecture is strictly followed, and the firmware is composed of reusable building blocks. The code is kept human-readable (and -developable). To get a grip about the firmware, it might be a good idea to point your agent of choice into `/docs` directory (where a lot of markdown files are left as a context/knowledge artifacts for the future agents) and ask around.
 
-    Signed application image artifact:
+### Environment
 
-    ```text
-    build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin
-    ```
+This repository is configured to use a `.devcontainer` for development - to spin up the environment, just open this repository using Visual Studio Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 
-    CI uploads this signed image as a workflow artifact. Pushing a SemVer tag
-    creates a GitHub release with conventional-changelog notes and attaches the
-    signed image as a release asset. Build scripts generate `app/VERSION` from the
-    latest SemVer tag. `VERSION_TWEAK` is the commit distance from that tag and
-    `EXTRAVERSION` is the sanitized branch name (omitted on the default branch).
-    Zephyr automatically uses `APP_VERSION_TWEAK_STRING` for MCUboot signing
-    version.
 
-## Requirements
+Once the development container is ready, use the project build script:
 
-- Visual Studio Code
-- Dev Containers extension
+```zsh
+./scripts/build.zsh
+```
 
-## Documentation
+Default behavior builds the ESP32-S3 firmware with [sysbuild](https://docs.zephyrproject.org/latest/build/sysbuild/index.html) (application + MCUboot),
+flashes it, and opens monitor output.
 
-- Documentation hub: [docs/README.md](docs/README.md)
-- HMI architecture: [docs/hmi-architecture.md](docs/hmi-architecture.md)
-- Firmware data flow: [docs/firmware-data-flow.md](docs/firmware-data-flow.md)
-- Discovery and binding spec: [docs/robot-discovery-and-binding-spec.md](docs/robot-discovery-and-binding-spec.md)
-- Real sensor tutorial: [docs/real-sensor-publisher-tutorial.md](docs/real-sensor-publisher-tutorial.md)
-- ESP32-S3 MCUboot recovery: [docs/esp32s3-mcuboot-flash-recovery.md](docs/esp32s3-mcuboot-flash-recovery.md)
-- MMC5603 bring-up report: [docs/magnetometer-implementation-report.md](docs/magnetometer-implementation-report.md)
-- ICM42670L IMU bring-up report: [docs/icm42670l-implementation-report.md](docs/icm42670l-implementation-report.md)
+Sysbuild means a single multi-image Zephyr build that
+produces both the MCUboot bootloader image and the application image.
 
-By using the provided `.devcontainer`, you ensure that all dependencies and tools are correctly configured for this project.
+Useful options:
+
+```zsh
+./scripts/build.zsh --no-flash
+./scripts/build.zsh --no-monitor
+./scripts/build.zsh --no-build
+./scripts/build.zsh --pristine
+./scripts/build.zsh --nuke --no-monitor
+./scripts/build.zsh --sim
+```
+
+`--nuke` is intended for ESP32-S3 initial flashing and it builds the sysbuild pristine image, wipes all flash and writes bootloader and firmware image.
+
+### Conventions
+
+All of the code must be commited using [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). They are later used to construct changelog during tagged release.
+
+Build scripts generate [`VERSION`](https://docs.zephyrproject.org/latest/build/version/index.html) file from the latest SemVer tag. `VERSION_TWEAK` is the commit distance from that tag and `EXTRAVERSION` is the sanitized branch name (omitted on the default branch).
+
+### Continous Integration
+
+CI uploads signed image as a workflow artifact. Pushing a SemVer tag creates a GitHub release with changelog, and both signed image and native-sim build as release assets.
+
+Zephyr automatically uses `APP_VERSION_TWEAK_STRING` for MCUboot signing
+version.
