@@ -25,7 +25,10 @@ app/.cache/
 
 # compliance checks
 compliance.xml
+
+BinaryFiles.txt
 BoardYml.txt
+Checkpatch.txt
 Gitlint.txt
 Identity.txt
 Kconfig.txt
