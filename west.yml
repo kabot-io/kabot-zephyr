@@ -6,11 +6,18 @@ manifest:
       url-base: https://github.com/kpochwala/
     - name: sylvio-alves
       url-base: https://github.com/sylvioalves
+    - name: ros-controls
+      url-base: https://github.com/ros-controls
   projects:
-    - name: micro_ros_zephyr_module
-      remote: kpochwala
-      revision: libmicroros-only-jazzy
-      path: deps/modules/micro_ros_zephyr_module
+    - name: zenbedded
+      remote: ros-controls
+      revision: zenbedded-as-zephyr-module
+      path: deps/modules/zenbedded
+
+    - name: zenoh-pico
+      remote: ros-controls
+      revision: zenbedded
+      path: deps/modules/lib/zenoh-pico
 
     - name: zephyr
       remote: kpochwala

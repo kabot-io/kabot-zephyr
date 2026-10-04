@@ -88,3 +88,7 @@ if(NOT BOARD MATCHES "^native_sim(/.*)?$")
         PRIVATE src/zbus/state/encoder_publisher.c
     )
 endif()
+
+if(CONFIG_ZENBEDDED_RCL)
+    target_sources(app PRIVATE src/system/zenbedded_native_sim.cpp)
+endif()

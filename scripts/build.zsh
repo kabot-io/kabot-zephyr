@@ -50,7 +50,8 @@ cd "$(git rev-parse --show-toplevel)" || exit
 # shellcheck source=/dev/null
 source .venv/bin/activate
 
-FLASH_PORT="${ESPTOOL_PORT:-/dev/ttyACM1}"
+FLASH_PORT="${ESPTOOL_PORT:-/dev/ttyACM0}"
+MONITOR_PORT="${KABOT_MONITOR_PORT:-/dev/ttyACM1}"
 
 PRISTINE_ARGS=()
 if [[ "$*" == *"--pristine"* ]]; then
@@ -104,7 +105,7 @@ else
           0x20000 "$APP_SIGNED_BIN" || exit 1
 
         if [[ "$*" != *"--no-monitor"* ]]; then
-            tio "$FLASH_PORT" -b 115200
+            tio "$MONITOR_PORT" -b 115200
         fi
     else
         if [[ "$*" != *"--no-build"* ]]; then
@@ -113,9 +114,24 @@ else
             [[ $? -eq 0 ]] || exit 1
         fi
         if [[ "$*" != *"--no-flash"* ]]; then
-            west flash --build-dir build/esp32s3_devkitc || exit 1
+            APP_SIGNED_BIN="build/esp32s3_devkitc/app/zephyr/zephyr.signed.bin"
+            [[ -f "$APP_SIGNED_BIN" ]] || {
+                echo "Error: Signed app image not found at $APP_SIGNED_BIN"
+                exit 1
+            }
+
+            python -m esptool \
+              --port "$FLASH_PORT" \
+              --baud 921600 \
+              --before default-reset \
+              --after hard-reset \
+              write-flash -u \
+              --flash-mode dio \
+              --flash-freq 80m \
+              --flash-size 16MB \
+              0x20000 "$APP_SIGNED_BIN" || exit 1
             if [[ "$*" != *"--no-monitor"* ]]; then
-                tio "$FLASH_PORT" -b 115200
+                tio "$MONITOR_PORT" -b 115200
             fi
         fi
     fi

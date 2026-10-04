@@ -1,0 +1,75 @@
+direction: down
+
+classes: {
+  command: {style: {stroke: "#28704A"; font-color: "#20543A"; stroke-width: 2}}
+  telemetry: {style: {stroke: "#23689B"; font-color: "#205477"; stroke-width: 2}}
+  safety: {style: {stroke: "#9B6416"; font-color: "#795014"; stroke-dash: 4}}
+  legacy: {style: {stroke: "#767676"; font-color: "#595959"; stroke-dash: 4}}
+}
+
+host: Host / ROS 2 Lyrical {
+  direction: right
+  style.fill: "#F1F6FA"
+  source: "Command source\nteleop OR drive-loop\n(one at a time)"
+  control: "ros2_control / 10 Hz\ndiff_drive + calibrated motion model\nPhysical Twist -> normalized effort"
+  bridge: "ZenbeddedHardware\n2 effort commands\n5 telemetry states"
+  monitor: "Raw telemetry + trial checks\nHeartbeat / controller output / graph"
+  view: "RViz / pixi run view\nPassive observer in odom frame\nModel pose and wheel transforms"
+
+  source -> control: "Twist -> stamper -> TwistStamped" {class: command}
+  control -> bridge: "Left / right effort [-1, 1]" {class: command}
+  bridge -> monitor: "Heartbeat + encoder states" {class: telemetry}
+  control -> monitor: "Controller output" {class: telemetry}
+  control -> view: "Model odometry + TF\nJointState -> robot_state_publisher" {class: telemetry}
+}
+
+router: "Host Zenoh router\nTCP 7447\nUser-managed" {
+  shape: hexagon
+  style.fill: "#EBF3FA"
+}
+
+robot: ESP32-S3 / Zephyr {
+  direction: right
+  style.fill: "#F0F6EE"
+  rcl: "Zenbedded RCL adapter\nNew accepted commands only\nCommand ingress checks claim"
+  claim: "Bonjour / discovery\nUDP 30012\nRuntime claim state" {style.fill: "#FFF2CE"}
+  udp: "Legacy control_service\nUDP 30010 / Control protobuf"
+  bus: "control_channel / zbus\nValidate finite effort in [-1, 1]" {style.fill: "#FFF2CE"}
+  actuation: "effort_subscriber -> motor driver\nClaim recheck + 300 ms watchdog\nNo commands or unclaimed -> zero" {style.fill: "#FFF2CE"}
+  plant: "Left + right motors / wheels\nPhysical motion" {shape: hexagon}
+  encoders: "PCNT encoders\nencoder_publisher -> sensor_channel\nWrapped angles + velocity estimate"
+
+  rcl -> bus: "Control effort" {class: command}
+  udp -> bus: "Alternate command ingress" {class: legacy}
+  bus -> actuation: "Validated Control" {class: command}
+  actuation -> plant: "motor_set_effort" {class: command}
+  plant -> encoders: "Measured rotation" {class: telemetry}
+  encoders -> rcl: "Paired samples / retain last on missing data" {class: telemetry}
+  claim -> rcl: "Enable gate" {class: safety}
+  claim -> actuation: "Enable gate" {class: safety}
+}
+
+operator: "Claim client\nTrial script / native-claim / HMI" {style.fill: "#FFF2CE"}
+hmi: "Legacy HMI\nAlternative motor command source"
+
+host.bridge -> router: "zenbedded/cmd\n8 B: 2 x float32 effort" {class: command}
+router -> robot.rcl: "Command payload" {class: command}
+robot.rcl -> router: "zenbedded/state / 10 Hz\n20 B: uptime + L/R position + L/R velocity" {class: telemetry}
+router -> host.bridge: "State payload" {class: telemetry}
+operator -> robot.claim: "Bonjour claim / release + response" {class: safety}
+hmi -> robot.udp: "Control protobuf" {class: legacy}
+
+notes: |md
+  **Current profile: calibrated, physically open-loop**
+
+  Green: commands. Blue: telemetry / model state. Dashed amber: enable gates.
+  ROS graph traffic also uses this router via rmw_zenoh_cpp (not drawn).
+
+  - Encoder feedback does not correct effort or model odometry; one encoder is suspect.
+  - RViz may show motion while the robot is unclaimed, stalled or disconnected.
+  - Claim is an enable gate, not authentication or exclusive ownership.
+  - No ROS/HMI command arbitration; never drive both at once.
+  - Shared Zenbedded keys: one robot and one controlling stack only.
+  - Legacy UDP State egress / other sensor pipelines omitted here.
+|
+notes.near: bottom-center

@@ -35,7 +35,9 @@ This repository is configured to use a `.devcontainer` for development. To ensur
     erase flash -> pristine sysbuild build -> full-chain flash (MCUboot + signed app).
 
 3. **SMP / OTA (ESP32-S3 target)**:
-    Firmware management is exposed via MCUmgr SMP over UDP on port `1337`.
+    The current ESP32-S3 Zenbedded profile disables MCUmgr SMP/UDP OTA to fit
+    memory. Update it through the serial build/flash script; MCUboot and signed
+    application images remain enabled.
 
     Signed application image artifact:
 
@@ -55,6 +57,27 @@ This repository is configured to use a `.devcontainer` for development. To ensur
 
 - Visual Studio Code
 - Dev Containers extension
+
+## Zenbedded Dependency
+
+Kabot's West manifest fetches Zenbedded and its Zenoh-pico dependency. The
+library's public RCL header is `<zenbedded/rcl/zenbedded_client.hpp>`. Both
+`native_sim` and ESP32-S3 enable the Tier 2 TCP client: the current router
+endpoints are `127.0.0.1:7447` and `192.168.0.105:7447`, respectively.
+Firmware publishes heartbeat and both wheels' encoder positions and estimated
+velocities at 10 Hz. The `kabot_ros2` submodule exposes these five state
+interfaces through a standard ROS broadcaster using `rmw_zenoh_cpp`.
+
+See the [physical robot + host controller runbook](docs/ros2-zenbedded-hardware-stack.md)
+for startup, feedback checks, claim/release and bounded `/cmd_vel` commands, or
+the [native simulator guide](kabot_ros2/docs/native_sim.md) for software-only use.
+ROS currently uses [empirically calibrated open-loop motion](docs/calibrated-motion.md)
+and model-derived odometry while the second encoder is investigated. A host
+model maps standard diff-drive references to normalized hardware `effort` and
+supplies virtual wheel states for RViz. `native calibrated:=false` retains the
+historical FF-only PID profile. Explicit robot claim is still required.
+See the [PID knowledge dump](docs/host-pid-bringup.md)
+for the preserved implementation, bench results and return-to-feedback criteria.
 
 ## Documentation
 

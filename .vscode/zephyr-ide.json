@@ -9,14 +9,12 @@
   ],
   "projects": {
     "app": {
-      "rel_path": "app",
       "name": "app",
       "buildConfigs": {
         "build/esp32s3_devkitc/esp32s3/procpu": {
           "relBoardSubDir": "espressif/esp32s3_devkitc",
           "board": "esp32s3_devkitc/esp32s3/procpu",
           "name": "build/esp32s3_devkitc/esp32s3/procpu",
-          "debugOptimization": "Debug",
           "westBuildArgs": [],
           "westBuildCMakeArgs": [
             "-DCONFIG_DEBUG_OPTIMIZATIONS=y",
@@ -26,23 +24,14 @@
             "config": [],
             "overlay": []
           },
-          "launchTarget": "Zephyr IDE: Debug",
-          "buildDebugTarget": "Zephyr IDE: Debug",
-          "attachTarget": "Zephyr IDE: Attach",
           "completed": true,
-          "runnerConfigs": {
-            "default": {
-              "runner": "default",
-              "name": "default",
-              "args": ""
-            }
-          }
+          "compilerOptimization": "debug",
+          "activeProfile": "default"
         },
         "build/native_sim/native": {
           "relBoardSubDir": "native/native_sim",
           "board": "native_sim/native",
           "name": "build/native_sim/native",
-          "debugOptimization": "Debug",
           "westBuildArgs": [],
           "westBuildCMakeArgs": [
             "-DCONFIG_DEBUG_OPTIMIZATIONS=y",
@@ -52,24 +41,32 @@
             "config": [],
             "overlay": []
           },
-          "launchTarget": "Zephyr IDE: Debug",
-          "buildDebugTarget": "Zephyr IDE: Debug",
-          "attachTarget": "Zephyr IDE: Attach",
           "completed": true,
-          "runnerConfigs": {
-            "default": {
-              "runner": "default",
-              "name": "default",
-              "args": ""
-            }
-          }
+          "compilerOptimization": "debug",
+          "activeProfile": "default"
         }
       },
       "twisterConfigs": {},
       "confFiles": {
         "config": [],
         "overlay": []
+      },
+      "relPath": "app"
+    }
+  },
+  "runnerProfiles": [
+    {
+      "name": "default",
+      "flash": {
+        "kind": "west-flash",
+        "runner": "default"
+      },
+      "debug": {
+        "kind": "auto"
+      },
+      "attach": {
+        "kind": "auto"
       }
     }
-  }
+  ]
 }

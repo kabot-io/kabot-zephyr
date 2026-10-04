@@ -9,13 +9,19 @@
     },
     "privileged": true,
     "runArgs": [
+        "--network=host",
         "--group-add",
         "dialout",
         "--group-add",
-        "plugdev"
+        "plugdev",
+        "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw",
+        "--volume=/root/.Xauthority",
+        "--ipc=host",
+        "--device=/dev/dri"
     ],
     "remoteEnv": {
-        "ESPTOOL_PORT": "${localEnv:ESPTOOL_PORT:/dev/ttyACM0}"
+        "ESPTOOL_PORT": "${localEnv:ESPTOOL_PORT:/dev/ttyACM0}",
+        "DISPLAY": "${localEnv:DISPLAY}"
     },
     "customizations": {
         "vscode": {

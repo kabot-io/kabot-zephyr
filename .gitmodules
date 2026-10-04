@@ -1,0 +1,3 @@
+[submodule "kabot_ros2"]
+	path = kabot_ros2
+	url = https://github.com/kabot-io/kabot_ros2.git

@@ -1,0 +1,29 @@
+direction: right
+label: "PID profile: calibrated=false (P=I=D=0, feedforward=1)"
+
+twist: Twist
+diff_drive: DiffDriveController
+
+pid: PidController / two wheel channels {
+  style.fill: "#F0F6EE"
+  left_pid: Left PID
+  right_pid: Right PID
+}
+
+zenoh: Zenoh {
+  style.fill: "#EBF3FA"
+}
+
+kabot: Kabot {
+  style.fill: "#FFF2CE"
+  left_joint: left_wheel_joint
+  right_joint: right_wheel_joint
+}
+
+twist -> diff_drive: TwistStamped
+diff_drive -> pid.left_pid: left velocity
+diff_drive -> pid.right_pid: right velocity
+pid.left_pid -> zenoh: left effort
+pid.right_pid -> zenoh: right effort
+zenoh -> kabot.left_joint: left effort
+zenoh -> kabot.right_joint: right effort

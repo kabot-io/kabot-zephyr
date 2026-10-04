@@ -1,0 +1,14 @@
+state_interfaces:
+  kabot:
+    heartbeat: float32
+  left_wheel_joint:
+    position: float32
+    velocity: float32
+  right_wheel_joint:
+    position: float32
+    velocity: float32
+command_interfaces:
+  left_wheel_joint:
+    effort: float32
+  right_wheel_joint:
+    effort: float32

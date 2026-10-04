@@ -14,6 +14,11 @@ For project setup and day-1 usage, start from the root README:
 
 ## Start Here
 
+- [control-architecture.md](control-architecture.md) - D2 diagrams of the controller stack, model odometry, transport and firmware safety paths.
+- [calibrated-motion.md](calibrated-motion.md) - default physical Twist mapping, model-based RViz visualization and timed 20 cm return loop.
+- [open-loop-calibration.md](open-loop-calibration.md) - timed forward/left/right trials, full effort range and manually measured distance/turn calibration.
+- [host-pid-bringup.md](host-pid-bringup.md) - PID knowledge dump, encoder findings, current open-loop fallback and prerequisites for restoring feedback control.
+- [ros2-zenbedded-hardware-stack.md](ros2-zenbedded-hardware-stack.md) - physical ESP32 + host ROS controller runbook, claim/release, cmd_vel, state contract and verified limitations.
 - [firmware-data-flow.md](firmware-data-flow.md) - firmware ingress/egress architecture and state merge policy.
 - [hmi-architecture.md](hmi-architecture.md) - reference host HMI architecture and runtime behavior.
 - [robot-discovery-and-binding-spec.md](robot-discovery-and-binding-spec.md) - normative discovery and state binding contract.

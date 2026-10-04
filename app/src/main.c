@@ -15,12 +15,19 @@
 #include "zbus/channels/control_channel.h"
 #include "zbus/state/sensor_subscriber.h"
 
+#include <zephyr/net/net_if.h>
+#include <zephyr/net/net_ip.h>
 #include <zephyr/net/wifi_mgmt.h>
 
 #include <zephyr/logging/log.h>
 #include <zephyr/logging/log_ctrl.h>
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
+
+#if defined(CONFIG_ZENBEDDED_RCL)
+extern int zenbedded_native_sim_init(void);
+extern void zenbedded_native_sim_update(void);
+#endif
 
 #if defined(CONFIG_WIFI) && defined(CONFIG_LED_STRIP)
 #define LED_STATUS_WIFI_EVENTS (NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT)
@@ -97,6 +104,24 @@ static void autoconnect_wifi(void)
 }
 #endif
 
+#if defined(CONFIG_ZENBEDDED_RCL) && defined(CONFIG_WIFI)
+static void wait_for_zenbedded_network(void)
+{
+	struct net_if *iface = net_if_get_wifi_sta();
+
+	while (iface == NULL || !net_if_is_up(iface) ||
+	       net_if_ipv4_get_global_addr(iface, NET_ADDR_PREFERRED) == NULL) {
+		LOG_INF("Waiting for Wi-Fi/IPv4 before starting Zenbedded client");
+		k_sleep(K_SECONDS(1));
+		iface = net_if_get_wifi_sta();
+	}
+}
+#else
+static void wait_for_zenbedded_network(void)
+{
+}
+#endif
+
 // Automatic startup using Zephyr's init system
 static int kabot_init(void)
 {
@@ -148,8 +173,21 @@ int main(void)
 {
 	// High-level application logic goes here
 	LOG_INF("Main loop running");
+#if defined(CONFIG_ZENBEDDED_RCL)
+	wait_for_zenbedded_network();
+	int zenbedded_rc;
+	while ((zenbedded_rc = zenbedded_native_sim_init()) < 0) {
+		LOG_WRN("Zenbedded client initialization failed: %d; retrying", zenbedded_rc);
+		k_sleep(K_SECONDS(1));
+	}
+#endif
 
 	while (1) {
+#if defined(CONFIG_ZENBEDDED_RCL)
+		zenbedded_native_sim_update();
+		k_sleep(K_MSEC(100));
+#else
 		k_sleep(K_FOREVER);
+#endif
 	}
 }
